@@ -242,8 +242,9 @@ whose row cannot be found says so in a toast. Slash commands are left out. On
 the session start the list is read from Claude Code's own prompt log
 (`~/.claude/history.jsonl`, this session's rows), so prompts sent before the mod
 loaded are there too; from then on each prompt joins as it is sent. The list
-lives in the session's state, so it survives a reload of the mod; the pane's
-body scrolls while it has the keyboard. While the list is empty the pane's body
+lives in the session's state, so it survives a reload of the mod. The wheel
+or the scroll keys move the list by messages while the header with the `×`
+stays put (`↑3` after the count says how many newer messages are above). While the list is empty the pane's body
 is framed in the theme's `history` color (Clawd orange in `default`); with
 messages inside, each has its own frame and the body none. The `×` in the top
 right corner

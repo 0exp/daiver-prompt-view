@@ -103,6 +103,23 @@ test('every message is a press; one whose row is nowhere to be found says so', a
   await ui.unmount()
 })
 
+test('the pane scrolls by messages under its header: the ones scrolled past are left out', async ($, on) => {
+  const { state } = world(on)
+
+  await $.session.start(start)
+  await $.prompt.submit(submit('older'))
+  await $.prompt.submit(submit('newer'))
+  // the person's wheel moved the list one message down (the ui.scroll hook's doing)
+  state.set('daiver-prompt-view.skip', { value: 1, version: 1 })
+
+  const ui = await $.ui.mount({ ...PANE, surface: 'terminal' })
+  const buttons = (await ui.findAll({ type: 'Button' })).filter(one => one.key !== 'close')
+
+  expect(buttons.map(one => one.text)).toEqual(['older'])
+  expect((await ui.find({ type: 'Text', text: /Prompts/ }))?.text).toBe('Prompts (2) ↑1')
+  await ui.unmount()
+})
+
 test("an empty pane says so, in the theme's history frame", async ($, on) => {
   world(on)
 

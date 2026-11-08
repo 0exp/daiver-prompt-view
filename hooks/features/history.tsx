@@ -53,6 +53,8 @@ async function transcriptRows($: EngineInterface) {
 
 // a new tag declines what an earlier shape of Prompt stored
 const prompts = atom({ plugin: 'daiver-prompt-view', key: 'prompts' } as const, [], { shape: 'prompts-2' })
+// the pane scrolls by messages, itself: how many of the newest it scrolled past
+const skip = atom({ plugin: 'daiver-prompt-view', key: 'skip' } as const, 0)
 
 // the pane, its body on the theme's pane background (darker than the terminal's)
 function open($: EngineInterface) {
@@ -181,14 +183,28 @@ export function registerHistory(on: On) {
     return next(e)
   }).catch(($, e, next) => next(e))
 
+  // the person's wheel or keys on the pane: the window stays where it is (no
+  // `next`), the list under the header moves by messages instead, so the
+  // header with the × stays put; a rough 4 rows a message
+  on('ui.scroll', { requestId: PANE }, async ($, e) => {
+    const count = (await read($, prompts)).length
+    const step = e.by === 0 ? 0 : Math.sign(e.by) * Math.max(1, Math.round(Math.abs(e.by) / 4))
+    await update($, skip, n => Math.min(Math.max(0, (n ?? 0) + step), Math.max(0, count - 1)))
+
+    return {}
+  }).catch(() => ({}))
+
   // the pane: the × in its top right corner, every prompt as a message of its
   // own (a frame in the theme's prompt color, its time on top, its whole text
-  // under), newest first; the body scrolls. Under the pointer a message's
-  // frame turns the theme's hover color and its text stays as it is; the frame in the theme's history color is drawn
-  // around the body only while it holds no message
+  // under), newest first, less the ones scrolled past. Under the pointer a
+  // message's frame turns the theme's hover color and its text stays as it
+  // is; the frame in the theme's history color is drawn around the body only
+  // while it holds no message
   on('ui.render', { component: 'Pane', requestId: PANE }, async ($, e) => {
     const { Box, Button, Text } = $.ui.resolve(e)
     const list = await read($, prompts)
+    const past = Math.min(await read($, skip), Math.max(0, list.length - 1))
+    const shown = [...list].reverse().slice(past)
     const theme = THEMES[config.theme]!
 
     const frame = list.length === 0 ? { borderStyle: 'round', borderColor: hexOf(theme.history) } : {}
@@ -196,11 +212,13 @@ export function registerHistory(on: On) {
     return (
       <Box flexDirection="column" paddingX={1} {...frame}>
         <Box justifyContent="space-between">
-          <Text bold>Prompts ({list.length})</Text>
+          <Text bold>
+            Prompts ({list.length}){past > 0 && <Text dimColor> ↑{past}</Text>}
+          </Text>
           <Button key="close" label="×" role="dismiss" hotkey="x" plain onPress={() => void $.ui.close({ id: PANE })} />
         </Box>
         {list.length === 0 && <Text dimColor>No prompts yet.</Text>}
-        {[...list].reverse().map((prompt, i) => (
+        {shown.map((prompt, i) => (
           <Box
             key={`m${i}`}
             flexDirection="column"

@@ -4,6 +4,7 @@ export type Prompt = { text: string; at: number; uuid?: string }
 
 declare module 'claude-code' {
   interface PluginState {
-    'daiver-prompt-view': { prompts: Shaped<Prompt[]> }
+    // skip: how many of the newest prompts the history pane scrolled past (its header stays)
+    'daiver-prompt-view': { prompts: Shaped<Prompt[]>; skip: number }
   }
 }
