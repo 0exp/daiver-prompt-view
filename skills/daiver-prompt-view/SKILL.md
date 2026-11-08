@@ -12,7 +12,7 @@ Opus 5.5 -> [demo] (sid:419e75ee) <stime:1h23m> <automemory:on>
 -> Explore (time:1m01s) [Find lock index usages]                                     ▘▘ ▝▝
 ctx ███░░░░░░░ 37% | lmt ████░░░░░░ 43% | rst ██████░░░░ 1h56m (at 17h48m) | pch …  2.1.303
 [RAM: 12.5G/16G | 78%] [CPU: 1.2/8 | 15%]
- (08d3788a) main [+#?] | ~/Projects/demo
+ (08d3788a) main [+#?] +12/-3 | ~/Projects/demo
 ```
 
 ## Where things are
@@ -35,7 +35,7 @@ ctx ███░░░░░░░ 37% | lmt ████░░░░░░ 43% 
 - The agents lines are printed by the script from `agents/<session_id>`, right after the modes line; the hooks module writes it only when its text changed.
 - The RAM/CPU segment (`resources` option) never runs `top` (half a second a call): `vm_stat` + `ps` on macOS, `/proc` elsewhere; a missing source drops its half, never the line.
 - The script is POSIX `sh` + `jq` + `git` and prints something even with `{"model":{"display_name":"X"},"cwd":"/tmp"}`. Private-use glyphs (U+E0A0) are `printf` octal escapes.
-- Colors live only in `hooks/shared/themes.ts` as SGR params. The script sources `theme.sh` (`c_gray`, `c_white`, `c_orange`, `c_session`, `c_ctx`, `c_lmt`, `c_rst`, `c_pch`, `c_sha`, `c_branch`, `c_flags`, `c_resources`, `c_values`, `c_effort`, `c_ostyle`); the agents line uses the same theme in TS. A new theme = an entry in `THEMES` + its name in `userConfig.theme.options` (`plugin.json`) + `argument-hint` of `commands/view/theme.md`. `tests/statusline.test.ts` and `tests/agents.test.ts` pin `default` byte for byte.
+- Colors live only in `hooks/shared/themes.ts` as SGR params. The script sources `theme.sh` (`c_gray`, `c_white`, `c_orange`, `c_session`, `c_ctx`, `c_lmt`, `c_rst`, `c_pch`, `c_sha`, `c_branch`, `c_flags`, `c_added`, `c_removed`, `c_resources`, `c_values`, `c_effort`, `c_ostyle`); the agents line uses the same theme in TS. A new theme = an entry in `THEMES` + its name in `userConfig.theme.options` (`plugin.json`) + `argument-hint` of `commands/view/theme.md`. `tests/statusline.test.ts` and `tests/agents.test.ts` pin `default` byte for byte.
 - A new command = `commands/<feature>/<name>.md` (`description`, `argument-hint`, `disable-model-invocation: true`) + a `command.run` hook on `command('<feature>', '<name>')` whose `.catch` answers `failed(...)` (never `next`: that would send the .md body to the model) + its values in `register.ts`'s typeahead table.
 - Agents: `AgentInfo` has no start time (`agentSince` stamped on first sight, cleared on every start); main time from `turn.start` while idle; shells/monitors from `tool.call` results, dropped on task notifications, `TaskStop`, `classic.Stop` snapshot.
 - Every gating hook has a `.catch`: a mod failure must never block a tool call or a prompt. `$` is passed only to top-level functions.

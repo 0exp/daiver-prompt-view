@@ -49,8 +49,9 @@ and [agent-count](https://github.com/0exp/claude-agent-count), with their histor
    first response (or once the 5-hour window has reset) `lmt` is 0%, `rst` a
    whole 5h00m window and `pch` 0%.
 5. The machine's RAM and CPU (the `resources` option, see below).
-6. Git: short sha, branch, flags (`+` staged, `#` untracked, `?` unstaged) and
-   the working directory.
+6. Git: short sha, branch, flags (`+` staged, `#` untracked, `?` unstaged),
+   the lines added and removed in the diff against HEAD (`+12/-3`; `+N/-N`
+   when the tree is clean) and the working directory.
 
 ## Clodik
 
@@ -126,7 +127,7 @@ Option `theme` (Color theme), default `default`.
 
 | Value | Colors |
 | --- | --- |
-| `default` (default) | white, gray, fuchsia (ctx), sky blue (lmt), light green (rst), Clawd orange, gray-green (pch), khaki (sha), violet (branch), coral (flags) |
+| `default` (default) | white, gray, fuchsia (ctx), sky blue (lmt), light green (rst), Clawd orange, gray-green (pch), khaki (sha), violet (branch), coral (flags), light green (+added), coral (-removed) |
 
 | Usage | Result |
 | --- | --- |

@@ -6,7 +6,7 @@
 #   3. the agents lines, which the mod writes for this session
 #   4. ctx / lmt / rst / pch bars
 #   5. [RAM: used/total | %] [CPU: busy cores/cores | %]
-#   6. git sha, branch, flags | directory
+#   6. git sha, branch, flags, +added/-removed lines | directory
 # with Clawd, Claude's mascot, at the right edge of the terminal
 # Requires jq. Usage in statusLine.command: sh <path>/daiver-prompt-view.sh
 
@@ -25,7 +25,7 @@ mod="$HOME/.claude/daiver-prompt-view"
 # the colors of the active theme (the `theme` option, /daiver-prompt-view:view:theme):
 # c_<name>='<SGR params>' lines the hooks module writes from its themes; with
 # none yet, no colors
-c_gray='' c_white='' c_orange='' c_session='' c_ctx='' c_lmt='' c_rst='' c_pch='' c_sha='' c_branch='' c_flags='' c_resources='' c_values='' c_effort='' c_ostyle=''
+c_gray='' c_white='' c_orange='' c_session='' c_ctx='' c_lmt='' c_rst='' c_pch='' c_sha='' c_branch='' c_flags='' c_added='' c_removed='' c_resources='' c_values='' c_effort='' c_ostyle=''
 [ -f "$mod/theme.sh" ] && . "$mod/theme.sh"
 gray=$(esc "$c_gray")
 white=$(esc "$c_white")
@@ -164,7 +164,8 @@ panel() {
   printf '%s\n' "$out"
   [ -n "$res" ] && printf '%s\n' "$res"
 
-  # line 6: git sha, branch, flags (+ staged, # untracked, ? unstaged) | directory
+  # line 6: git sha, branch, flags (+ staged, # untracked, ? unstaged),
+  # +added/-removed lines of the diff against HEAD (+N/-N with none) | directory
   if [ -n "$dir" ]; then
     rawdir=$(echo "$input" | jq -r '.workspace.current_dir // .cwd // empty')
     branch=''
@@ -178,11 +179,17 @@ panel() {
       printf '%s\n' "$st" | grep -q '^[MADRCTU]' && flags="$flags+"
       printf '%s\n' "$st" | grep -q '^??' && flags="$flags#"
       printf '%s\n' "$st" | grep -q '^.[MADRCTU]' && flags="$flags?"
+      added='N' removed='N'
+      ns=$(git -C "$rawdir" --no-optional-locks diff HEAD --numstat 2>/dev/null | awk '{ if ($1 != "-") a += $1; if ($2 != "-") d += $2 } END { printf "%d %d", a, d }')
+      if [ "$ns" != "0 0" ] && [ -n "$ns" ]; then
+        added=${ns% *}
+        removed=${ns#* }
+      fi
     fi
     if [ -n "$branch" ]; then
       violet=$(esc "$c_branch")
       icon=$(printf '\356\202\240') # Nerd Font branch glyph (U+E0A0)
-      printf '%s\n' "${violet}${icon}${reset} $sha${violet}$branch${reset} $(esc "$c_flags")[$flags]${reset} | ${white}$dir${reset}"
+      printf '%s\n' "${violet}${icon}${reset} $sha${violet}$branch${reset} $(esc "$c_flags")[$flags]${reset} $(esc "$c_added")+$added${gray}/$(esc "$c_removed")-$removed${reset} | ${white}$dir${reset}"
     else
       printf '%s\n' "${white}$dir${reset}"
     fi
