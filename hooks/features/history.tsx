@@ -116,18 +116,18 @@ export async function startHistory($: EngineInterface) {
   if (config.history) await open($)
 }
 
-// a press on a message scrolls the transcript to the prompt's row; a row the
-// transcript no longer keeps drawn (or never drew) cannot be reached
+// a press on a message scrolls the transcript to the prompt's row; a row that
+// cannot be reached is noted in the debug log alone (no toasts: the mod stays quiet)
 async function jump($: EngineInterface, text: string, uuid: string | undefined) {
   const requestId = uuid ?? rows.get(text) ?? (await transcriptRows($)).get(text)
 
   if (requestId === undefined) {
-    $.ui.toast('That prompt is not on screen any more.')
+    $.ui.log('history: the prompt has no transcript row to scroll to', { to: 'debug' })
     return
   }
   const moved = await $.ui.scroll({ to: { requestId }, block: 'start' })
 
-  if (moved.deny !== undefined) $.ui.toast(`Could not scroll to the prompt: ${moved.deny}`)
+  if (moved.deny !== undefined) $.ui.log(`history: could not scroll to the prompt: ${moved.deny}`, { to: 'debug' })
 }
 
 // a prompt's time as the pane shows it: HH:MM:SS, local time

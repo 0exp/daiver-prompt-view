@@ -81,8 +81,8 @@ test("the pane lists the session's prompts with their times in the theme's histo
 // every message is a press that scrolls the transcript to the prompt's row
 // ($.ui.scroll, which the test engine does not answer: the real one does); a
 // prompt whose row the transcript has not drawn says so in a toast
-test('every message is a press; one whose row is nowhere to be found says so', async ($, on) => {
-  const { files, toasts } = world(on)
+test('every message is a press; one whose row is nowhere to be found is noted in the debug log, no toast', async ($, on) => {
+  const { files, toasts, logs } = world(on)
   // the session's transcript holds the first prompt's row
   files.set('/home/me/.claude/projects/-home-me-proj/s1.jsonl', '{"type":"user","uuid":"u1","message":{"role":"user","content":"find me"}}\n{"type":"user","isMeta":true,"uuid":"u2","message":{"role":"user","content":"gone"}}\n')
 
@@ -99,7 +99,8 @@ test('every message is a press; one whose row is nowhere to be found says so', a
   // each message is a keyed Box (a hover scope: the frame's hover color is the surface's to apply)
   expect((await ui.findAll({ type: 'Box' })).filter(one => one.key?.startsWith('m')).length).toBe(2)
   await ui.press({ key: buttons[0]!.key! })
-  expect(toasts).toEqual(['That prompt is not on screen any more.'])
+  expect(toasts).toEqual([])
+  expect(logs).toEqual(['history: the prompt has no transcript row to scroll to'])
   await ui.unmount()
 })
 
@@ -120,16 +121,17 @@ test('the pane scrolls by messages under its header: the ones scrolled past are 
   await ui.unmount()
 })
 
-test('with no /config row the change holds for the session and a toast says so', async ($, on) => {
+test('with no /config row the change holds for the session, noted in the debug log, no toast', async ($, on) => {
   // another plugin above filters this mod's rows out of the list
-  const { toasts, config, sets } = world(on, { configRows: false })
+  const { toasts, logs, config, sets } = world(on, { configRows: false })
 
   await $.session.start(start)
 
   expect((await $.command.run(run('history:show', 'on'))).text).toBe('The prompt history pane is now shown.')
   expect(config()).toBe(conf(true, false, 'random', 'default', true, true))
   expect(sets).toEqual([])
-  expect(toasts).toEqual(['daiver-prompt-view: the history option has no /config row to save to; the change holds for this session'])
+  expect(toasts).toEqual([])
+  expect(logs).toEqual(['the history option has no /config row to save to; the change holds for this session'])
 })
 
 test('the scrollbar stands at the list\'s right edge, its thumb where the list is', async ($, on) => {

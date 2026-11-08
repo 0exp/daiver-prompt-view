@@ -12,6 +12,7 @@ export function world(on: On, { configRows = true } = {}) {
   const state = new Map<string, { value: unknown; version: number }>()
   const panes = { open: [] as string[], closed: [] as string[], background: undefined as unknown }
   const toasts: string[] = []
+  const logs: string[] = []
 
   on('fs.exists', ($, e) => ({ value: files.has(e.path) || e.path.endsWith('/statusline/daiver-prompt-view.sh') }))
   on('fs.read', ($, e) => ({ value: files.get(e.path) ?? '#!/bin/sh\n' }))
@@ -47,6 +48,10 @@ export function world(on: On, { configRows = true } = {}) {
     toasts.push(e.text)
     return { value: undefined }
   })
+  on('ui.log', ($, e) => {
+    logs.push(e.text)
+    return { value: undefined }
+  })
   const provider = { plugin: 'daiver-prompt-view', tier: 'user' } as const
   on('config.list', $ => ({
     value: !configRows ? [] : [
@@ -65,7 +70,7 @@ export function world(on: On, { configRows = true } = {}) {
   on('session.start', ($, e) => ({ cwd: e.cwd }))
   on('prompt.autocomplete', () => ({ suggestions: [] }))
 
-  return { files, sets, panes, toasts, state, config: () => files.get(`${DIR}/config`), agents: () => files.get(`${DIR}/agents/s1`) }
+  return { files, sets, panes, toasts, logs, state, config: () => files.get(`${DIR}/config`), agents: () => files.get(`${DIR}/agents/s1`) }
 }
 
 export const start = { cwd: '/tmp', surface: 'terminal', isInteractive: true } as const

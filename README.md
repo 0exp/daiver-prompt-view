@@ -95,7 +95,8 @@ theme's `command` color (gray in `default`).
 Every command sets the option of the same row in `/config` (so the choice stays
 across sessions and reloads), answers at once, and never starts a model turn.
 When the row cannot be reached (a plugin above filters the list, or this build
-has no such row) the change holds for the session alone and a toast says so.
+has no such row) the change holds for the session alone (the debug log says so; the mod raises
+no toasts).
 The prompt box's typeahead lists each command's values: type the command's
 prefix (`/daiver-prompt-view:clodik:`) for ready rows such as
 `/daiver-prompt-view:clodik:animation spin`, or the first letter of the value
@@ -246,7 +247,7 @@ prompt; under the pointer a message's frame turns the theme's `hover` color
 (a brighter orange in `default`); the pane's body sits on the theme's
 `paneBackground`, darker than the terminal's own (near black in `default`) (the row's id comes with the row as the session stores it, or from the
 session's transcript file for prompts sent before the mod loaded); a prompt
-whose row cannot be found says so in a toast. Slash commands are left out. On
+whose row cannot be found is noted in the debug log, nothing on screen. Slash commands are left out. On
 the session start the list is read from Claude Code's own prompt log
 (`~/.claude/history.jsonl`, this session's rows), so prompts sent before the mod
 loaded are there too; from then on each prompt joins as it is sent. The list
