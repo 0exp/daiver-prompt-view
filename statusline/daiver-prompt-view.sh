@@ -207,8 +207,9 @@ pad=2 # the status line's left indent
 inner=''
 case "$COLUMNS" in '' | *[!0-9]*) ;; *) [ "$COLUMNS" -gt $((2 * pad + 13)) ] && inner=$((COLUMNS - 2 * pad - 2)) ;; esac
 frame() {
-  # the borders option (/daiver-prompt-view:chat:show-borders) off: no frame
-  if grep -qx 'borders=false' "$mod/config" 2>/dev/null; then
+  # the borders option (/daiver-prompt-view:chat:show-borders) or the status
+  # line's own (chat:show-statusline-borders) off: no frame
+  if grep -qx 'borders=false' "$mod/config" 2>/dev/null || grep -qx 'statuslineBorders=false' "$mod/config" 2>/dev/null; then
     cat
     return
   fi

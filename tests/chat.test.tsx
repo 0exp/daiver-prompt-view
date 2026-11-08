@@ -23,6 +23,20 @@ test('show-borders toggles the option, on and off set it', async ($, on) => {
   expect((await $.command.run(run('chat:show-borders', 'maybe'))).text).toBe('Usage: /daiver-prompt-view:chat:show-borders [on|off]')
 })
 
+test("show-statusline-borders toggles the status line's own option, on and off set it", async ($, on) => {
+  const { sets, config } = world(on)
+
+  await $.session.start(start)
+
+  expect((await $.command.run(run('chat:show-statusline-borders'))).text).toBe("The status line's frame is now hidden.")
+  expect(config()).toBe(conf(true, false, 'random', 'default', true, false, true, false))
+  expect((await $.command.run(run('chat:show-statusline-borders'))).text).toBe("The status line's frame is now shown.")
+  expect((await $.command.run(run('chat:show-statusline-borders', 'off'))).text).toBe("The status line's frame is now hidden.")
+  expect((await $.command.run(run('chat:show-statusline-borders', 'on'))).text).toBe("The status line's frame is now shown.")
+  expect(sets).toEqual(['statuslineBorders=false', 'statuslineBorders=true', 'statuslineBorders=false', 'statuslineBorders=true'])
+  expect((await $.command.run(run('chat:show-statusline-borders', 'maybe'))).text).toBe('Usage: /daiver-prompt-view:chat:show-statusline-borders [on|off]')
+})
+
 test('with the frames off every framed site is left to the engine', { options: { borders: false } }, async ($, on) => {
   world(on)
   on('ui.render', ($, e) => {

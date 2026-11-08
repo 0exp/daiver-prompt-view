@@ -110,6 +110,7 @@ after the command.
 | `/daiver-prompt-view:resources:show` | `on`, `off`, or nothing | `on` | Show (`on`) or hide (`off`) the RAM and CPU line; with no argument, toggles |
 | `/daiver-prompt-view:history:show` | `on`, `off`, or nothing | `off` | Show (`on`) or hide (`off`) the pane with this session's prompts; with no argument, toggles |
 | `/daiver-prompt-view:chat:show-borders` | `on`, `off`, or nothing | `on` | Show (`on`) or hide (`off`) the frames around prompts, replies, tool calls, the spinner, command output and the status line; with no argument, toggles |
+| `/daiver-prompt-view:chat:show-statusline-borders` | `on`, `off`, or nothing | `on` | Show (`on`) or hide (`off`) the frame around the status line alone; with no argument, toggles |
 
 ### `/daiver-prompt-view:clodik:animate [on|off]`
 
@@ -178,6 +179,7 @@ Every option is in `/config`, or in `~/.claude/settings.json` under
 | `resources` | Show RAM and CPU | boolean | `true` | `true`, `false` | `resources:show` |
 | `history` | Show the prompt history pane | boolean | `false` | `true`, `false` | `history:show` |
 | `borders` | Show the frames | boolean | `true` | `true`, `false` | `chat:show-borders` |
+| `statuslineBorders` | Show the status line's frame | boolean | `true` | `true`, `false` | `chat:show-statusline-borders` |
 | `clodik` | Show Clawd | boolean | `true` | `true`, `false` | (none) |
 | `clodikAnimate` | Animate Clawd always | boolean | `false` | `true`, `false` | `clodik:animate` |
 | `clodikAnimation` | Clawd's animation | choice | `random` | `random`, `jump`, `spin`, `sway`, `blink`, `cheer`, `wave`, `stretch`, `hop`, `tap`, `shiver`, `pixels`, `matrix` | `clodik:animation` |
@@ -189,13 +191,14 @@ For example, in `~/.claude/settings.json`:
 "pluginConfigs": {
   "daiver-prompt-view@daiver-prompt-view": {
     "options": {
-      "resources":       true,
-      "history":         false,
-      "borders":         true,
-      "clodik":          true,
-      "clodikAnimate":   false,
-      "clodikAnimation": "pixels",
-      "theme":           "default"
+      "resources":         true,
+      "history":           false,
+      "borders":           true,
+      "statuslineBorders": true,
+      "clodik":            true,
+      "clodikAnimate":     false,
+      "clodikAnimation":   "pixels",
+      "theme":             "default"
     }
   }
 }
@@ -287,7 +290,7 @@ history pane's own frames stay.
 | Value | Effect |
 | --- | --- |
 | `on` | the frames are drawn |
-| `off` | every framed row is drawn as Claude Code draws it, the status line bare |
+| `off` | every framed row is drawn as Claude Code draws it, the status line bare (whatever `statuslineBorders` says) |
 
 | Usage | Result |
 | --- | --- |
@@ -295,6 +298,25 @@ history pane's own frames stay.
 | `/daiver-prompt-view:chat:show-borders off` | `The frames are now hidden.` |
 | `/daiver-prompt-view:chat:show-borders` | toggles: `The frames are now hidden.` when they were on, `The frames are now shown.` when they were off |
 | `/daiver-prompt-view:chat:show-borders maybe` | nothing changes: `Usage: /daiver-prompt-view:chat:show-borders [on|off]` |
+
+### `/daiver-prompt-view:chat:show-statusline-borders [on|off]`
+
+Option `statuslineBorders` (Show the status line's frame), default `true`
+(`on`). It covers the status line's frame alone and is separate from `borders`:
+the frame is drawn while both are on, so `borders` off hides it whatever this
+one says, and this one off hides it while the transcript's frames stay.
+
+| Value | Effect |
+| --- | --- |
+| `on` | the status line is framed (while `borders` is on too) |
+| `off` | the status line is bare, the transcript's frames as `borders` says |
+
+| Usage | Result |
+| --- | --- |
+| `/daiver-prompt-view:chat:show-statusline-borders on` | `The status line's frame is now shown.` |
+| `/daiver-prompt-view:chat:show-statusline-borders off` | `The status line's frame is now hidden.` |
+| `/daiver-prompt-view:chat:show-statusline-borders` | toggles: `The status line's frame is now hidden.` when it was on, `The status line's frame is now shown.` when it was off |
+| `/daiver-prompt-view:chat:show-statusline-borders maybe` | nothing changes: `Usage: /daiver-prompt-view:chat:show-statusline-borders [on|off]` |
 
 ### Adding a theme
 
