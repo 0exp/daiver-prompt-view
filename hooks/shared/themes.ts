@@ -54,7 +54,7 @@ export const THEMES: Record<string, Theme> = {
     prompt: '38;2;215;119;87',
     frame: '38;2;215;119;87',
     reply: '38;2;0;200;255',
-    tool: '38;2;0;200;255',
+    tool: '38;2;106;52;163',
     resources: '38;2;200;200;200',
     values: '38;2;165;165;165',
     effort: '38;2;215;119;87',

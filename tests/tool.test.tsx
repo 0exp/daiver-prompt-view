@@ -23,7 +23,7 @@ test("a tool call's row is framed in the theme's tool color, the engine's row in
     const box = await ui.find({ type: 'Box' })
 
     expect(box?.props.borderStyle).toBe('round')
-    expect(box?.props.borderColor).toBe('#00c8ff')
+    expect(box?.props.borderColor).toBe('#6a34a3')
     expect((await ui.find({ type: 'Text', text: /Bash/ }))?.text).toBe('Bash(ls)')
     await ui.unmount()
   }
