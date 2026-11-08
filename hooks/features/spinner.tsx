@@ -1,7 +1,6 @@
 // spinner: the line that animates while a turn runs (`Sauteing... (12s)`),
 // framed in a box of the theme's `spinner` color (the output style's yellow by default).
-// The engine's line goes inside the frame as it is, less the blank line its own
-// top margin would leave under the border
+// The engine's line goes inside the frame as it is
 import type { On } from 'claude-code'
 import { config } from '../shared/config'
 import { hexOf, THEMES } from '../shared/themes'
@@ -14,7 +13,7 @@ export function registerSpinner(on: On) {
 
     return (
       <Box borderStyle="round" borderColor={hexOf(THEMES[config.theme]!.spinner)} paddingX={1}>
-        <Box marginTop={-1}>{line}</Box>
+        {line}
       </Box>
     )
   }).catch(($, e, next) => next(e))
