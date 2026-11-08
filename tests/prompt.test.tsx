@@ -10,21 +10,24 @@ const ROW = {
 
 test("the person's prompt is framed in the theme's prompt color, on every surface", async ($, on) => {
   world(on)
-  // the engine's own row beneath the plugin
+  // the engine's own row beneath the plugin, never drawn for a prompt
   on('ui.render', ($, e) => {
     const { Text } = $.ui.resolve(e)
-    return <Text>{'> ' + (e.props as { text: string }).text}</Text>
+    return <Text backgroundColor="inactive">{'> ' + (e.props as { text: string }).text}</Text>
   })
 
   await $.session.start(start)
 
   for (const surface of ['terminal', 'desktop', 'vscode', 'mobile'] as const) {
     const ui = await $.ui.mount({ ...ROW, surface })
+    expect(await ui.find({ type: 'Text', text: /> hello/ })).toBeUndefined()
     const box = await ui.find({ type: 'Box' })
 
     expect(box?.props.borderStyle).toBe('round')
     expect(box?.props.borderColor).toBe('#d77757')
-    expect((await ui.find({ type: 'Text', text: /hello/ }))?.text).toBe('> hello')
+    const text = await ui.find({ type: 'Text', text: /hello/ })
+    expect(text?.text).toBe('hello')
+    expect(text?.props.backgroundColor).toBeUndefined()
     await ui.unmount()
   }
 })

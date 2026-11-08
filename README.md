@@ -71,8 +71,9 @@ random animation starts every 8 seconds, a frame per refresh.
 Every prompt you send is drawn in the transcript inside a rounded frame in the
 theme's `prompt` color (Clawd orange in `default`). Only your own prompts are
 framed: background task notifications and messages from other sessions keep the
-plain row. The frame is drawing only, the stored message is untouched, and a
-theme switch redraws it at once.
+plain row. Inside the frame the prompt is plain text, without the highlight the
+bare row paints under it. The frame is drawing only, the stored message is
+untouched, and a theme switch redraws it at once.
 
 ## Commands
 
