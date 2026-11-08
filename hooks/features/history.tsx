@@ -182,7 +182,8 @@ export function registerHistory(on: On) {
 
   // the pane: the × in its top right corner, every prompt as a message of its
   // own (a frame in the theme's prompt color, its time on top, its whole text
-  // under), newest first; the body scrolls; the frame in the theme's history color is drawn
+  // under), newest first; the body scrolls. Under the pointer a message's
+  // frame turns the theme's hover color and its text stays as it is; the frame in the theme's history color is drawn
   // around the body only while it holds no message
   on('ui.render', { component: 'Pane', requestId: PANE }, async ($, e) => {
     const { Box, Button, Text } = $.ui.resolve(e)
@@ -199,9 +200,16 @@ export function registerHistory(on: On) {
         </Box>
         {list.length === 0 && <Text dimColor>No prompts yet.</Text>}
         {[...list].reverse().map((prompt, i) => (
-          <Box flexDirection="column" borderStyle="round" borderColor={hexOf(theme.prompt)} paddingX={1}>
+          <Box
+            key={`m${i}`}
+            flexDirection="column"
+            borderStyle="round"
+            borderColor={hexOf(theme.prompt)}
+            paddingX={1}
+            hover={{ borderColor: hexOf(theme.hover) }}
+          >
             <Text dimColor>{clock(prompt.at)}</Text>
-            <Button key={`p${i}`} plain onPress={() => jump($, prompt.text, prompt.uuid)}>
+            <Button key={`p${i}`} plain hover={{ inverse: false }} onPress={() => jump($, prompt.text, prompt.uuid)}>
               {prompt.text.trim()}
             </Button>
           </Box>
