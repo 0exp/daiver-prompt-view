@@ -4,7 +4,7 @@ import { conf, DIR, start, world } from './world'
 const THEME_SH =
   "# daiver-prompt-view theme: default\nc_gray='38;2;128;128;128'\nc_white='38;2;255;255;255'\nc_orange='38;2;215;119;87'\n" +
   "c_session='38;2;255;250;250'\nc_ctx='38;2;255;0;255'\nc_lmt='38;2;135;206;235'\nc_rst='38;2;144;238;144'\n" +
-  "c_pch='38;2;132;136;132'\nc_sha='38;2;212;201;106'\nc_branch='1;38;2;170;127;240'\nc_flags='1;38;2;239;100;124'\nc_added='38;2;144;238;144'\nc_removed='38;2;239;100;124'\nc_resources='38;2;225;225;225'\nc_values='38;2;190;190;190'\nc_effort='38;2;215;119;87'\nc_ostyle='38;2;230;200;110'\n"
+  "c_pch='38;2;132;136;132'\nc_sha='38;2;212;201;106'\nc_branch='1;38;2;170;127;240'\nc_flags='1;38;2;239;100;124'\nc_added='38;2;144;238;144'\nc_removed='38;2;239;100;124'\nc_resources='38;2;200;200;200'\nc_values='38;2;165;165;165'\nc_effort='38;2;215;119;87'\nc_ostyle='38;2;230;200;110'\n"
 
 test('the session start installs the script, its config and the default theme', async ($, on) => {
   const { files, config } = world(on)
