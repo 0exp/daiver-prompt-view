@@ -54,8 +54,9 @@ async function transcriptRows($: EngineInterface) {
 // a new tag declines what an earlier shape of Prompt stored
 const prompts = atom({ plugin: 'daiver-prompt-view', key: 'prompts' } as const, [], { shape: 'prompts-2' })
 
+// the pane, its body on the theme's pane background (darker than the terminal's)
 function open($: EngineInterface) {
-  return $.ui.open({ id: PANE, title: 'Prompts' })
+  return $.ui.open({ id: PANE, title: 'Prompts', backgroundColor: hexOf(THEMES[config.theme]!.paneBackground) })
 }
 
 // turns the option, writes it to the config file, opens or closes the pane

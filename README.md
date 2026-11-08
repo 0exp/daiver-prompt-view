@@ -152,7 +152,7 @@ Option `theme` (Color theme), default `default`.
 
 | Value | Colors |
 | --- | --- |
-| `default` (default) | white, gray, fuchsia (ctx), sky blue (lmt), light green (rst), Clawd orange, gray-green (pch), khaki (sha), violet (branch), coral (flags), light green (+added), coral (-removed), Clawd orange (the matrix rain, the frame around your prompts and the frame around the status line too), neon blue (the frame around Claude's replies), dark violet (the frame around the tool calls), green (the frame around the spinner), gray (the frame around a command's output), Clawd orange (the prompt history pane's frame too), bright orange (the history message under the pointer) |
+| `default` (default) | white, gray, fuchsia (ctx), sky blue (lmt), light green (rst), Clawd orange, gray-green (pch), khaki (sha), violet (branch), coral (flags), light green (+added), coral (-removed), Clawd orange (the matrix rain, the frame around your prompts and the frame around the status line too), neon blue (the frame around Claude's replies), dark violet (the frame around the tool calls), green (the frame around the spinner), gray (the frame around a command's output), Clawd orange (the prompt history pane's frame too), bright orange (the history message under the pointer), near black (the history pane's background) |
 
 | Usage | Result |
 | --- | --- |
@@ -235,7 +235,8 @@ its own: a frame in the theme's `prompt` color, the time it was sent
 (`HH:MM:SS`, local) on top, the whole text under. A click on a message (or
 Enter on it while the pane has the keyboard) scrolls the transcript to that
 prompt; under the pointer a message's frame turns the theme's `hover` color
-(a brighter orange in `default`) (the row's id comes with the row as the session stores it, or from the
+(a brighter orange in `default`); the pane's body sits on the theme's
+`paneBackground`, darker than the terminal's own (near black in `default`) (the row's id comes with the row as the session stores it, or from the
 session's transcript file for prompts sent before the mod loaded); a prompt
 whose row cannot be found says so in a toast. Slash commands are left out. On
 the session start the list is read from Claude Code's own prompt log

@@ -9,7 +9,7 @@ export function world(on: On) {
   const files = new Map<string, string>()
   const sets: string[] = []
   const state = new Map<string, { value: unknown; version: number }>()
-  const panes = { open: [] as string[], closed: [] as string[] }
+  const panes = { open: [] as string[], closed: [] as string[], background: undefined as unknown }
   const toasts: string[] = []
 
   on('fs.exists', ($, e) => ({ value: files.has(e.path) || e.path.endsWith('/statusline/daiver-prompt-view.sh') }))
@@ -33,6 +33,7 @@ export function world(on: On) {
   })
   on('ui.open', ($, e) => {
     if (!panes.open.includes(e.id)) panes.open.push(e.id)
+    panes.background = e.backgroundColor
     return { value: { isPlaced: true } }
   })
   on('ui.close', ($, e) => {
