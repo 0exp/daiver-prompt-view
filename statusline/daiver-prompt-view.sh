@@ -214,7 +214,7 @@ e=$(printf '\033')
 
 # a pose on Clawd's 11-cell canvas: r0 is the spare line above it, r1-r3 its
 # body (at rest in cells 1-9: cell 0 and 10 are room to move sideways); pcol is
-# its color, Clawd orange but for the matrix rain (m1-m8), in the theme's green
+# its color, Clawd orange and the theme's own for the matrix rain (m1-m8)
 pose() {
   pcol=$orange
   r0=''

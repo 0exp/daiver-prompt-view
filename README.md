@@ -63,7 +63,7 @@ narrow, it sits right next to the lines.
 While Claude Code is busy (the agents line shows the main loop anything but
 `idle`), Clawd moves: jump, spin around, sway, blink, cheer, wave, squash and
 stretch, hop side to side, tap dance, shiver, fall to pixels and back, dissolve
-into the Matrix's rain of green glyphs and back. A new
+into the Matrix's rain of glyphs and back. A new
 random animation starts every 8 seconds, a frame per refresh.
 
 ## Commands
@@ -112,7 +112,7 @@ Option `clodikAnimation` (Clawd's animation), default `random`.
 | `tap` | tap dance |
 | `shiver` | shiver |
 | `pixels` | fall to pixels and back |
-| `matrix` | fall to pixels, then the Matrix's rain of green glyphs runs down the canvas, then back |
+| `matrix` | fall to pixels, then the Matrix's rain of glyphs runs down the canvas, then back |
 
 | Usage | Result |
 | --- | --- |
@@ -130,7 +130,7 @@ Option `theme` (Color theme), default `default`.
 
 | Value | Colors |
 | --- | --- |
-| `default` (default) | white, gray, fuchsia (ctx), sky blue (lmt), light green (rst), Clawd orange, gray-green (pch), khaki (sha), violet (branch), coral (flags), light green (+added), coral (-removed), Matrix green (the matrix rain) |
+| `default` (default) | white, gray, fuchsia (ctx), sky blue (lmt), light green (rst), Clawd orange, gray-green (pch), khaki (sha), violet (branch), coral (flags), light green (+added), coral (-removed), Clawd orange (the matrix rain too) |
 
 | Usage | Result |
 | --- | --- |
