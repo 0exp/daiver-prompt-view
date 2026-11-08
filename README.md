@@ -62,29 +62,110 @@ While Claude Code is busy (the agents line shows the main loop anything but
 stretch, hop side to side, tap dance, shiver, fall to pixels and back. A new
 random animation starts every 8 seconds, a frame per refresh.
 
-## Options and commands
+## Commands
 
-Every option is in `/config` (or `pluginConfigs["daiver-prompt-view@daiver-prompt-view"].options`
-in `~/.claude/settings.json`); the commands set the same options. The prompt
-box's typeahead lists each command's values.
+Every command sets the option of the same row in `/config` (so the choice stays
+across sessions and reloads), answers at once, and never starts a model turn.
+The prompt box's typeahead lists each command's values: type the command's
+prefix (`/daiver-prompt-view:clodik:`) for ready rows such as
+`/daiver-prompt-view:clodik:animation spin`, or the first letter of the value
+after the command.
 
-| Option | Default | Command | What |
+| Command | Arguments | Default | What it does |
 | --- | --- | --- | --- |
-| `clodik` (Show Clawd) | `true` | | Clawd at the right edge |
-| `clodikAnimate` | `false` | `/daiver-prompt-view:clodik:animate [on\|off]` | animate all the time, not only while busy (toggles with no argument) |
-| `clodikAnimation` | `random` | `/daiver-prompt-view:clodik:animation [name]` | `random`, `jump`, `spin`, `sway`, `blink`, `cheer`, `wave`, `stretch`, `hop`, `tap`, `shiver`, `pixels` (shows the current one with no argument) |
-| `theme` (Color theme) | `default` | `/daiver-prompt-view:view:theme [name]` | the colors of every line, the agents line's included |
+| `/daiver-prompt-view:clodik:animate` | `on`, `off`, or nothing | `off` | Animate Clawd all the time (`on`) or only while Claude Code is busy (`off`); with no argument, toggles |
+| `/daiver-prompt-view:clodik:animation` | an animation name, or nothing | `random` | Pick the animation Clawd plays; with no argument, shows the current one and the list |
+| `/daiver-prompt-view:view:theme` | a theme name, or nothing | `default` | Pick the colors of every line (the agents line's included); with no argument, shows the current one and the list |
 
-Themes: `default` (white, gray, fuchsia, sky blue, light green, Clawd orange,
-khaki, violet, coral). Every theme is written once, in `hooks/shared/themes.ts`:
-the hooks module draws the agents line with it and writes the status line's
-colors to `~/.claude/daiver-prompt-view/theme.sh` for the script. A new theme is
-an entry in `THEMES` there and its name in the `theme` option's `options` in
-`.claude-plugin/plugin.json` and in `commands/view/theme.md`'s `argument-hint`.
+### `/daiver-prompt-view:clodik:animate [on|off]`
+
+Option `clodikAnimate` (Animate Clawd always), default `off`: Clawd moves only
+while Claude Code is busy (the agents line's main loop is anything but `idle`).
+
+| Usage | Result |
+| --- | --- |
+| `/daiver-prompt-view:clodik:animate on` | Clawd animates all the time, busy or not: `Clawd now animates all the time.` |
+| `/daiver-prompt-view:clodik:animate off` | Clawd animates only while busy: `Clawd now animates only while Claude Code is busy.` |
+| `/daiver-prompt-view:clodik:animate` | toggles between the two |
+| `/daiver-prompt-view:clodik:animate maybe` | nothing changes: `Usage: /daiver-prompt-view:clodik:animate [on\|off]` |
+
+### `/daiver-prompt-view:clodik:animation [name]`
+
+Option `clodikAnimation` (Clawd's animation), default `random`.
+
+| Value | Animation |
+| --- | --- |
+| `random` (default) | a random one of the others, a new one every 8 seconds, never the same twice in a row |
+| `jump` | squash and jump |
+| `spin` | turn around |
+| `sway` | sway left and right |
+| `blink` | blink |
+| `cheer` | raise both arms |
+| `wave` | wave one arm |
+| `stretch` | squash and stretch |
+| `hop` | hop side to side |
+| `tap` | tap dance |
+| `shiver` | shiver |
+| `pixels` | fall to pixels and back |
+
+| Usage | Result |
+| --- | --- |
+| `/daiver-prompt-view:clodik:animation spin` | Clawd plays `spin`: `Clawd now plays spin.` |
+| `/daiver-prompt-view:clodik:animation random` | back to random: `Clawd now plays a random animation.` |
+| `/daiver-prompt-view:clodik:animation` | shows the current one: `Clawd's animation: spin (one of random, jump, …)` |
+| `/daiver-prompt-view:clodik:animation moonwalk` | nothing changes: `Usage: /daiver-prompt-view:clodik:animation [random\|jump\|…]` |
+
+The animation plays while Clawd animates: while busy, or all the time with
+`clodik:animate on`.
+
+### `/daiver-prompt-view:view:theme [name]`
+
+Option `theme` (Color theme), default `default`.
+
+| Value | Colors |
+| --- | --- |
+| `default` (default) | white, gray, fuchsia (ctx), sky blue (lmt), light green (rst), Clawd orange, gray-green (pch), khaki (sha), violet (branch), coral (flags) |
+
+| Usage | Result |
+| --- | --- |
+| `/daiver-prompt-view:view:theme default` | the status line and the agents line switch at once: `The status line now uses the default theme.` |
+| `/daiver-prompt-view:view:theme` | shows the current one: `Status line theme: default (one of default)` |
+| `/daiver-prompt-view:view:theme neon` | nothing changes: `Usage: /daiver-prompt-view:view:theme [default]` |
+
+## Options
+
+Every option is in `/config`, or in `~/.claude/settings.json` under
+`pluginConfigs["daiver-prompt-view@daiver-prompt-view"].options`. A change in
+`/config` reloads the mod and applies at once.
+
+| Option | `/config` label | Type | Default | Values | Command |
+| --- | --- | --- | --- | --- | --- |
+| `clodik` | Show Clawd | boolean | `true` | `true`, `false` | (none) |
+| `clodikAnimate` | Animate Clawd always | boolean | `false` | `true`, `false` | `clodik:animate` |
+| `clodikAnimation` | Clawd's animation | choice | `random` | `random`, `jump`, `spin`, `sway`, `blink`, `cheer`, `wave`, `stretch`, `hop`, `tap`, `shiver`, `pixels` | `clodik:animation` |
+| `theme` | Color theme | choice | `default` | `default` | `view:theme` |
+
+For example, in `~/.claude/settings.json`:
+
+```json
+"pluginConfigs": {
+  "daiver-prompt-view@daiver-prompt-view": {
+    "options": { "clodik": true, "clodikAnimate": false, "clodikAnimation": "pixels", "theme": "default" }
+  }
+}
+```
+
+### Adding a theme
+
+Every theme is written once, in `hooks/shared/themes.ts`: the hooks module draws
+the agents line with it and writes the status line's colors to
+`~/.claude/daiver-prompt-view/theme.sh` for the script. A new theme is an entry
+in `THEMES` there, its name in the `theme` option's `options` in
+`.claude-plugin/plugin.json`, and in `commands/view/theme.md`'s `argument-hint`.
 
 The commands are the plugin's `commands/<feature>/<name>.md` files, which Claude
 Code names `/daiver-prompt-view:<feature>:<name>`; the hooks module answers each
-itself, so a command never starts a model turn.
+itself.
 
 ## Install
 
