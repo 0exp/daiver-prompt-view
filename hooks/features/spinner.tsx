@@ -1,5 +1,5 @@
 // spinner: the line that animates while a turn runs (`Sauteing... (12s)`),
-// framed in a box of the theme's `spinner` color (green by default).
+// framed in a box of the theme's `spinner` color (the output style's yellow by default).
 // The engine's line goes inside the frame as it is, less the blank line its own
 // top margin would leave under the border
 import type { On } from 'claude-code'

@@ -24,7 +24,7 @@ export type Theme = {
   frame: string // the frame around the whole status line
   reply: string // the frame around Claude's replies in the transcript
   tool: string // the frame around the tool calls' rows in the transcript
-  spinner: string // the frame around the spinner line of a running turn (green by default)
+  spinner: string // the frame around the spinner line of a running turn (the output style's yellow by default)
   command: string // the frame around a slash command's output row
   history: string // the frame of the prompt history pane
   hover: string // the frame of the history pane's message under the pointer, brighter
@@ -60,7 +60,7 @@ export const THEMES: Record<string, Theme> = {
     frame: '38;2;215;119;87',
     reply: '38;2;0;200;255',
     tool: '38;2;106;52;163',
-    spinner: '38;2;0;200;80',
+    spinner: '38;2;230;200;110',
     command: '38;2;128;128;128',
     history: '38;2;215;119;87',
     hover: '38;2;255;170;120',
