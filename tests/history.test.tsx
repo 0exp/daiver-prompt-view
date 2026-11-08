@@ -64,17 +64,37 @@ test("the pane lists the session's prompts with their times in the theme's histo
     expect(body?.props.borderStyle).toBeUndefined()
     expect((await ui.find({ type: 'Text', text: /Prompts/ }))?.text).toBe('Prompts (3)')
     expect((await ui.find({ type: 'Text', text: hms(3600000) }))?.text).toBe(hms(3600000))
-    expect((await ui.find({ type: 'Text', text: /logged/ }))?.text).toBe('logged before the mod')
-    expect((await ui.find({ type: 'Text', text: /first/ }))?.text).toBe('first prompt')
-    expect((await ui.find({ type: 'Text', text: /second/ }))?.text).toBe('second\nline two')
-    expect(await ui.find({ type: 'Text', text: /cost/ })).toBeUndefined()
-    expect(await ui.find({ type: 'Text', text: /another/ })).toBeUndefined()
+    expect((await ui.find({ type: 'Button', text: /logged/ }))?.text).toBe('logged before the mod')
+    expect((await ui.find({ type: 'Button', text: /first/ }))?.text).toBe('first prompt')
+    expect((await ui.find({ type: 'Button', text: /second/ }))?.text).toBe('second\nline two')
+    expect(await ui.find({ type: 'Button', text: /cost/ })).toBeUndefined()
+    expect(await ui.find({ type: 'Button', text: /another/ })).toBeUndefined()
     expect((await ui.find({ key: 'close' }))?.props.label).toBe('×')
     await ui.unmount()
   }
 
   await (await $.ui.mount({ ...PANE, surface: 'terminal' })).press({ key: 'close' })
   expect(panes.closed).toEqual(['history'])
+})
+
+// every message is a press that scrolls the transcript to the prompt's row
+// ($.ui.scroll, which the test engine does not answer: the real one does); a
+// prompt whose row the transcript has not drawn says so in a toast
+test('every message is a press; one whose row is not drawn says so', async ($, on) => {
+  const { toasts } = world(on)
+
+  await $.session.start(start)
+  await $.prompt.submit(submit('find me'))
+  await $.prompt.submit(submit('gone'))
+
+  const ui = await $.ui.mount({ ...PANE, surface: 'terminal' })
+  const buttons = (await ui.findAll({ type: 'Button' })).filter(one => one.key !== 'close')
+
+  expect(buttons.map(one => one.text)).toEqual(['find me', 'gone'])
+  expect(buttons.map(one => one.props.plain)).toEqual([true, true])
+  await ui.press({ key: buttons[1]!.key! })
+  expect(toasts).toEqual(['That prompt is not on screen any more.'])
+  await ui.unmount()
 })
 
 test("an empty pane says so, in the theme's history frame", async ($, on) => {

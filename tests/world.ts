@@ -10,6 +10,7 @@ export function world(on: On) {
   const sets: string[] = []
   const state = new Map<string, { value: unknown; version: number }>()
   const panes = { open: [] as string[], closed: [] as string[] }
+  const toasts: string[] = []
 
   on('fs.exists', ($, e) => ({ value: files.has(e.path) || e.path.endsWith('/statusline/daiver-prompt-view.sh') }))
   on('fs.read', ($, e) => ({ value: files.get(e.path) ?? '#!/bin/sh\n' }))
@@ -39,6 +40,10 @@ export function world(on: On) {
     return { value: undefined }
   })
   on('prompt.submit', ($, e) => ({ text: e.text }))
+  on('ui.toast', ($, e) => {
+    toasts.push(e.text)
+    return { value: undefined }
+  })
   const provider = { plugin: 'daiver-prompt-view', tier: 'user' } as const
   on('config.list', $ => ({
     value: [
@@ -56,7 +61,7 @@ export function world(on: On) {
   on('session.start', ($, e) => ({ cwd: e.cwd }))
   on('prompt.autocomplete', () => ({ suggestions: [] }))
 
-  return { files, sets, panes, config: () => files.get(`${DIR}/config`), agents: () => files.get(`${DIR}/agents/s1`) }
+  return { files, sets, panes, toasts, config: () => files.get(`${DIR}/config`), agents: () => files.get(`${DIR}/agents/s1`) }
 }
 
 export const start = { cwd: '/tmp', surface: 'terminal', isInteractive: true } as const

@@ -6,10 +6,12 @@
 import type { On } from 'claude-code'
 import { config } from '../shared/config'
 import { hexOf, THEMES } from '../shared/themes'
+import { noteRow } from './history'
 
 export function registerPrompt(on: On) {
   on('ui.render', { component: 'UserMessage', props: { origin: { kind: 'composer' } } }, ($, e) => {
     const { Box, Text } = $.ui.resolve(e)
+    noteRow(e.props.text, e.requestId)
 
     return (
       <Box borderStyle="round" borderColor={hexOf(THEMES[config.theme]!.prompt)} paddingX={1}>

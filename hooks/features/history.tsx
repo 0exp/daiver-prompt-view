@@ -14,6 +14,12 @@ export const HISTORY = command('history', 'show')
 export const PANE = 'history'
 const KEEP = 1000
 
+// the transcript row of each prompt, by its text, as the UserMessage render
+// hook (prompt.tsx) sees it: what a press on a message scrolls to. A module
+// variable: every drawn row renders again on a load, so it fills itself
+const rows = new Map<string, string>()
+export const noteRow = (text: string, requestId: string) => void rows.set(text, requestId)
+
 // a new tag declines what an earlier shape of Prompt stored
 const prompts = atom({ plugin: 'daiver-prompt-view', key: 'prompts' } as const, [], { shape: 'prompts-1' })
 
@@ -76,6 +82,20 @@ export async function startHistory($: EngineInterface) {
   if (config.history) await open($)
 }
 
+// a press on a message scrolls the transcript to the prompt's row; a row the
+// transcript no longer keeps drawn (or never drew) cannot be reached
+async function jump($: EngineInterface, text: string) {
+  const requestId = rows.get(text)
+
+  if (requestId === undefined) {
+    $.ui.toast('That prompt is not on screen any more.')
+    return
+  }
+  const moved = await $.ui.scroll({ to: { requestId }, block: 'start' })
+
+  if (moved.deny !== undefined) $.ui.toast(`Could not scroll to the prompt: ${moved.deny}`)
+}
+
 // a prompt's time as the pane shows it: HH:MM:SS, local time
 const clock = (at: number) => {
   const d = new Date(at)
@@ -133,10 +153,12 @@ export function registerHistory(on: On) {
           <Button key="close" label="×" role="dismiss" hotkey="x" plain onPress={() => void $.ui.close({ id: PANE })} />
         </Box>
         {list.length === 0 && <Text dimColor>No prompts yet.</Text>}
-        {list.map(prompt => (
+        {list.map((prompt, i) => (
           <Box flexDirection="column" borderStyle="round" borderColor={hexOf(theme.prompt)} paddingX={1}>
             <Text dimColor>{clock(prompt.at)}</Text>
-            <Text>{prompt.text.trim()}</Text>
+            <Button key={`p${i}`} plain onPress={() => jump($, prompt.text)}>
+              {prompt.text.trim()}
+            </Button>
           </Box>
         ))}
       </Box>
