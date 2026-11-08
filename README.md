@@ -19,6 +19,10 @@ and [agent-count](https://github.com/0exp/claude-agent-count), with their histor
 
 ## The lines
 
+The whole status line sits in a rounded frame in the theme's `frame` color
+(Clawd orange in `default`): as wide as the terminal when its width is known,
+else as wide as the widest line, Clawd inside it at the right border.
+
 1. Model, session name, short session id, session time (`stime`, from the
    transcript's creation time), whether auto memory is on in this session
    (`automemory`, written by the hooks module: the status line's input has no
@@ -139,7 +143,7 @@ Option `theme` (Color theme), default `default`.
 
 | Value | Colors |
 | --- | --- |
-| `default` (default) | white, gray, fuchsia (ctx), sky blue (lmt), light green (rst), Clawd orange, gray-green (pch), khaki (sha), violet (branch), coral (flags), light green (+added), coral (-removed), Clawd orange (the matrix rain and the frame around your prompts too) |
+| `default` (default) | white, gray, fuchsia (ctx), sky blue (lmt), light green (rst), Clawd orange, gray-green (pch), khaki (sha), violet (branch), coral (flags), light green (+added), coral (-removed), Clawd orange (the matrix rain, the frame around your prompts and the frame around the status line too) |
 
 | Usage | Result |
 | --- | --- |

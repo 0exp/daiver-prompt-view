@@ -21,6 +21,7 @@ export type Theme = {
   removed: string // -N lines removed in the diff
   matrix: string // the matrix rain Clawd dissolves into (Clawd orange by default)
   prompt: string // the frame around the person's prompts in the transcript
+  frame: string // the frame around the whole status line
   resources: string // the RAM/CPU line's brackets and labels, a shade under white
   values: string // the RAM/CPU numbers, a shade under that
   effort: string // the effort level on the modes line
@@ -49,6 +50,7 @@ export const THEMES: Record<string, Theme> = {
     removed: '38;2;239;100;124',
     matrix: '38;2;215;119;87',
     prompt: '38;2;215;119;87',
+    frame: '38;2;215;119;87',
     resources: '38;2;200;200;200',
     values: '38;2;165;165;165',
     effort: '38;2;215;119;87',
@@ -75,7 +77,7 @@ export const hexOf = (params: string) => {
 export const sgr = (params: string) => `\x1b[${params}m`
 
 // the status line's colors as the script sources them: c_<name>='<params>'
-const SHELL_KEYS = ['gray', 'white', 'orange', 'session', 'ctx', 'lmt', 'rst', 'pch', 'sha', 'branch', 'flags', 'added', 'removed', 'matrix', 'resources', 'values', 'effort', 'ostyle'] as const
+const SHELL_KEYS = ['gray', 'white', 'orange', 'session', 'ctx', 'lmt', 'rst', 'pch', 'sha', 'branch', 'flags', 'added', 'removed', 'matrix', 'frame', 'resources', 'values', 'effort', 'ostyle'] as const
 
 export const themeShell = (name: string) =>
   `# daiver-prompt-view theme: ${name}\n` + SHELL_KEYS.map(key => `c_${key}='${THEMES[name][key]}'\n`).join('')

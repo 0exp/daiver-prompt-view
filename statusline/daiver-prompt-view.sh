@@ -25,7 +25,7 @@ mod="$HOME/.claude/daiver-prompt-view"
 # the colors of the active theme (the `theme` option, /daiver-prompt-view:view:theme):
 # c_<name>='<SGR params>' lines the hooks module writes from its themes; with
 # none yet, no colors
-c_gray='' c_white='' c_orange='' c_session='' c_ctx='' c_lmt='' c_rst='' c_pch='' c_sha='' c_branch='' c_flags='' c_added='' c_removed='' c_matrix='' c_resources='' c_values='' c_effort='' c_ostyle=''
+c_gray='' c_white='' c_orange='' c_session='' c_ctx='' c_lmt='' c_rst='' c_pch='' c_sha='' c_branch='' c_flags='' c_added='' c_removed='' c_matrix='' c_frame='' c_resources='' c_values='' c_effort='' c_ostyle=''
 [ -f "$mod/theme.sh" ] && . "$mod/theme.sh"
 gray=$(esc "$c_gray")
 white=$(esc "$c_white")
@@ -196,10 +196,43 @@ panel() {
   fi
 }
 
+e=$(printf '\033')
+# the visible width of a line: no color escapes, one cell per UTF-8 character
+vis() { printf '%s' "$1" | sed "s/$e\[[0-9;]*m//g" | LC_ALL=C tr -d '\200-\277' | wc -c | tr -d ' '; }
+
+pad=2 # the status line's left indent
+# the frame around the whole status line, in the theme's frame color: as wide
+# as the terminal less the indent on both sides when $COLUMNS is known, else
+# as wide as the widest line; `inner` is the room between its borders
+inner=''
+case "$COLUMNS" in '' | *[!0-9]*) ;; *) [ "$COLUMNS" -gt $((2 * pad + 13)) ] && inner=$((COLUMNS - 2 * pad - 2)) ;; esac
+frame() {
+  body=$(cat)
+  # never narrower than the widest line (a narrow terminal, Clawd beside the panel)
+  fw=${inner:-0}
+  while IFS= read -r l; do
+    v=$(vis "$l")
+    [ "$v" -gt "$fw" ] && fw=$v
+  done <<EOF
+$body
+EOF
+  fc=$(esc "$c_frame")
+  bar=$(printf '%*s' "$fw" '' | sed 's/ /─/g')
+  printf '%s\n' "${fc}╭${bar}╮${reset}"
+  while IFS= read -r l; do
+    fill=$((fw - $(vis "$l")))
+    [ $fill -lt 0 ] && fill=0
+    printf '%s%s%*s%s\n' "${fc}│${reset}" "$l" $fill '' "${fc}│${reset}"
+  done <<EOF
+$body
+EOF
+  printf '%s\n' "${fc}╰${bar}╯${reset}"
+}
+
 # Clawd is the mod's option (userConfig `clodik`, on by default): the hooks
 # module writes it to the config file next to this script
 if grep -qx 'clodik=false' "$mod/config" 2>/dev/null; then
-  panel
+  panel | frame
   exit 0
 fi
 
@@ -210,7 +243,6 @@ fi
 # main loop is not idle) Clawd plays one of twelve animations, a new random one
 # every few seconds, a frame per refresh (the status line runs once a second)
 ver=$(echo "$input" | jq -r '.version // empty')
-e=$(printf '\033')
 
 # a pose on Clawd's 11-cell canvas: r0 is the spare line above it, r1-r3 its
 # body (at rest in cells 1-9: cell 0 and 10 are room to move sideways); pcol is
@@ -317,8 +349,6 @@ clawd() {
 }
 h=3
 [ -n "$ver" ] && h=4
-# the visible width of a line: no color escapes, one cell per UTF-8 character
-vis() { printf '%s' "$1" | sed "s/$e\[[0-9;]*m//g" | LC_ALL=C tr -d '\200-\277' | wc -c | tr -d ' '; }
 lines=$(panel)
 n=$(printf '%s\n' "$lines" | wc -l | tr -d ' ')
 # at least one spare line, so Clawd sits off the prompt (and has room to jump)
@@ -332,11 +362,11 @@ done <<EOF
 $lines
 EOF
 top=$(((n - h + 1) / 2)) # an odd spare line goes above, off the prompt
-pad=2 # the status line's left indent
-# the canvas' first cell: the whole canvas (a step right included) ends pad
-# cells before the right edge
+# the canvas' first cell: the whole canvas (a step right included) ends at
+# the frame's right border
 col=$((w + 1))
-case "$COLUMNS" in '' | *[!0-9]*) ;; *) [ $((COLUMNS - 2 * pad - 11)) -gt $col ] && col=$((COLUMNS - 2 * pad - 11)) ;; esac
+[ -n "$inner" ] && [ $((inner - 11)) -gt $col ] && col=$((inner - 11))
+{
 i=0
 while IFS= read -r l; do
   a=$((i - top))
@@ -351,3 +381,4 @@ while IFS= read -r l; do
 done <<EOF
 $lines
 EOF
+} | frame
