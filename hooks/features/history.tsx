@@ -115,16 +115,19 @@ export function registerHistory(on: On) {
     return next(e)
   }).catch(($, e, next) => next(e))
 
-  // the pane: a frame in the theme's history color, the × in its top right
-  // corner, every prompt as a message of its own: a frame in the theme's prompt
-  // color, its time on top, its whole text under (the body scrolls)
+  // the pane: the × in its top right corner, every prompt as a message of its
+  // own (a frame in the theme's prompt color, its time on top, its whole text
+  // under; the body scrolls); the frame in the theme's history color is drawn
+  // around the body only while it holds no message
   on('ui.render', { component: 'Pane', requestId: PANE }, async ($, e) => {
     const { Box, Button, Text } = $.ui.resolve(e)
     const list = await read($, prompts)
     const theme = THEMES[config.theme]!
 
+    const frame = list.length === 0 ? { borderStyle: 'round', borderColor: hexOf(theme.history) } : {}
+
     return (
-      <Box flexDirection="column" borderStyle="round" borderColor={hexOf(theme.history)} paddingX={1}>
+      <Box flexDirection="column" paddingX={1} {...frame}>
         <Box justifyContent="space-between">
           <Text bold>Prompts ({list.length})</Text>
           <Button key="close" label="×" role="dismiss" hotkey="x" plain onPress={() => void $.ui.close({ id: PANE })} />

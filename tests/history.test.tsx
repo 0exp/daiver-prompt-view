@@ -58,10 +58,10 @@ test("the pane lists the session's prompts with their times in the theme's histo
 
   for (const surface of ['terminal', 'desktop', 'vscode', 'mobile'] as const) {
     const ui = await $.ui.mount({ ...PANE, surface })
-    const frame = await ui.find({ type: 'Box' })
+    const body = await ui.find({ type: 'Box' })
 
-    expect(frame?.props.borderStyle).toBe('round')
-    expect(frame?.props.borderColor).toBe('#d77757')
+    // with messages inside, the body has no frame of its own, each message has
+    expect(body?.props.borderStyle).toBeUndefined()
     expect((await ui.find({ type: 'Text', text: /Prompts/ }))?.text).toBe('Prompts (3)')
     expect((await ui.find({ type: 'Text', text: hms(3600000) }))?.text).toBe(hms(3600000))
     expect((await ui.find({ type: 'Text', text: /logged/ }))?.text).toBe('logged before the mod')
@@ -77,12 +77,15 @@ test("the pane lists the session's prompts with their times in the theme's histo
   expect(panes.closed).toEqual(['history'])
 })
 
-test('an empty pane says so', async ($, on) => {
+test("an empty pane says so, in the theme's history frame", async ($, on) => {
   world(on)
 
   await $.session.start(start)
   const ui = await $.ui.mount({ ...PANE, surface: 'terminal' })
+  const body = await ui.find({ type: 'Box' })
 
+  expect(body?.props.borderStyle).toBe('round')
+  expect(body?.props.borderColor).toBe('#d77757')
   expect((await ui.find({ type: 'Text', text: /No prompts/ }))?.text).toBe('No prompts yet.')
   await ui.unmount()
 })
