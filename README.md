@@ -66,6 +66,14 @@ stretch, hop side to side, tap dance, shiver, fall to pixels and back, dissolve
 into the Matrix's rain of glyphs and back. A new
 random animation starts every 8 seconds, a frame per refresh.
 
+## Your prompts
+
+Every prompt you send is drawn in the transcript inside a rounded frame in the
+theme's `prompt` color (Clawd orange in `default`). Only your own prompts are
+framed: background task notifications and messages from other sessions keep the
+plain row. The frame is drawing only, the stored message is untouched, and a
+theme switch redraws it at once.
+
 ## Commands
 
 Every command sets the option of the same row in `/config` (so the choice stays
@@ -130,7 +138,7 @@ Option `theme` (Color theme), default `default`.
 
 | Value | Colors |
 | --- | --- |
-| `default` (default) | white, gray, fuchsia (ctx), sky blue (lmt), light green (rst), Clawd orange, gray-green (pch), khaki (sha), violet (branch), coral (flags), light green (+added), coral (-removed), Clawd orange (the matrix rain too) |
+| `default` (default) | white, gray, fuchsia (ctx), sky blue (lmt), light green (rst), Clawd orange, gray-green (pch), khaki (sha), violet (branch), coral (flags), light green (+added), coral (-removed), Clawd orange (the matrix rain and the frame around your prompts too) |
 
 | Usage | Result |
 | --- | --- |

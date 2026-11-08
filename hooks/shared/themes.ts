@@ -20,6 +20,7 @@ export type Theme = {
   added: string // +N lines added in the diff
   removed: string // -N lines removed in the diff
   matrix: string // the matrix rain Clawd dissolves into (Clawd orange by default)
+  prompt: string // the frame around the person's prompts in the transcript
   resources: string // the RAM/CPU line's brackets and labels, a shade under white
   values: string // the RAM/CPU numbers, a shade under that
   effort: string // the effort level on the modes line
@@ -47,6 +48,7 @@ export const THEMES: Record<string, Theme> = {
     added: '38;2;144;238;144',
     removed: '38;2;239;100;124',
     matrix: '38;2;215;119;87',
+    prompt: '38;2;215;119;87',
     resources: '38;2;200;200;200',
     values: '38;2;165;165;165',
     effort: '38;2;215;119;87',
@@ -61,6 +63,13 @@ export const THEMES: Record<string, Theme> = {
 export const THEME_NAMES = Object.keys(THEMES)
 
 export const themeOf = (name: unknown) => (THEME_NAMES.includes(String(name)) ? String(name) : 'default')
+
+// a 24-bit SGR color (`38;2;R;G;B`, a `1;` bold prefix allowed) as the #rrggbb
+// a Box's borderColor takes; a color of another shape comes back as it is
+export const hexOf = (params: string) => {
+  const m = /(?:^|;)38;2;(\d+);(\d+);(\d+)$/.exec(params)
+  return m === null ? params : `#${m.slice(1, 4).map(n => Number(n).toString(16).padStart(2, '0')).join('')}`
+}
 
 // the escape of one color
 export const sgr = (params: string) => `\x1b[${params}m`

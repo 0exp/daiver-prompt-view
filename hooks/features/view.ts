@@ -24,6 +24,7 @@ export function registerView(on: On) {
     config.theme = arg
     await writeConfig($)
     await redrawAgents($)
+    $.ui.invalidate('ui.render')
 
     return { text: `The status line now uses the ${arg} theme.` }
   }).catch(($, e, next) => failed(next.error.message ?? next.error.kind))

@@ -6,6 +6,7 @@ import { ANIMATIONS, config, loadConfig } from './shared/config'
 import { THEME_NAMES } from './shared/themes'
 import { registerAgents, startAgents } from './features/agents'
 import { ANIMATE, ANIMATION, registerClodik } from './features/clodik'
+import { registerPrompt } from './features/prompt'
 import { registerResources, SHOW } from './features/resources'
 import { registerStatusline, startStatusline } from './features/statusline'
 import { registerView, THEME } from './features/view'
@@ -25,6 +26,7 @@ export const register: Register = (on, options) => {
   registerAgents(on)
   registerClodik(on)
   registerResources(on)
+  registerPrompt(on)
   registerView(on)
 
   // the commands' values in the prompt box's typeahead
