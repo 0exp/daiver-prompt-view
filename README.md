@@ -102,6 +102,7 @@ after the command.
 | `/daiver-prompt-view:clodik:animation` | an animation name, or nothing | `random` | Pick the animation Clawd plays; with no argument, shows the current one and the list |
 | `/daiver-prompt-view:view:theme` | a theme name, or nothing | `default` | Pick the colors of every line (the agents line's included); with no argument, shows the current one and the list |
 | `/daiver-prompt-view:resources:show` | `on`, `off`, or nothing | `on` | Show (`on`) or hide (`off`) the RAM and CPU line; with no argument, toggles |
+| `/daiver-prompt-view:history:show` | `on`, `off`, or nothing | `off` | Show (`on`) or hide (`off`) the pane with this session's prompts; with no argument, toggles |
 
 ### `/daiver-prompt-view:clodik:animate [on|off]`
 
@@ -151,7 +152,7 @@ Option `theme` (Color theme), default `default`.
 
 | Value | Colors |
 | --- | --- |
-| `default` (default) | white, gray, fuchsia (ctx), sky blue (lmt), light green (rst), Clawd orange, gray-green (pch), khaki (sha), violet (branch), coral (flags), light green (+added), coral (-removed), Clawd orange (the matrix rain, the frame around your prompts and the frame around the status line too), neon blue (the frame around Claude's replies), dark violet (the frame around the tool calls), green (the frame around the spinner), gray (the frame around a command's output) |
+| `default` (default) | white, gray, fuchsia (ctx), sky blue (lmt), light green (rst), Clawd orange, gray-green (pch), khaki (sha), violet (branch), coral (flags), light green (+added), coral (-removed), Clawd orange (the matrix rain, the frame around your prompts and the frame around the status line too), neon blue (the frame around Claude's replies), dark violet (the frame around the tool calls), green (the frame around the spinner), gray (the frame around a command's output), Clawd orange (the prompt history pane's frame too) |
 
 | Usage | Result |
 | --- | --- |
@@ -168,6 +169,7 @@ Every option is in `/config`, or in `~/.claude/settings.json` under
 | Option | `/config` label | Type | Default | Values | Command |
 | --- | --- | --- | --- | --- | --- |
 | `resources` | Show RAM and CPU | boolean | `true` | `true`, `false` | `resources:show` |
+| `history` | Show the prompt history pane | boolean | `false` | `true`, `false` | `history:show` |
 | `clodik` | Show Clawd | boolean | `true` | `true`, `false` | (none) |
 | `clodikAnimate` | Animate Clawd always | boolean | `false` | `true`, `false` | `clodik:animate` |
 | `clodikAnimation` | Clawd's animation | choice | `random` | `random`, `jump`, `spin`, `sway`, `blink`, `cheer`, `wave`, `stretch`, `hop`, `tap`, `shiver`, `pixels`, `matrix` | `clodik:animation` |
@@ -180,6 +182,7 @@ For example, in `~/.claude/settings.json`:
   "daiver-prompt-view@daiver-prompt-view": {
     "options": {
       "resources":       true,
+      "history":         false,
       "clodik":          true,
       "clodikAnimate":   false,
       "clodikAnimation": "pixels",
@@ -223,6 +226,32 @@ of the last minute (`top` would take half a second per refresh). Elsewhere,
 memory is `/proc/meminfo`'s total minus available, and CPU the busy share of
 `/proc/stat` since the previous refresh, kept in
 `~/.claude/daiver-prompt-view/cpu` (so the first refresh shows RAM alone).
+
+### Prompt history pane
+
+With `history` on, a pane at the right (above the prompt in a narrow terminal)
+lists the prompts you sent this session, newest at the bottom, one line each,
+numbered. Slash commands are left out. The list lives in the session's state,
+so it survives a reload of the mod. The pane's body is framed in the theme's
+`history` color (Clawd orange in `default`); the `×` in its top right corner
+(or `x` while the pane has the keyboard, or ctrl+x x) closes it and turns the
+option off.
+
+### `/daiver-prompt-view:history:show [on|off]`
+
+Option `history` (Show the prompt history pane), default `false` (`off`).
+
+| Value | Effect |
+| --- | --- |
+| `on` | the pane opens and stays open across sessions |
+| `off` | the pane closes |
+
+| Usage | Result |
+| --- | --- |
+| `/daiver-prompt-view:history:show on` | `The prompt history pane is now shown.` |
+| `/daiver-prompt-view:history:show off` | `The prompt history pane is now hidden.` |
+| `/daiver-prompt-view:history:show` | toggles: `The prompt history pane is now shown.` when it was off, `The prompt history pane is now hidden.` when it was on |
+| `/daiver-prompt-view:history:show maybe` | nothing changes: `Usage: /daiver-prompt-view:history:show [on|off]` |
 
 ### Adding a theme
 

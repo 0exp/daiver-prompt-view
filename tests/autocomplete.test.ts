@@ -23,6 +23,10 @@ test('the typeahead offers each command its values', async ($, on) => {
     { text: '/daiver-prompt-view:resources:show off', description: '' },
   ])
   expect(await rows('/daiver-prompt-view:resources:show of')).toEqual([{ text: 'off', description: '' }])
+  expect(await rows('/daiver-prompt-view:history:s')).toEqual([
+    { text: '/daiver-prompt-view:history:show on', description: '' },
+    { text: '/daiver-prompt-view:history:show off', description: 'current' },
+  ])
   expect(await rows('/daiver')).toEqual([])
   expect(await rows('hello /daiver-prompt-view:view:theme')).toEqual([])
 })

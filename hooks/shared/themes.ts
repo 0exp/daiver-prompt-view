@@ -26,6 +26,7 @@ export type Theme = {
   tool: string // the frame around the tool calls' rows in the transcript
   spinner: string // the frame around the spinner line of a running turn (green by default)
   command: string // the frame around a slash command's output row
+  history: string // the frame of the prompt history pane
   resources: string // the RAM/CPU line's brackets and labels, a shade under white
   values: string // the RAM/CPU numbers, a shade under that
   effort: string // the effort level on the modes line
@@ -59,6 +60,7 @@ export const THEMES: Record<string, Theme> = {
     tool: '38;2;106;52;163',
     spinner: '38;2;0;200;80',
     command: '38;2;128;128;128',
+    history: '38;2;215;119;87',
     resources: '38;2;200;200;200',
     values: '38;2;165;165;165',
     effort: '38;2;215;119;87',

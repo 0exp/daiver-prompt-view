@@ -1,7 +1,7 @@
 // agents: the line of the main loop's state and the background work by kind
 // and state, and a line per live subagent; written to <mod dir>/agents/<session>,
 // which the status line script prints after the modes line
-import type { AgentStatus, EngineInterface, On } from 'claude-code'
+import type { AgentStatus, EngineInterface, On, PromptSubmitInput } from 'claude-code'
 import { config } from '../shared/config'
 import { home } from '../shared/files'
 import { sgr, THEMES } from '../shared/themes'
@@ -147,6 +147,14 @@ export async function startAgents($: EngineInterface) {
   $.clock.every(1000, () => refresh($))
 }
 
+// a task notification's prompt ends the tasks it names (called from the one
+// prompt.submit hook, in register.ts)
+export function forgetNotifiedTasks(e: PromptSubmitInput) {
+  if (e.origin.kind === 'task-notification') {
+    for (const [, id] of e.text.matchAll(/<task-id>([^<]+)<\/task-id>/g)) tasks.delete(id.trim())
+  }
+}
+
 export function registerAgents(on: On) {
   on('turn.start', async ($, e, next) => {
     if (main === 'idle') mainSince = await $.clock.now()
@@ -208,14 +216,6 @@ export function registerAgents(on: On) {
     if (id !== undefined && ran.deny === undefined) tasks.delete(id)
 
     return ran
-  }).catch(($, e, next) => next(e))
-
-  on('prompt.submit', ($, e, next) => {
-    if (e.origin.kind === 'task-notification') {
-      for (const [, id] of e.text.matchAll(/<task-id>([^<]+)<\/task-id>/g)) tasks.delete(id.trim())
-    }
-
-    return next(e)
   }).catch(($, e, next) => next(e))
 
   on('classic.Stop', ($, e, next) => {

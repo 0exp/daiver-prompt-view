@@ -8,6 +8,8 @@ export const DIR = '/home/me/.claude/daiver-prompt-view'
 export function world(on: On) {
   const files = new Map<string, string>()
   const sets: string[] = []
+  const state = new Map<string, { value: unknown; version: number }>()
+  const panes = { open: [] as string[], closed: [] as string[] }
 
   on('fs.exists', ($, e) => ({ value: files.has(e.path) || e.path.endsWith('/statusline/daiver-prompt-view.sh') }))
   on('fs.read', ($, e) => ({ value: files.get(e.path) ?? '#!/bin/sh\n' }))
@@ -20,6 +22,22 @@ export function world(on: On) {
   on('clock.now', () => ({ value: 0 }))
   on('settings.read', () => ({ value: {} }))
   on('command.register', ($, e) => ({ value: { command: e.name } }))
+  on('state.get', ($, e) => ({ value: state.get(`${e.plugin}.${e.key}`) ?? { value: undefined, version: 0 } }))
+  on('state.set', ($, e) => {
+    const version = (state.get(`${e.plugin}.${e.key}`)?.version ?? 0) + 1
+    state.set(`${e.plugin}.${e.key}`, { value: e.value, version })
+    return { value: { isSet: true, version } }
+  })
+  on('ui.open', ($, e) => {
+    if (!panes.open.includes(e.id)) panes.open.push(e.id)
+    return { value: { isPlaced: true } }
+  })
+  on('ui.close', ($, e) => {
+    panes.open = panes.open.filter(id => id !== e.id)
+    panes.closed.push(e.id)
+    return { value: undefined }
+  })
+  on('prompt.submit', ($, e) => ({ text: e.text }))
   const provider = { plugin: 'daiver-prompt-view', tier: 'user' } as const
   on('config.list', $ => ({
     value: [
@@ -27,6 +45,7 @@ export function world(on: On) {
       { key: `${$.plugin.name}.clodikAnimation`, label: "Clawd's animation", kind: 'choice', value: 'random', provider, isLocked: false },
       { key: `${$.plugin.name}.theme`, label: 'Color theme', kind: 'choice', value: 'default', provider, isLocked: false },
       { key: `${$.plugin.name}.resources`, label: 'Show RAM and CPU', kind: 'boolean', value: true, provider, isLocked: false },
+      { key: `${$.plugin.name}.history`, label: 'Show the prompt history pane', kind: 'boolean', value: false, provider, isLocked: false },
     ],
   }))
   on('config.set', ($, e) => {
@@ -37,7 +56,7 @@ export function world(on: On) {
   on('prompt.autocomplete', () => ({ suggestions: [] }))
   mock.env(on, { HOME: '/home/me' })
 
-  return { files, sets, config: () => files.get(`${DIR}/config`), agents: () => files.get(`${DIR}/agents/s1`) }
+  return { files, sets, panes, config: () => files.get(`${DIR}/config`), agents: () => files.get(`${DIR}/agents/s1`) }
 }
 
 export const start = { cwd: '/tmp', surface: 'terminal', isInteractive: true } as const
@@ -56,5 +75,5 @@ export const typed = (text: string) => {
   return { text, cursor: text.length, token: text.slice(start), start }
 }
 
-export const conf = (clodik: boolean, animate: boolean, animation: string, theme = 'default', resources = true) =>
-  `clodik=${clodik}\nanimate=${animate}\nanimation=${animation}\ntheme=${theme}\nresources=${resources}\n`
+export const conf = (clodik: boolean, animate: boolean, animation: string, theme = 'default', resources = true, history = false) =>
+  `clodik=${clodik}\nanimate=${animate}\nanimation=${animation}\ntheme=${theme}\nresources=${resources}\nhistory=${history}\n`

@@ -4,9 +4,10 @@ import type { Register } from 'claude-code'
 import { choiceRows } from './shared/commands'
 import { ANIMATIONS, config, loadConfig } from './shared/config'
 import { THEME_NAMES } from './shared/themes'
-import { registerAgents, startAgents } from './features/agents'
+import { forgetNotifiedTasks, registerAgents, startAgents } from './features/agents'
 import { ANIMATE, ANIMATION, registerClodik } from './features/clodik'
 import { registerCommand } from './features/command'
+import { collectPrompt, HISTORY, registerHistory, startHistory } from './features/history'
 import { registerPrompt } from './features/prompt'
 import { registerReply } from './features/reply'
 import { registerSpinner } from './features/spinner'
@@ -22,6 +23,15 @@ export const register: Register = (on, options) => {
   on('session.start', async ($, e, next) => {
     await startStatusline($)
     await startAgents($)
+    await startHistory($)
+
+    return next(e)
+  }).catch(($, e, next) => next(e))
+
+  // one prompt.submit for every feature: a module hooks it once without a matcher
+  on('prompt.submit', async ($, e, next) => {
+    forgetNotifiedTasks(e)
+    await collectPrompt($, e)
 
     return next(e)
   }).catch(($, e, next) => next(e))
@@ -35,6 +45,7 @@ export const register: Register = (on, options) => {
   registerTool(on)
   registerSpinner(on)
   registerCommand(on)
+  registerHistory(on)
   registerView(on)
 
   // the commands' values in the prompt box's typeahead
@@ -44,6 +55,7 @@ export const register: Register = (on, options) => {
       [ANIMATION]: { values: ANIMATIONS, current: config.animation },
       [THEME]: { values: THEME_NAMES, current: config.theme },
       [SHOW]: { values: ['on', 'off'], current: config.resources ? 'on' : 'off' },
+      [HISTORY]: { values: ['on', 'off'], current: config.history ? 'on' : 'off' },
     })
 
     if (rows.length === 0) return next(e)
