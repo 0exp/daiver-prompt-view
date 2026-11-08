@@ -19,6 +19,7 @@ export type Theme = {
   flags: string // git flags
   added: string // +N lines added in the diff
   removed: string // -N lines removed in the diff
+  matrix: string // the matrix rain Clawd dissolves into
   resources: string // the RAM/CPU line's brackets and labels, a shade under white
   values: string // the RAM/CPU numbers, a shade under that
   effort: string // the effort level on the modes line
@@ -45,6 +46,7 @@ export const THEMES: Record<string, Theme> = {
     flags: '1;38;2;239;100;124',
     added: '38;2;144;238;144',
     removed: '38;2;239;100;124',
+    matrix: '38;2;0;255;70',
     resources: '38;2;200;200;200',
     values: '38;2;165;165;165',
     effort: '38;2;215;119;87',
@@ -64,7 +66,7 @@ export const themeOf = (name: unknown) => (THEME_NAMES.includes(String(name)) ? 
 export const sgr = (params: string) => `\x1b[${params}m`
 
 // the status line's colors as the script sources them: c_<name>='<params>'
-const SHELL_KEYS = ['gray', 'white', 'orange', 'session', 'ctx', 'lmt', 'rst', 'pch', 'sha', 'branch', 'flags', 'added', 'removed', 'resources', 'values', 'effort', 'ostyle'] as const
+const SHELL_KEYS = ['gray', 'white', 'orange', 'session', 'ctx', 'lmt', 'rst', 'pch', 'sha', 'branch', 'flags', 'added', 'removed', 'matrix', 'resources', 'values', 'effort', 'ostyle'] as const
 
 export const themeShell = (name: string) =>
   `# daiver-prompt-view theme: ${name}\n` + SHELL_KEYS.map(key => `c_${key}='${THEMES[name][key]}'\n`).join('')

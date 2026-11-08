@@ -3,7 +3,7 @@ import { home, sync } from './files'
 import { themeOf, themeShell } from './themes'
 
 // Clawd's animations, as the script and the clodikAnimation option name them
-export const ANIMATIONS = ['random', 'jump', 'spin', 'sway', 'blink', 'cheer', 'wave', 'stretch', 'hop', 'tap', 'shiver', 'pixels']
+export const ANIMATIONS = ['random', 'jump', 'spin', 'sway', 'blink', 'cheer', 'wave', 'stretch', 'hop', 'tap', 'shiver', 'pixels', 'matrix']
 
 // the options the status line script reads, from the plugin's userConfig;
 // a change in /config reloads the module, and session.start fires again

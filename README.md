@@ -62,7 +62,8 @@ narrow, it sits right next to the lines.
 
 While Claude Code is busy (the agents line shows the main loop anything but
 `idle`), Clawd moves: jump, spin around, sway, blink, cheer, wave, squash and
-stretch, hop side to side, tap dance, shiver, fall to pixels and back. A new
+stretch, hop side to side, tap dance, shiver, fall to pixels and back, dissolve
+into the Matrix's rain of green glyphs and back. A new
 random animation starts every 8 seconds, a frame per refresh.
 
 ## Commands
@@ -111,6 +112,7 @@ Option `clodikAnimation` (Clawd's animation), default `random`.
 | `tap` | tap dance |
 | `shiver` | shiver |
 | `pixels` | fall to pixels and back |
+| `matrix` | fall to pixels, then the Matrix's rain of green glyphs runs down the canvas, then back |
 
 | Usage | Result |
 | --- | --- |
@@ -128,7 +130,7 @@ Option `theme` (Color theme), default `default`.
 
 | Value | Colors |
 | --- | --- |
-| `default` (default) | white, gray, fuchsia (ctx), sky blue (lmt), light green (rst), Clawd orange, gray-green (pch), khaki (sha), violet (branch), coral (flags), light green (+added), coral (-removed) |
+| `default` (default) | white, gray, fuchsia (ctx), sky blue (lmt), light green (rst), Clawd orange, gray-green (pch), khaki (sha), violet (branch), coral (flags), light green (+added), coral (-removed), Matrix green (the matrix rain) |
 
 | Usage | Result |
 | --- | --- |
@@ -147,7 +149,7 @@ Every option is in `/config`, or in `~/.claude/settings.json` under
 | `resources` | Show RAM and CPU | boolean | `true` | `true`, `false` | `resources:show` |
 | `clodik` | Show Clawd | boolean | `true` | `true`, `false` | (none) |
 | `clodikAnimate` | Animate Clawd always | boolean | `false` | `true`, `false` | `clodik:animate` |
-| `clodikAnimation` | Clawd's animation | choice | `random` | `random`, `jump`, `spin`, `sway`, `blink`, `cheer`, `wave`, `stretch`, `hop`, `tap`, `shiver`, `pixels` | `clodik:animation` |
+| `clodikAnimation` | Clawd's animation | choice | `random` | `random`, `jump`, `spin`, `sway`, `blink`, `cheer`, `wave`, `stretch`, `hop`, `tap`, `shiver`, `pixels`, `matrix` | `clodik:animation` |
 | `theme` | Color theme | choice | `default` | `default` | `view:theme` |
 
 For example, in `~/.claude/settings.json`:

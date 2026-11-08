@@ -25,7 +25,7 @@ mod="$HOME/.claude/daiver-prompt-view"
 # the colors of the active theme (the `theme` option, /daiver-prompt-view:view:theme):
 # c_<name>='<SGR params>' lines the hooks module writes from its themes; with
 # none yet, no colors
-c_gray='' c_white='' c_orange='' c_session='' c_ctx='' c_lmt='' c_rst='' c_pch='' c_sha='' c_branch='' c_flags='' c_added='' c_removed='' c_resources='' c_values='' c_effort='' c_ostyle=''
+c_gray='' c_white='' c_orange='' c_session='' c_ctx='' c_lmt='' c_rst='' c_pch='' c_sha='' c_branch='' c_flags='' c_added='' c_removed='' c_matrix='' c_resources='' c_values='' c_effort='' c_ostyle=''
 [ -f "$mod/theme.sh" ] && . "$mod/theme.sh"
 gray=$(esc "$c_gray")
 white=$(esc "$c_white")
@@ -207,14 +207,16 @@ fi
 # the edge as the status line is from the left one; next to the panel when the
 # terminal width ($COLUMNS) is unknown or too narrow; the Claude Code version
 # centered under its feet. While Claude Code is busy (the agents line's
-# main loop is not idle) Clawd plays one of eleven animations, a new random one
+# main loop is not idle) Clawd plays one of twelve animations, a new random one
 # every few seconds, a frame per refresh (the status line runs once a second)
 ver=$(echo "$input" | jq -r '.version // empty')
 e=$(printf '\033')
 
 # a pose on Clawd's 11-cell canvas: r0 is the spare line above it, r1-r3 its
-# body (at rest in cells 1-9: cell 0 and 10 are room to move sideways)
+# body (at rest in cells 1-9: cell 0 and 10 are room to move sideways); pcol is
+# its color, Clawd orange but for the matrix rain (m1-m8), in the theme's green
 pose() {
+  pcol=$orange
   r0=''
   r1='  ▐▛███▜▌'
   r2=' ▝▜█████▛▘'
@@ -235,6 +237,14 @@ pose() {
     crack) r0='      ▝' r1='  ▐▛▞█▜▘ ▗' r2=' ▝▜█▚██▛▖' r3='   ▘▖ ▝▗' ;;
     scatter) r0='  ▗   ▘  ▝' r1=' ▘ ▚▝▞▖▘ ▗' r2='▖ ▞▗▚ ▘▞ ▝' r3='  ▝ ▖ ▗ ▘' ;;
     dust) r0=' ▝    ▖   ▗' r1='▗   ▘    ▝' r2='   ▖   ▗' r3='▘    ▝    ▖' ;;
+    m1) pcol=$(esc "$c_matrix") r0='ﾃ ﾘ ｳ    ﾔ' r1='  ﾈ ｲ    ﾆ' r2='  ｸ    ｵ  ﾏ' r3='       ﾑ  ｲ' ;;
+    m2) pcol=$(esc "$c_matrix") r0='ｱ    ｴ' r1='ｼ ﾉ ｾ    ｲ' r2='  ﾊ ｳ    ﾊ' r3='  ｴ    ﾒ  ﾓ' ;;
+    m3) pcol=$(esc "$c_matrix") r0='ﾗ    ﾈ  ｲ' r1='ｽ    ﾔ' r2='ｶ ﾔ ﾓ    ｱ' r3='  ﾗ ｲ    ｽ' ;;
+    m4) pcol=$(esc "$c_matrix") r0=' ﾉ   ﾂ  ﾚ' r1='ﾁ    ﾓ  ﾒ' r2='ｷ    ｶ' r3='ﾒ ｸ ﾑ    ｺ' ;;
+    m5) pcol=$(esc "$c_matrix") r0=' ﾗ      ｳ ﾓ' r1=' ﾓ   ｵ  ﾜ' r2='ﾔ    ﾆ  ﾒ' r3='ｵ    ｻ' ;;
+    m6) pcol=$(esc "$c_matrix") r0='       ﾑ  ﾌ' r1=' ｼ      ﾌ ﾔ' r2=' ﾖ   ﾚ  ﾃ' r3='ｲ    ﾎ  ﾊ' ;;
+    m7) pcol=$(esc "$c_matrix") r0='  ｾ    ｾ  ﾎ' r1='       ﾛ  ﾐ' r2=' ﾂ      ﾓ ﾂ' r3=' ﾆ   ｺ  ｴ' ;;
+    m8) pcol=$(esc "$c_matrix") r0='  ﾋ ﾁ    ﾏ' r1='  ﾝ    ｳ  Z' r2='       ﾕ  ｹ' r3=' ﾄ      ｶ ﾉ' ;;
   esac
   case "$2" in
     L) r0=${r0# } r1=${r1# } r2=${r2# } r3=${r3# } ;;
@@ -244,7 +254,7 @@ pose() {
 
 # the animations, by the names the clodikAnimation option takes: one
 # pose[:L|R shift] per frame
-anims='jump spin sway blink cheer wave stretch hop tap shiver pixels'
+anims='jump spin sway blink cheer wave stretch hop tap shiver pixels matrix'
 anim() {
   case "$1" in
     jump) echo 'rest squash up rest' ;;
@@ -258,6 +268,7 @@ anim() {
     tap) echo 'rest tapl rest tapr' ;;                              # tap dance
     shiver) echo 'rest:L rest:R rest:L rest:R' ;;
     pixels) echo 'rest crack scatter dust scatter crack' ;;         # fall to pixels and back
+    matrix) echo 'rest crack scatter dust m1 m2 m3 m4 m5 m6 m7 m8 m1 m2 m3 m4 dust scatter crack' ;; # to pixels, then the rain
   esac
 }
 # the clodikAnimation option (/daiver-prompt-view:clodik:animation): one of them, or random
@@ -276,11 +287,11 @@ if [ -n "$busy" ]; then
   rnd() {
     x=$((($1 * 2654435761) & 4294967295))
     x=$((((x ^ (x >> 16)) * 73244475) & 4294967295))
-    echo $(((x ^ (x >> 16)) % 11))
+    echo $(((x ^ (x >> 16)) % 12))
   }
   if [ -z "$animation" ]; then
     k=$(rnd $((now / 8)))
-    [ "$k" -eq "$(rnd $((now / 8 - 1)))" ] && k=$(((k + 1) % 11))
+    [ "$k" -eq "$(rnd $((now / 8 - 1)))" ] && k=$(((k + 1) % 12))
     set -- $anims
     shift $k
     animation=$1
@@ -302,7 +313,7 @@ clawd() {
     2) r=$r3 ;;
     3) r="$(printf '%*s' $(((11 - ${#ver}) / 2)) '')${gray}$ver" ;;
   esac
-  [ -n "$r" ] && printf '%s' "${orange}$r${reset}"
+  [ -n "$r" ] && printf '%s' "${pcol}$r${reset}"
 }
 h=3
 [ -n "$ver" ] && h=4
