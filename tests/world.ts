@@ -55,6 +55,7 @@ export function world(on: On, { configRows = true } = {}) {
       { key: `${$.plugin.name}.theme`, label: 'Color theme', kind: 'choice', value: 'default', provider, isLocked: false },
       { key: `${$.plugin.name}.resources`, label: 'Show RAM and CPU', kind: 'boolean', value: true, provider, isLocked: false },
       { key: `${$.plugin.name}.history`, label: 'Show the prompt history pane', kind: 'boolean', value: false, provider, isLocked: false },
+      { key: `${$.plugin.name}.borders`, label: 'Show the frames', kind: 'boolean', value: true, provider, isLocked: false },
     ],
   }))
   on('config.set', ($, e) => {
@@ -83,5 +84,5 @@ export const typed = (text: string) => {
   return { text, cursor: text.length, token: text.slice(start), start }
 }
 
-export const conf = (clodik: boolean, animate: boolean, animation: string, theme = 'default', resources = true, history = false) =>
-  `clodik=${clodik}\nanimate=${animate}\nanimation=${animation}\ntheme=${theme}\nresources=${resources}\nhistory=${history}\n`
+export const conf = (clodik: boolean, animate: boolean, animation: string, theme = 'default', resources = true, history = false, borders = true) =>
+  `clodik=${clodik}\nanimate=${animate}\nanimation=${animation}\ntheme=${theme}\nresources=${resources}\nhistory=${history}\nborders=${borders}\n`

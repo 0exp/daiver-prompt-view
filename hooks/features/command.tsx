@@ -8,6 +8,7 @@ import { hexOf, THEMES } from '../shared/themes'
 
 export function registerCommand(on: On) {
   on('ui.render', { component: 'CommandOutput' }, async ($, e, next) => {
+    if (!config.borders) return next(e)
     const row = await next(e)
     const { Box } = $.ui.resolve(e)
 

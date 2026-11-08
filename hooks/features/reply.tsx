@@ -7,6 +7,7 @@ import { hexOf, THEMES } from '../shared/themes'
 
 export function registerReply(on: On) {
   on('ui.render', { component: 'AssistantMessage' }, async ($, e, next) => {
+    if (!config.borders) return next(e)
     const block = await next(e)
     const { Box } = $.ui.resolve(e)
 

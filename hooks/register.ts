@@ -4,6 +4,7 @@ import type { Register } from 'claude-code'
 import { choiceRows } from './shared/commands'
 import { ANIMATIONS, config, loadConfig } from './shared/config'
 import { THEME_NAMES } from './shared/themes'
+import { BORDERS, registerChat } from './features/chat'
 import { forgetNotifiedTasks, registerAgents, startAgents } from './features/agents'
 import { ANIMATE, ANIMATION, registerClodik } from './features/clodik'
 import { registerCommand } from './features/command'
@@ -46,6 +47,7 @@ export const register: Register = (on, options) => {
   registerSpinner(on)
   registerCommand(on)
   registerHistory(on)
+  registerChat(on)
   registerView(on)
 
   // the commands' values in the prompt box's typeahead
@@ -56,6 +58,7 @@ export const register: Register = (on, options) => {
       [THEME]: { values: THEME_NAMES, current: config.theme },
       [SHOW]: { values: ['on', 'off'], current: config.resources ? 'on' : 'off' },
       [HISTORY]: { values: ['on', 'off'], current: config.history ? 'on' : 'off' },
+      [BORDERS]: { values: ['on', 'off'], current: config.borders ? 'on' : 'off' },
     })
 
     if (rows.length === 0) return next(e)

@@ -8,6 +8,7 @@ import { hexOf, THEMES } from '../shared/themes'
 
 export function registerSpinner(on: On) {
   on('ui.render', { component: 'Spinner' }, async ($, e, next) => {
+    if (!config.borders) return next(e)
     const line = await next(e)
     const { Box } = $.ui.resolve(e)
 

@@ -9,9 +9,10 @@ import { hexOf, THEMES } from '../shared/themes'
 import { noteRow } from './history'
 
 export function registerPrompt(on: On) {
-  on('ui.render', { component: 'UserMessage', props: { origin: { kind: 'composer' } } }, ($, e) => {
-    const { Box, Text } = $.ui.resolve(e)
+  on('ui.render', { component: 'UserMessage', props: { origin: { kind: 'composer' } } }, ($, e, next) => {
     noteRow(e.props.text, e.requestId)
+    if (!config.borders) return next(e)
+    const { Box, Text } = $.ui.resolve(e)
 
     return (
       <Box borderStyle="round" borderColor={hexOf(THEMES[config.theme]!.prompt)} paddingX={1}>

@@ -72,6 +72,9 @@ random animation starts every 8 seconds, a frame per refresh.
 
 ## Your prompts, Claude's replies, tool calls, the spinner and command output
 
+All of these frames, and the status line's, follow the `borders` option
+(`/daiver-prompt-view:chat:show-borders`, see below).
+
 Every prompt you send is drawn in the transcript inside a rounded frame in the
 theme's `prompt` color (Clawd orange in `default`). Only your own prompts are
 framed: background task notifications and messages from other sessions keep the
@@ -105,6 +108,7 @@ after the command.
 | `/daiver-prompt-view:view:theme` | a theme name, or nothing | `default` | Pick the colors of every line (the agents line's included); with no argument, shows the current one and the list |
 | `/daiver-prompt-view:resources:show` | `on`, `off`, or nothing | `on` | Show (`on`) or hide (`off`) the RAM and CPU line; with no argument, toggles |
 | `/daiver-prompt-view:history:show` | `on`, `off`, or nothing | `off` | Show (`on`) or hide (`off`) the pane with this session's prompts; with no argument, toggles |
+| `/daiver-prompt-view:chat:show-borders` | `on`, `off`, or nothing | `on` | Show (`on`) or hide (`off`) the frames around prompts, replies, tool calls, the spinner, command output and the status line; with no argument, toggles |
 
 ### `/daiver-prompt-view:clodik:animate [on|off]`
 
@@ -172,6 +176,7 @@ Every option is in `/config`, or in `~/.claude/settings.json` under
 | --- | --- | --- | --- | --- | --- |
 | `resources` | Show RAM and CPU | boolean | `true` | `true`, `false` | `resources:show` |
 | `history` | Show the prompt history pane | boolean | `false` | `true`, `false` | `history:show` |
+| `borders` | Show the frames | boolean | `true` | `true`, `false` | `chat:show-borders` |
 | `clodik` | Show Clawd | boolean | `true` | `true`, `false` | (none) |
 | `clodikAnimate` | Animate Clawd always | boolean | `false` | `true`, `false` | `clodik:animate` |
 | `clodikAnimation` | Clawd's animation | choice | `random` | `random`, `jump`, `spin`, `sway`, `blink`, `cheer`, `wave`, `stretch`, `hop`, `tap`, `shiver`, `pixels`, `matrix` | `clodik:animation` |
@@ -185,6 +190,7 @@ For example, in `~/.claude/settings.json`:
     "options": {
       "resources":       true,
       "history":         false,
+      "borders":         true,
       "clodik":          true,
       "clodikAnimate":   false,
       "clodikAnimation": "pixels",
@@ -269,6 +275,25 @@ Option `history` (Show the prompt history pane), default `false` (`off`).
 | `/daiver-prompt-view:history:show off` | `The prompt history pane is now hidden.` |
 | `/daiver-prompt-view:history:show` | toggles: `The prompt history pane is now shown.` when it was off, `The prompt history pane is now hidden.` when it was on |
 | `/daiver-prompt-view:history:show maybe` | nothing changes: `Usage: /daiver-prompt-view:history:show [on|off]` |
+
+### `/daiver-prompt-view:chat:show-borders [on|off]`
+
+Option `borders` (Show the frames), default `true` (`on`). It covers every
+frame the mod draws in the transcript (your prompts, Claude's replies, tool
+calls, the spinner, command output) and the frame around the status line; the
+history pane's own frames stay.
+
+| Value | Effect |
+| --- | --- |
+| `on` | the frames are drawn |
+| `off` | every framed row is drawn as Claude Code draws it, the status line bare |
+
+| Usage | Result |
+| --- | --- |
+| `/daiver-prompt-view:chat:show-borders on` | `The frames are now shown.` |
+| `/daiver-prompt-view:chat:show-borders off` | `The frames are now hidden.` |
+| `/daiver-prompt-view:chat:show-borders` | toggles: `The frames are now hidden.` when they were on, `The frames are now shown.` when they were off |
+| `/daiver-prompt-view:chat:show-borders maybe` | nothing changes: `Usage: /daiver-prompt-view:chat:show-borders [on|off]` |
 
 ### Adding a theme
 
