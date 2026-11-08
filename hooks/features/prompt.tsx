@@ -6,12 +6,11 @@
 import type { On } from 'claude-code'
 import { config } from '../shared/config'
 import { hexOf, THEMES } from '../shared/themes'
-import { noteOnScreen, noteRow } from './history'
+import { noteRow } from './history'
 
 export function registerPrompt(on: On) {
   on('ui.render', { component: 'UserMessage', props: { origin: { kind: 'composer' } } }, ($, e, next) => {
     noteRow(e.props.text, e.requestId)
-    noteOnScreen(e.requestId, e.props.onScreen)
     if (!config.borders) return next(e)
     const { Box, Text } = $.ui.resolve(e)
 

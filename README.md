@@ -159,7 +159,7 @@ Option `theme` (Color theme), default `default`.
 
 | Value | Colors |
 | --- | --- |
-| `default` (default) | white, gray, fuchsia (ctx), sky blue (lmt), light green (rst), Clawd orange, gray-green (pch), khaki (sha), violet (branch), coral (flags), light green (+added), coral (-removed), Clawd orange (the matrix rain, the frame around your prompts and the frame around the status line too), neon blue (the frame around Claude's replies), dark violet (the frame around the tool calls), yellow (the frame around the spinner, as the output style), gray (the frame around a command's output), Clawd orange (the prompt history pane's frame too), bright orange (the history message under the pointer), near black (the history pane's background), white (the history message whose prompt is on screen) |
+| `default` (default) | white, gray, fuchsia (ctx), sky blue (lmt), light green (rst), Clawd orange, gray-green (pch), khaki (sha), violet (branch), coral (flags), light green (+added), coral (-removed), Clawd orange (the matrix rain, the frame around your prompts and the frame around the status line too), neon blue (the frame around Claude's replies), dark violet (the frame around the tool calls), yellow (the frame around the spinner, as the output style), gray (the frame around a command's output), Clawd orange (the prompt history pane's frame too), bright orange (the history message under the pointer), near black (the history pane's background) |
 
 | Usage | Result |
 | --- | --- |
@@ -254,11 +254,7 @@ loaded are there too; from then on each prompt joins as it is sent. The list
 lives in the session's state, so it survives a reload of the mod. The wheel
 or the scroll keys move the list by messages while the header with the `×`
 stays put (`↑3` after the count says how many newer messages are above); a
-scrollbar at the list's right edge shows where it stands. The messages whose
-prompt is on screen in the transcript right now are drawn in a bold frame of
-the theme's `onscreen` color (white in `default`), so the pane doubles as a map
-of where the chat stands; the set follows the transcript's own drawing, so it
-covers the prompts the transcript has drawn and updates within a second. While the list is empty the pane's body
+scrollbar at the list's right edge shows where it stands. While the list is empty the pane's body
 is framed in the theme's `history` color (Clawd orange in `default`); with
 messages inside, each has its own frame and the body none. The `×` in the top
 right corner

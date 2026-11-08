@@ -29,7 +29,6 @@ export type Theme = {
   history: string // the frame of the prompt history pane
   hover: string // the frame of the history pane's message under the pointer, brighter
   paneBackground: string // what is painted under the history pane's body, darker than the terminal's
-  onscreen: string // the frame of a history message whose prompt is on screen in the transcript
   resources: string // the RAM/CPU line's brackets and labels, a shade under white
   values: string // the RAM/CPU numbers, a shade under that
   effort: string // the effort level on the modes line
@@ -66,7 +65,6 @@ export const THEMES: Record<string, Theme> = {
     history: '38;2;215;119;87',
     hover: '38;2;255;170;120',
     paneBackground: '38;2;16;16;22',
-    onscreen: '38;2;255;255;255',
     resources: '38;2;200;200;200',
     values: '38;2;165;165;165',
     effort: '38;2;215;119;87',
