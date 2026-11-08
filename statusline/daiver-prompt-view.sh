@@ -25,7 +25,7 @@ mod="$HOME/.claude/daiver-prompt-view"
 # the colors of the active theme (the `theme` option, /daiver-prompt-view:view:theme):
 # c_<name>='<SGR params>' lines the hooks module writes from its themes; with
 # none yet, no colors
-c_gray='' c_white='' c_orange='' c_session='' c_ctx='' c_lmt='' c_rst='' c_pch='' c_sha='' c_branch='' c_flags='' c_values=''
+c_gray='' c_white='' c_orange='' c_session='' c_ctx='' c_lmt='' c_rst='' c_pch='' c_sha='' c_branch='' c_flags='' c_resources='' c_values='' c_effort='' c_ostyle=''
 [ -f "$mod/theme.sh" ] && . "$mod/theme.sh"
 gray=$(esc "$c_gray")
 white=$(esc "$c_white")
@@ -72,11 +72,11 @@ model="${model}${gray}<${bold}stime:${unbold}$stm>${reset} "
 am=$(cat "$mod/automemory/$(echo "$input" | jq -r '.session_id // empty')" 2>/dev/null)
 case "$am" in on | off) model="${model}${gray}<${bold}automemory:${unbold}$am>${reset} " ;; esac
 
-# line 2: modes
+# line 2: modes; the effort level and the output style in their theme colors
 effort=$(echo "$input" | jq -r '.effort.level // empty')
-[ -n "$effort" ] && modes="$modes (${bold}effort${unbold}:$effort)"
+[ -n "$effort" ] && modes="$modes (${bold}effort${unbold}:$(esc "$c_effort")$effort${reset})"
 ostyle=$(echo "$input" | jq -r '.output_style.name // empty')
-[ -n "$ostyle" ] && modes="$modes (${bold}outputstyle${unbold}:$ostyle)"
+[ -n "$ostyle" ] && modes="$modes (${bold}outputstyle${unbold}:$(esc "$c_ostyle")$ostyle${reset})"
 thinking=$(echo "$input" | jq -r '.thinking.enabled')
 case "$thinking" in
   true) modes="$modes (${bold}thinkmode${unbold}:thinking)" ;;
@@ -92,10 +92,11 @@ case "$fast" in true | false) modes="$modes (${bold}fastmode${unbold}:$fast)" ;;
 # else /proc/meminfo's total - available; CPU is the sum of every process's %cpu
 # from ps (a decaying average of the last minute) over the cores, else the busy
 # share of /proc/stat since the previous run, kept in <mod>/cpu (none on the first).
-# The labels in white, the numbers a shade under it
+# The brackets and labels in the theme's resources color, the numbers in values
 gb() { awk -v b="$1" 'BEGIN { printf "%.1f", b / 1073741824 }' | sed 's/\.0$//'; }
 res=''
 vals=$(esc "$c_values")
+rfr=$(esc "$c_resources")
 if ! grep -qx 'resources=false' "$mod/config" 2>/dev/null; then
   ncpu=$(sysctl -n hw.ncpu 2>/dev/null || nproc 2>/dev/null || echo 1)
   if [ -f /proc/meminfo ]; then
@@ -108,7 +109,7 @@ if ! grep -qx 'resources=false' "$mod/config" 2>/dev/null; then
   fi
   if [ -n "$mem" ]; then
     used=${mem% *} total=${mem#* }
-    res="[${bold}RAM:${unbold} ${vals}$(gb "$used")G/$(gb "$total")G | $((used * 100 / total))%${white}]"
+    res="[${bold}RAM:${unbold} ${vals}$(gb "$used")G/$(gb "$total")G | $((used * 100 / total))%${rfr}]"
   fi
   if [ -f /proc/stat ]; then
     ticks=$(awk 'NR == 1 { b = 0; for (i = 2; i <= NF; i++) b += $i; print b, $5 + $6 }' /proc/stat)
@@ -120,9 +121,9 @@ if ! grep -qx 'resources=false' "$mod/config" 2>/dev/null; then
   fi
   if [ -n "$cpu" ]; then
     set -- $(awk -v p="$cpu" -v n="$ncpu" 'BEGIN { if (p > 100) p = 100; printf "%.1f %.0f", p * n / 100, p }')
-    res="$res [${bold}CPU:${unbold} ${vals}$(printf '%s' "$1" | sed 's/\.0$//')/$ncpu | $2%${white}]"
+    res="$res [${bold}CPU:${unbold} ${vals}$(printf '%s' "$1" | sed 's/\.0$//')/$ncpu | $2%${rfr}]"
   fi
-  [ -n "$res" ] && res="${white}${res# }${reset}"
+  [ -n "$res" ] && res="${rfr}${res# }${reset}"
 fi
 
 session=$(echo "$input" | jq -r '.session_name // empty')
