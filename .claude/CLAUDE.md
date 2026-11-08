@@ -5,6 +5,7 @@ The mod's layout, invariants and checks are in `skills/daiver-prompt-view/SKILL.
 ## A new or changed option (`userConfig` in `.claude-plugin/plugin.json`)
 
 - Update `README.md` in the same change: a row in the **Options** table (key, `/config` label, type, default, values, command if any) and the option in the `pluginConfigs` JSON example.
+- The `pluginConfigs` example stays one option per line, with the values aligned in a column (pad after the key's colon so every value starts at the same column). Re-align the whole block when a longer key is added; never collapse it back to one line.
 - Give a usage example for it in `README.md`: what a value does, shown in a table or a snippet.
 - A renamed or removed option is renamed or removed in the README too.
 

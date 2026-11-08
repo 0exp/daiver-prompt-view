@@ -153,7 +153,13 @@ For example, in `~/.claude/settings.json`:
 ```json
 "pluginConfigs": {
   "daiver-prompt-view@daiver-prompt-view": {
-    "options": { "resources": true, "clodik": true, "clodikAnimate": false, "clodikAnimation": "pixels", "theme": "default" }
+    "options": {
+      "resources":       true,
+      "clodik":          true,
+      "clodikAnimate":   false,
+      "clodikAnimation": "pixels",
+      "theme":           "default"
+    }
   }
 }
 ```
