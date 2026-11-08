@@ -150,6 +150,35 @@ test('the scrollbar stands at the list\'s right edge, its thumb where the list i
   await ui.unmount()
 })
 
+test('a message whose prompt is on screen in the transcript gets the bold onscreen frame', async ($, on) => {
+  const { state } = world(on)
+
+  await $.session.start(start)
+  await $.prompt.submit(submit('shown'))
+  await $.prompt.submit(submit('hidden'))
+  // the transcript drew the first prompt's row (its id learnt) and the tick copied the on-screen set
+  await (
+    await $.ui.mount({
+      plugin: 'daiver-prompt-view',
+      component: 'UserMessage',
+      requestId: 'm1',
+      surface: 'terminal',
+      props: { text: 'shown', origin: { kind: 'composer' }, isExpanded: false, onScreen: { first: 0, last: 2, of: 3 } },
+    })
+  ).unmount()
+  state.set('daiver-prompt-view.visible', { value: ['m1'], version: 1 })
+
+  const ui = await $.ui.mount({ ...PANE, surface: 'terminal' })
+  const frames = (await ui.findAll({ type: 'Box' })).filter(one => one.key?.startsWith('m'))
+
+  // newest first: 'hidden' then 'shown'
+  expect(frames.map(one => [one.props.borderStyle, one.props.borderColor])).toEqual([
+    ['round', '#d77757'],
+    ['bold', '#ffffff'],
+  ])
+  await ui.unmount()
+})
+
 test("an empty pane says so, in the theme's history frame", async ($, on) => {
   world(on)
 

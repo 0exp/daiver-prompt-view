@@ -19,6 +19,27 @@ const KEEP = 1000
 const rows = new Map<string, string>()
 export const noteRow = (text: string, requestId: string) => void rows.set(text, requestId)
 
+// the prompt rows the transcript has on screen, by id, as the UserMessage
+// render hook reports them (`onScreen`: an object while in view, null once
+// out; absent says nothing). A render hook cannot write state, so a tick
+// copies the set to `visible` when it changed, and the pane alone redraws
+const onScreen = new Map<string, boolean>()
+export function noteOnScreen(requestId: string, on: object | null | undefined) {
+  if (on === undefined) return
+  if (on === null) onScreen.delete(requestId)
+  else onScreen.set(requestId, true)
+}
+const onScreenRows = atom({ plugin: 'daiver-prompt-view', key: 'visible' } as const, [])
+let lastVisible = ''
+async function syncVisible($: EngineInterface) {
+  const now = [...onScreen.keys()].sort()
+  const key = now.join('\n')
+
+  if (key === lastVisible) return
+  lastVisible = key
+  await update($, onScreenRows, () => now)
+}
+
 // the text of a stored user row: its text blocks joined
 const textOf = (content: readonly { type: string; text?: string }[]) =>
   content
@@ -114,6 +135,7 @@ export async function startHistory($: EngineInterface) {
     })
   }
   if (config.history) await open($)
+  $.clock.every(1000, () => syncVisible($))
 }
 
 // a press on a message scrolls the transcript to the prompt's row; a row that
@@ -206,6 +228,8 @@ export function registerHistory(on: On) {
     const past = Math.min(await read($, skip), Math.max(0, list.length - 1))
     const shown = [...list].reverse().slice(past)
     const theme = THEMES[config.theme]!
+    const shownNow = new Set(await read($, onScreenRows))
+    const isOnScreen = (prompt: Prompt) => shownNow.has(prompt.uuid ?? rows.get(prompt.text) ?? '')
     const frame = list.length === 0 ? { borderStyle: 'round', borderColor: hexOf(theme.history) } : {}
     // the scrollbar at the list's right edge: a track as tall as the body under
     // the header, its thumb where the list stands (messages a rough 4 rows each)
@@ -214,12 +238,14 @@ export function registerHistory(on: On) {
     const thumb = Math.max(1, Math.round((track * Math.min(visible, list.length)) / Math.max(1, list.length)))
     const thumbAt = list.length > 1 ? Math.round(((track - thumb) * past) / (list.length - 1)) : 0
     const bar = Array.from({ length: track }, (_, row) => row >= thumbAt && row < thumbAt + thumb)
+    // a message whose prompt is on screen in the transcript: a bold frame in the
+    // theme's onscreen color, so the pane maps where the chat stands
     const message = (prompt: Prompt, i: number) => (
       <Box
         key={`m${i}`}
         flexDirection="column"
-        borderStyle="round"
-        borderColor={hexOf(theme.prompt)}
+        borderStyle={isOnScreen(prompt) ? 'bold' : 'round'}
+        borderColor={hexOf(isOnScreen(prompt) ? theme.onscreen : theme.prompt)}
         paddingX={1}
         hover={{ borderColor: hexOf(theme.hover) }}
       >

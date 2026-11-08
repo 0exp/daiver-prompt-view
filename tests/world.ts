@@ -25,6 +25,7 @@ export function world(on: On, { configRows = true } = {}) {
   on('session.id', () => ({ value: 's1' }))
   on('session.cwd', () => ({ value: '/home/me/proj' }))
   on('clock.now', () => ({ value: 0 }))
+  on('clock.every', () => ({ value: { id: 'tick' } }))
   on('settings.read', () => ({ value: {} }))
   on('command.register', ($, e) => ({ value: { command: e.name } }))
   on('state.get', ($, e) => ({ value: state.get(`${e.plugin}.${e.key}`) ?? { value: undefined, version: 0 } }))
