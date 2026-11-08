@@ -1,0 +1,59 @@
+import type { On } from 'claude-code'
+import { mock } from 'claude-code/testing'
+
+export const DIR = '/home/me/.claude/daiver-prompt-view'
+
+// the world beneath the plugin: a filesystem in memory (the shipped script and
+// what the plugin writes), no agents, the plugin's /config rows and their changes
+export function world(on: On) {
+  const files = new Map<string, string>()
+  const sets: string[] = []
+
+  on('fs.exists', ($, e) => ({ value: files.has(e.path) || e.path.endsWith('/statusline/daiver-prompt-view.sh') }))
+  on('fs.read', ($, e) => ({ value: files.get(e.path) ?? '#!/bin/sh\n' }))
+  on('fs.write', ($, e) => {
+    files.set(e.path, e.text)
+    return { value: undefined }
+  })
+  on('agent.list', () => ({ value: [] }))
+  on('session.id', () => ({ value: 's1' }))
+  on('clock.now', () => ({ value: 0 }))
+  on('settings.read', () => ({ value: {} }))
+  on('command.register', ($, e) => ({ value: { command: e.name } }))
+  const provider = { plugin: 'daiver-prompt-view', tier: 'user' } as const
+  on('config.list', $ => ({
+    value: [
+      { key: `${$.plugin.name}.clodikAnimate`, label: 'Animate Clawd always', kind: 'boolean', value: false, provider, isLocked: false },
+      { key: `${$.plugin.name}.clodikAnimation`, label: "Clawd's animation", kind: 'choice', value: 'random', provider, isLocked: false },
+      { key: `${$.plugin.name}.theme`, label: 'Color theme', kind: 'choice', value: 'default', provider, isLocked: false },
+    ],
+  }))
+  on('config.set', ($, e) => {
+    sets.push(`${e.key.split('.').at(-1)}=${e.value}`)
+    return { value: e.value }
+  })
+  on('session.start', ($, e) => ({ cwd: e.cwd }))
+  on('prompt.autocomplete', () => ({ suggestions: [] }))
+  mock.env(on, { HOME: '/home/me' })
+
+  return { files, sets, config: () => files.get(`${DIR}/config`), agents: () => files.get(`${DIR}/agents/s1`) }
+}
+
+export const start = { cwd: '/tmp', surface: 'terminal', isInteractive: true } as const
+
+// a command of the plugin typed at the prompt: /daiver-prompt-view:<feature>:<name> <args>
+export const run = (command: string, args = '') => ({
+  command: `daiver-prompt-view:${command}`,
+  args,
+  origin: { kind: 'composer' },
+  presentation: { isFullscreen: false, columns: 120 },
+}) as const
+
+// the prompt box with the caret at the end, as prompt.autocomplete sees it
+export const typed = (text: string) => {
+  const start = text.lastIndexOf(' ') + 1
+  return { text, cursor: text.length, token: text.slice(start), start }
+}
+
+export const conf = (clodik: boolean, animate: boolean, animation: string, theme = 'default') =>
+  `clodik=${clodik}\nanimate=${animate}\nanimation=${animation}\ntheme=${theme}\n`
