@@ -1,8 +1,8 @@
 # daiver-prompt-view
 
 A Claude Code mod that ships a multi-line status line for under the prompt:
-model and session, modes, the session's agents, usage bars, git state, and
-Clawd, Claude's mascot, at the right edge.
+model, RAM and CPU, session, modes, the session's agents, usage bars, git state,
+and Clawd, Claude's mascot, at the right edge.
 
 ```
 Opus 5.5 -> [demo] (sid:419e75ee) <stime:1h23m> <automemory:on>
@@ -10,6 +10,7 @@ Opus 5.5 -> [demo] (sid:419e75ee) <stime:1h23m> <automemory:on>
 ⚙ main:thinking (1m13s) │ agents:2 (sub:1 sh:1 mon:0) -> pending:0 running:2 waiting:0 idle:0  ▝▜█████▛▘
 -> Explore (time:1m01s) [Find lock index usages]                                                 ▘▘ ▝▝
 ctx ███░░░░░░░ 37% | lmt ████░░░░░░ 43% | rst ██████░░░░ 1h56m (at 17h48m) | pch ████████░░ 85%  2.1.303
+[RAM: 12.5G/16G | 78%] [CPU: 1.2/8 | 15%]
  (08d3788a) main [+#?] | ~/Projects/demo
 ```
 
@@ -47,7 +48,8 @@ and [agent-count](https://github.com/0exp/claude-agent-count), with their histor
    cache hits of the last request. All four show from the start: before the
    first response (or once the 5-hour window has reset) `lmt` is 0%, `rst` a
    whole 5h00m window and `pch` 0%.
-5. Git: short sha, branch, flags (`+` staged, `#` untracked, `?` unstaged) and
+5. The machine's RAM and CPU (the `resources` option, see below).
+6. Git: short sha, branch, flags (`+` staged, `#` untracked, `?` unstaged) and
    the working directory.
 
 ## Clodik
@@ -140,6 +142,7 @@ Every option is in `/config`, or in `~/.claude/settings.json` under
 
 | Option | `/config` label | Type | Default | Values | Command |
 | --- | --- | --- | --- | --- | --- |
+| `resources` | Show RAM and CPU | boolean | `true` | `true`, `false` | (none) |
 | `clodik` | Show Clawd | boolean | `true` | `true`, `false` | (none) |
 | `clodikAnimate` | Animate Clawd always | boolean | `false` | `true`, `false` | `clodik:animate` |
 | `clodikAnimation` | Clawd's animation | choice | `random` | `random`, `jump`, `spin`, `sway`, `blink`, `cheer`, `wave`, `stretch`, `hop`, `tap`, `shiver`, `pixels` | `clodik:animation` |
@@ -150,10 +153,29 @@ For example, in `~/.claude/settings.json`:
 ```json
 "pluginConfigs": {
   "daiver-prompt-view@daiver-prompt-view": {
-    "options": { "clodik": true, "clodikAnimate": false, "clodikAnimation": "pixels", "theme": "default" }
+    "options": { "resources": true, "clodik": true, "clodikAnimate": false, "clodikAnimation": "pixels", "theme": "default" }
   }
 }
 ```
+
+### RAM and CPU
+
+With `resources` on, the line under the bars shows the machine's memory and
+CPU use:
+
+| `resources` | Line under the bars |
+| --- | --- |
+| `true` | `[RAM: 12.5G/16G | 78%] [CPU: 1.2/8 | 15%]` |
+| `false` | no such line: the git line follows the bars |
+
+`RAM` is used over total memory (GiB) and the used share; `CPU` is the busy
+cores over all cores and the busy share. On macOS, memory is Activity Monitor's
+"Memory Used" (`vm_stat`: anonymous minus purgeable, wired and compressor
+pages) and CPU the sum of every process's `%cpu` from `ps`, a decaying average
+of the last minute (`top` would take half a second per refresh). Elsewhere,
+memory is `/proc/meminfo`'s total minus available, and CPU the busy share of
+`/proc/stat` since the previous refresh, kept in
+`~/.claude/daiver-prompt-view/cpu` (so the first refresh shows RAM alone).
 
 ### Adding a theme
 
@@ -194,8 +216,8 @@ Requires `jq` and `git`; the branch glyph needs a Nerd Font. The script uses
 macOS `stat -f`; elsewhere `stime` falls back to the session's duration.
 
 What the mod keeps in `~/.claude/daiver-prompt-view/`: `statusline.sh`, `config`
-(the options), `theme.sh` (the active theme's colors), `agents/<session_id>`
-and `automemory/<session_id>`.
+(the options), `theme.sh` (the active theme's colors), `agents/<session_id>`,
+`automemory/<session_id>` and, off macOS, `cpu` (the last CPU sample).
 
 ## Develop
 

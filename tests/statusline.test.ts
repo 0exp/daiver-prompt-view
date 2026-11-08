@@ -17,11 +17,11 @@ test('the session start installs the script, its config and the default theme', 
   expect(files.get(`${DIR}/theme.sh`)).toBe(THEME_SH)
 })
 
-test('the options reach the config file', { options: { clodik: false, clodikAnimate: true, clodikAnimation: 'pixels' } }, async ($, on) => {
+test('the options reach the config file', { options: { clodik: false, clodikAnimate: true, clodikAnimation: 'pixels', resources: false } }, async ($, on) => {
   const { config } = world(on)
 
   await $.session.start(start)
 
-  expect(config()).toBe(conf(false, true, 'pixels'))
+  expect(config()).toBe(conf(false, true, 'pixels', 'default', false))
 })
 

@@ -1,6 +1,6 @@
 {
   "name": "daiver-prompt-view",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "A multi-line status line under the prompt: model, session, modes, agents, usage bars, git state and Clawd",
   "author": {
     "name": "Rustam Ibragimov",
@@ -8,6 +8,12 @@
   },
   "license": "MIT",
   "userConfig": {
+    "resources": {
+      "type": "boolean",
+      "title": "Show RAM and CPU",
+      "description": "The machine's memory and CPU use, on a line under the usage bars: [RAM: used/total | %] [CPU: busy cores/cores | %]",
+      "default": true
+    },
     "clodik": {
       "type": "boolean",
       "title": "Show Clawd",

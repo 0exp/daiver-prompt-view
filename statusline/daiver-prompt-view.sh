@@ -5,7 +5,8 @@
 #   2. modes: effort, outputstyle, thinkmode, fastmode
 #   3. the agents lines, which the mod writes for this session
 #   4. ctx / lmt / rst / pch bars
-#   5. git sha, branch, flags | directory
+#   5. [RAM: used/total | %] [CPU: busy cores/cores | %]
+#   6. git sha, branch, flags | directory
 # with Clawd, Claude's mascot, at the right edge of the terminal
 # Requires jq. Usage in statusLine.command: sh <path>/daiver-prompt-view.sh
 
@@ -84,6 +85,44 @@ esac
 fast=$(echo "$input" | jq -r '.fast_mode')
 case "$fast" in true | false) modes="$modes (${bold}fastmode${unbold}:$fast)" ;; esac
 
+# line 5: RAM and CPU of the machine (the `resources` option, on by default):
+# [RAM: used/total | used%] [CPU: busy cores/cores | busy%]. `top` takes half
+# a second, too slow for a run a second: RAM is Activity Monitor's "Memory Used"
+# from vm_stat (anonymous - purgeable + wired + compressor pages) over hw.memsize,
+# else /proc/meminfo's total - available; CPU is the sum of every process's %cpu
+# from ps (a decaying average of the last minute) over the cores, else the busy
+# share of /proc/stat since the previous run, kept in <mod>/cpu (none on the first)
+gb() { awk -v b="$1" 'BEGIN { printf "%.1f", b / 1073741824 }' | sed 's/\.0$//'; }
+res=''
+if ! grep -qx 'resources=false' "$mod/config" 2>/dev/null; then
+  ncpu=$(sysctl -n hw.ncpu 2>/dev/null || nproc 2>/dev/null || echo 1)
+  if [ -f /proc/meminfo ]; then
+    mem=$(awk '/^MemTotal:/ { t = $2 } /^MemAvailable:/ { a = $2 } END { if (t > 0) printf "%.0f %.0f", (t - a) * 1024, t * 1024 }' /proc/meminfo)
+  else
+    mem=$(vm_stat 2>/dev/null | awk -v t="$(sysctl -n hw.memsize 2>/dev/null)" '
+      /page size of/ { p = $8 } /^Anonymous pages/ { a = $3 } /^Pages purgeable/ { g = $3 }
+      /^Pages wired/ { w = $4 } /^Pages occupied by compressor/ { c = $5 }
+      END { if (t > 0 && p > 0) printf "%.0f %.0f", (a - g + w + c) * p, t }')
+  fi
+  if [ -n "$mem" ]; then
+    used=${mem% *} total=${mem#* }
+    res="[${bold}RAM:${unbold} $(gb "$used")G/$(gb "$total")G | $((used * 100 / total))%]"
+  fi
+  if [ -f /proc/stat ]; then
+    ticks=$(awk 'NR == 1 { b = 0; for (i = 2; i <= NF; i++) b += $i; print b, $5 + $6 }' /proc/stat)
+    prev=$(cat "$mod/cpu" 2>/dev/null)
+    printf '%s\n' "$ticks" > "$mod/cpu" 2>/dev/null
+    cpu=$(echo "$ticks $prev" | awk '$4 != "" && $1 > $3 { print ($1 - $3 - ($2 - $4)) * 100 / ($1 - $3) }')
+  else
+    cpu=$(ps -A -o %cpu= 2>/dev/null | awk -v n="$ncpu" '{ s += $1 } END { if (NR > 0) print s / n }')
+  fi
+  if [ -n "$cpu" ]; then
+    set -- $(awk -v p="$cpu" -v n="$ncpu" 'BEGIN { if (p > 100) p = 100; printf "%.1f %.0f", p * n / 100, p }')
+    res="$res [${bold}CPU:${unbold} $(printf '%s' "$1" | sed 's/\.0$//')/$ncpu | $2%]"
+  fi
+  [ -n "$res" ] && res="${gray}${res# }${reset}"
+fi
+
 session=$(echo "$input" | jq -r '.session_name // empty')
 model="$(esc "$c_session")[${bold}$session${unbold}]${reset} $model"
 model="$mname -> ${model% }"
@@ -120,8 +159,9 @@ panel() {
   [ -n "$modes" ] && printf '%s\n' "${modes# }"
   [ -f "$af" ] && cat "$af"
   printf '%s\n' "$out"
+  [ -n "$res" ] && printf '%s\n' "$res"
 
-  # line 5: git sha, branch, flags (+ staged, # untracked, ? unstaged) | directory
+  # line 6: git sha, branch, flags (+ staged, # untracked, ? unstaged) | directory
   if [ -n "$dir" ]; then
     rawdir=$(echo "$input" | jq -r '.workspace.current_dir // .cwd // empty')
     branch=''

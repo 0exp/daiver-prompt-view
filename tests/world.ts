@@ -55,5 +55,5 @@ export const typed = (text: string) => {
   return { text, cursor: text.length, token: text.slice(start), start }
 }
 
-export const conf = (clodik: boolean, animate: boolean, animation: string, theme = 'default') =>
-  `clodik=${clodik}\nanimate=${animate}\nanimation=${animation}\ntheme=${theme}\n`
+export const conf = (clodik: boolean, animate: boolean, animation: string, theme = 'default', resources = true) =>
+  `clodik=${clodik}\nanimate=${animate}\nanimation=${animation}\ntheme=${theme}\nresources=${resources}\n`

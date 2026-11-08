@@ -1,6 +1,6 @@
 ---
 name: daiver-prompt-view
-description: Manage the daiver-prompt-view Claude Code mod (the multi-line status line under the prompt - model/session/stime, modes, the agents line of the main loop and background agents/shells/monitors, ctx/lmt/rst/pch bars, git state, Clawd the mascot, color themes). Use when the user asks to check, enable, disable, update, change, debug, release, publish or uninstall the daiver-prompt-view mod/plugin, its status line, agents counters, Clawd (clodik), its themes, commands or statusLine wiring.
+description: Manage the daiver-prompt-view Claude Code mod (the multi-line status line under the prompt - model/session/stime, modes, the agents line of the main loop and background agents/shells/monitors, ctx/lmt/rst/pch bars, RAM+CPU, git state, Clawd the mascot, color themes). Use when the user asks to check, enable, disable, update, change, debug, release, publish or uninstall the daiver-prompt-view mod/plugin, its status line, agents counters, Clawd (clodik), its themes, commands or statusLine wiring.
 ---
 
 # daiver-prompt-view mod
@@ -11,6 +11,7 @@ Opus 5.5 -> [demo] (sid:419e75ee) <stime:1h23m> <automemory:on>
 ⚙ main:thinking (1m13s) │ agents:1 (sub:1 sh:0 mon:0) -> pending:0 running:1 …    ▝▜█████▛▘
 -> Explore (time:1m01s) [Find lock index usages]                                     ▘▘ ▝▝
 ctx ███░░░░░░░ 37% | lmt ████░░░░░░ 43% | rst ██████░░░░ 1h56m (at 17h48m) | pch …  2.1.303
+[RAM: 12.5G/16G | 78%] [CPU: 1.2/8 | 15%]
  (08d3788a) main [+#?] | ~/Projects/demo
 ```
 
@@ -25,13 +26,14 @@ ctx ███░░░░░░░ 37% | lmt ████░░░░░░ 43% 
 | Commands | `commands/<feature>/<name>.md` -> `/daiver-prompt-view:<feature>:<name>`, answered by a `command.run` hook (the .md body is only a fallback if the mod is not loaded) |
 | Status line script (source of truth) | `statusline/daiver-prompt-view.sh` |
 | Installed copy (what the status line runs) | `~/.claude/daiver-prompt-view/statusline.sh` |
-| State, per session | `~/.claude/daiver-prompt-view/agents/<session_id>`, `.../automemory/<session_id>`; options in `.../config`, colors in `.../theme.sh` |
+| State, per session | `~/.claude/daiver-prompt-view/agents/<session_id>`, `.../automemory/<session_id>`; options in `.../config`, colors in `.../theme.sh`; off macOS `.../cpu`, the last `/proc/stat` sample of the RAM/CPU segment |
 | Wiring | `statusLine.command` in `~/.claude/settings.json` = `sh "$HOME/.claude/daiver-prompt-view/statusline.sh"`, `refreshInterval: 1` |
 | Installed as | `daiver-prompt-view@daiver-prompt-view`, user scope; for development a `directory` marketplace pointing at the repo (read from the folder itself: never move it without reinstalling) |
 
 ## Invariants
 
-- Line 3+ (agents) is printed by the script from `agents/<session_id>`, right after the modes line; the hooks module writes it only when its text changed.
+- The agents lines are printed by the script from `agents/<session_id>`, right after the modes line; the hooks module writes it only when its text changed.
+- The RAM/CPU segment (`resources` option) never runs `top` (half a second a call): `vm_stat` + `ps` on macOS, `/proc` elsewhere; a missing source drops its half, never the line.
 - The script is POSIX `sh` + `jq` + `git` and prints something even with `{"model":{"display_name":"X"},"cwd":"/tmp"}`. Private-use glyphs (U+E0A0) are `printf` octal escapes.
 - Colors live only in `hooks/shared/themes.ts` as SGR params. The script sources `theme.sh` (`c_gray`, `c_white`, `c_orange`, `c_session`, `c_ctx`, `c_lmt`, `c_rst`, `c_pch`, `c_sha`, `c_branch`, `c_flags`); the agents line uses the same theme in TS. A new theme = an entry in `THEMES` + its name in `userConfig.theme.options` (`plugin.json`) + `argument-hint` of `commands/view/theme.md`. `tests/statusline.test.ts` and `tests/agents.test.ts` pin `default` byte for byte.
 - A new command = `commands/<feature>/<name>.md` (`description`, `argument-hint`, `disable-model-invocation: true`) + a `command.run` hook on `command('<feature>', '<name>')` whose `.catch` answers `failed(...)` (never `next`: that would send the .md body to the model) + its values in `register.ts`'s typeahead table.
