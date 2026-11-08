@@ -38,6 +38,12 @@ ctx ███░░░░░░░ 37% | lmt ████░░░░░░ 43% 
 - Agents: `AgentInfo` has no start time (`agentSince` stamped on first sight, cleared on every start); main time from `turn.start` while idle; shells/monitors from `tool.call` results, dropped on task notifications, `TaskStop`, `classic.Stop` snapshot.
 - Every gating hook has a `.catch`: a mod failure must never block a tool call or a prompt. `$` is passed only to top-level functions.
 
+## Development rules (`.claude/CLAUDE.md` in the repo)
+
+- A new or changed option: update `README.md` (the **Options** table, the `pluginConfigs` example) with a usage example, in the same change.
+- A new or changed command: a row in README's **Commands** table and its own section (option and default, every value described, a usage table with each form and its exact answer).
+- Every command's values have typeahead: a `choiceRows` entry in `hooks/register.ts` + `argument-hint` in its `.md`, from the constant the command validates against, covered in `tests/autocomplete.test.ts`.
+
 ## Tasks
 
 **Status / health check**: `sh <this skill's base directory>/scripts/status.sh`; report install state and version, repo changes, installed copy vs repo, wiring, the sample render and the newest agents lines.

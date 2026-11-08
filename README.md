@@ -199,6 +199,9 @@ and `automemory/<session_id>`.
 
 ## Develop
 
+Development rules (docs for every option and command, typeahead for every
+command's values) are in `.claude/CLAUDE.md`.
+
 ```
 hooks/register.ts          the hooks module: options, the one session.start, typeahead
 hooks/features/            statusline, agents, clodik, view: a file per feature
