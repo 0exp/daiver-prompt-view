@@ -83,7 +83,7 @@ Claude's replies get a frame of their own, in the theme's `reply` color (neon
 blue in `default`), around each text block as the transcript draws it. So do
 the tool calls' rows (`Bash(ls)` and the result), in the theme's `tool` color
 (dark violet in `default`), and the spinner line of a running turn
-(`Sauteing… (12s)`), in the theme's `spinner` color (yellow-green in `default`), and the output row
+(`Sauteing… (12s)`), in the theme's `spinner` color (green in `default`), and the output row
 of a slash command (`/reload-plugins`, `/cost`, this mod's own commands), in the
 theme's `command` color (gray in `default`).
 
@@ -151,7 +151,7 @@ Option `theme` (Color theme), default `default`.
 
 | Value | Colors |
 | --- | --- |
-| `default` (default) | white, gray, fuchsia (ctx), sky blue (lmt), light green (rst), Clawd orange, gray-green (pch), khaki (sha), violet (branch), coral (flags), light green (+added), coral (-removed), Clawd orange (the matrix rain, the frame around your prompts and the frame around the status line too), neon blue (the frame around Claude's replies), dark violet (the frame around the tool calls), yellow-green (the frame around the spinner), gray (the frame around a command's output) |
+| `default` (default) | white, gray, fuchsia (ctx), sky blue (lmt), light green (rst), Clawd orange, gray-green (pch), khaki (sha), violet (branch), coral (flags), light green (+added), coral (-removed), Clawd orange (the matrix rain, the frame around your prompts and the frame around the status line too), neon blue (the frame around Claude's replies), dark violet (the frame around the tool calls), green (the frame around the spinner), gray (the frame around a command's output) |
 
 | Usage | Result |
 | --- | --- |
