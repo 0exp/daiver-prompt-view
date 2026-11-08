@@ -1,6 +1,7 @@
 // reply: Claude's own replies in the transcript, each text block framed in a
 // box of the theme's `reply` color (neon blue by default). The engine's drawing
-// (markdown, the bullet) goes inside the frame as it is
+// (markdown, the bullet) goes inside the frame as it is, less the blank line
+// its own top margin would leave under the border
 import type { On } from 'claude-code'
 import { config } from '../shared/config'
 import { hexOf, THEMES } from '../shared/themes'
@@ -13,7 +14,7 @@ export function registerReply(on: On) {
 
     return (
       <Box borderStyle="round" borderColor={hexOf(THEMES[config.theme]!.reply)} paddingX={1}>
-        {block}
+        <Box marginTop={-1}>{block}</Box>
       </Box>
     )
   }).catch(($, e, next) => next(e))
