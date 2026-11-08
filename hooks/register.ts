@@ -7,6 +7,7 @@ import { THEME_NAMES } from './shared/themes'
 import { registerAgents, startAgents } from './features/agents'
 import { ANIMATE, ANIMATION, registerClodik } from './features/clodik'
 import { registerPrompt } from './features/prompt'
+import { registerReply } from './features/reply'
 import { registerResources, SHOW } from './features/resources'
 import { registerStatusline, startStatusline } from './features/statusline'
 import { registerView, THEME } from './features/view'
@@ -27,6 +28,7 @@ export const register: Register = (on, options) => {
   registerClodik(on)
   registerResources(on)
   registerPrompt(on)
+  registerReply(on)
   registerView(on)
 
   // the commands' values in the prompt box's typeahead
