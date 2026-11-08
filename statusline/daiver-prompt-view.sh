@@ -200,10 +200,7 @@ e=$(printf '\033')
 # the visible width of a line: no color escapes, one cell per UTF-8 character
 vis() { printf '%s' "$1" | sed "s/$e\[[0-9;]*m//g" | LC_ALL=C tr -d '\200-\277' | wc -c | tr -d ' '; }
 
-# the status line's left indent: statusLine.padding in settings.json (Claude
-# Code's default 2); the frame keeps the same room on the right
-pad=$(jq -r '.statusLine.padding // 2' "$HOME/.claude/settings.json" 2>/dev/null)
-case "$pad" in '' | *[!0-9]*) pad=2 ;; esac
+pad=2 # the status line's left indent
 # the frame around the whole status line, in the theme's frame color: as wide
 # as the terminal less the indent on both sides when $COLUMNS is known, else
 # as wide as the widest line; `inner` is the room between its borders

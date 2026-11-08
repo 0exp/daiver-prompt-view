@@ -327,14 +327,9 @@ plugin updates. Point `statusLine` in `~/.claude/settings.json` at it:
 "statusLine": {
   "type": "command",
   "command": "sh \"$HOME/.claude/daiver-prompt-view/statusline.sh\"",
-  "refreshInterval": 1,
-  "padding": 0
+  "refreshInterval": 1
 }
 ```
-
-`padding` is Claude Code's indent of the status line (its default 2). The frame
-reads it from `settings.json` and keeps the same room on the right, so with
-`0` it runs from edge to edge.
 
 Requires `jq` and `git`; the branch glyph needs a Nerd Font. The script uses
 macOS `stat -f`; elsewhere `stime` falls back to the session's duration.
