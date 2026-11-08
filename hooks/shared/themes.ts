@@ -25,6 +25,7 @@ export type Theme = {
   reply: string // the frame around Claude's replies in the transcript
   tool: string // the frame around the tool calls' rows in the transcript
   spinner: string // the frame around the spinner line of a running turn
+  command: string // the frame around a slash command's output row
   resources: string // the RAM/CPU line's brackets and labels, a shade under white
   values: string // the RAM/CPU numbers, a shade under that
   effort: string // the effort level on the modes line
@@ -57,6 +58,7 @@ export const THEMES: Record<string, Theme> = {
     reply: '38;2;0;200;255',
     tool: '38;2;106;52;163',
     spinner: '38;2;191;255;0',
+    command: '38;2;128;128;128',
     resources: '38;2;200;200;200',
     values: '38;2;165;165;165',
     effort: '38;2;215;119;87',
