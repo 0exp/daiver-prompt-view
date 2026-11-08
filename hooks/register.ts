@@ -6,6 +6,7 @@ import { ANIMATIONS, config, loadConfig } from './shared/config'
 import { THEME_NAMES } from './shared/themes'
 import { registerAgents, startAgents } from './features/agents'
 import { ANIMATE, ANIMATION, registerClodik } from './features/clodik'
+import { registerResources, SHOW } from './features/resources'
 import { registerStatusline, startStatusline } from './features/statusline'
 import { registerView, THEME } from './features/view'
 
@@ -23,6 +24,7 @@ export const register: Register = (on, options) => {
   registerStatusline(on)
   registerAgents(on)
   registerClodik(on)
+  registerResources(on)
   registerView(on)
 
   // the commands' values in the prompt box's typeahead
@@ -31,6 +33,7 @@ export const register: Register = (on, options) => {
       [ANIMATE]: { values: ['on', 'off'], current: config.animate ? 'on' : 'off' },
       [ANIMATION]: { values: ANIMATIONS, current: config.animation },
       [THEME]: { values: THEME_NAMES, current: config.theme },
+      [SHOW]: { values: ['on', 'off'], current: config.resources ? 'on' : 'off' },
     })
 
     if (rows.length === 0) return next(e)

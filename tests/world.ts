@@ -26,6 +26,7 @@ export function world(on: On) {
       { key: `${$.plugin.name}.clodikAnimate`, label: 'Animate Clawd always', kind: 'boolean', value: false, provider, isLocked: false },
       { key: `${$.plugin.name}.clodikAnimation`, label: "Clawd's animation", kind: 'choice', value: 'random', provider, isLocked: false },
       { key: `${$.plugin.name}.theme`, label: 'Color theme', kind: 'choice', value: 'default', provider, isLocked: false },
+      { key: `${$.plugin.name}.resources`, label: 'Show RAM and CPU', kind: 'boolean', value: true, provider, isLocked: false },
     ],
   }))
   on('config.set', ($, e) => {

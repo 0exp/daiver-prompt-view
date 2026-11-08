@@ -79,6 +79,7 @@ after the command.
 | `/daiver-prompt-view:clodik:animate` | `on`, `off`, or nothing | `off` | Animate Clawd all the time (`on`) or only while Claude Code is busy (`off`); with no argument, toggles |
 | `/daiver-prompt-view:clodik:animation` | an animation name, or nothing | `random` | Pick the animation Clawd plays; with no argument, shows the current one and the list |
 | `/daiver-prompt-view:view:theme` | a theme name, or nothing | `default` | Pick the colors of every line (the agents line's included); with no argument, shows the current one and the list |
+| `/daiver-prompt-view:resources:show` | `on`, `off`, or nothing | `on` | Show (`on`) or hide (`off`) the RAM and CPU line; with no argument, shows whether it is on |
 
 ### `/daiver-prompt-view:clodik:animate [on|off]`
 
@@ -143,7 +144,7 @@ Every option is in `/config`, or in `~/.claude/settings.json` under
 
 | Option | `/config` label | Type | Default | Values | Command |
 | --- | --- | --- | --- | --- | --- |
-| `resources` | Show RAM and CPU | boolean | `true` | `true`, `false` | (none) |
+| `resources` | Show RAM and CPU | boolean | `true` | `true`, `false` | `resources:show` |
 | `clodik` | Show Clawd | boolean | `true` | `true`, `false` | (none) |
 | `clodikAnimate` | Animate Clawd always | boolean | `false` | `true`, `false` | `clodik:animate` |
 | `clodikAnimation` | Clawd's animation | choice | `random` | `random`, `jump`, `spin`, `sway`, `blink`, `cheer`, `wave`, `stretch`, `hop`, `tap`, `shiver`, `pixels` | `clodik:animation` |
@@ -174,6 +175,22 @@ CPU use:
 | --- | --- |
 | `true` | `[RAM: 12.5G/16G \| 78%] [CPU: 1.2/8 \| 15%]` |
 | `false` | no such line: the git line follows the bars |
+
+### `/daiver-prompt-view:resources:show [on|off]`
+
+Option `resources` (Show RAM and CPU), default `true` (`on`).
+
+| Value | Effect |
+| --- | --- |
+| `on` | the RAM and CPU line is drawn under the bars |
+| `off` | no such line |
+
+| Usage | Result |
+| --- | --- |
+| `/daiver-prompt-view:resources:show on` | `The status line now shows RAM and CPU.` |
+| `/daiver-prompt-view:resources:show off` | `The status line no longer shows RAM and CPU.` |
+| `/daiver-prompt-view:resources:show` | shows the current state: `The RAM and CPU line is on.` |
+| `/daiver-prompt-view:resources:show maybe` | nothing changes: `Usage: /daiver-prompt-view:resources:show [on|off]` |
 
 `RAM` is used over total memory (GiB) and the used share; `CPU` is the busy
 cores over all cores and the busy share. On macOS, memory is Activity Monitor's
