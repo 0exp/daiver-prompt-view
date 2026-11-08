@@ -70,7 +70,7 @@ stretch, hop side to side, tap dance, shiver, fall to pixels and back, dissolve
 into the Matrix's rain of glyphs and back. A new
 random animation starts every 8 seconds, a frame per refresh.
 
-## Your prompts, Claude's replies and tool calls
+## Your prompts, Claude's replies, tool calls and the spinner
 
 Every prompt you send is drawn in the transcript inside a rounded frame in the
 theme's `prompt` color (Clawd orange in `default`). Only your own prompts are
@@ -82,7 +82,8 @@ untouched, and a theme switch redraws it at once.
 Claude's replies get a frame of their own, in the theme's `reply` color (neon
 blue in `default`), around each text block as the transcript draws it. So do
 the tool calls' rows (`Bash(ls)` and the result), in the theme's `tool` color
-(dark violet in `default`).
+(dark violet in `default`), and the spinner line of a running turn
+(`Sauteing… (12s)`), in the theme's `spinner` color (yellow-green in `default`).
 
 ## Commands
 
@@ -148,7 +149,7 @@ Option `theme` (Color theme), default `default`.
 
 | Value | Colors |
 | --- | --- |
-| `default` (default) | white, gray, fuchsia (ctx), sky blue (lmt), light green (rst), Clawd orange, gray-green (pch), khaki (sha), violet (branch), coral (flags), light green (+added), coral (-removed), Clawd orange (the matrix rain, the frame around your prompts and the frame around the status line too), neon blue (the frame around Claude's replies), dark violet (the frame around the tool calls) |
+| `default` (default) | white, gray, fuchsia (ctx), sky blue (lmt), light green (rst), Clawd orange, gray-green (pch), khaki (sha), violet (branch), coral (flags), light green (+added), coral (-removed), Clawd orange (the matrix rain, the frame around your prompts and the frame around the status line too), neon blue (the frame around Claude's replies), dark violet (the frame around the tool calls), yellow-green (the frame around the spinner) |
 
 | Usage | Result |
 | --- | --- |

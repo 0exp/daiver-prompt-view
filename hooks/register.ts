@@ -8,6 +8,7 @@ import { registerAgents, startAgents } from './features/agents'
 import { ANIMATE, ANIMATION, registerClodik } from './features/clodik'
 import { registerPrompt } from './features/prompt'
 import { registerReply } from './features/reply'
+import { registerSpinner } from './features/spinner'
 import { registerTool } from './features/tool'
 import { registerResources, SHOW } from './features/resources'
 import { registerStatusline, startStatusline } from './features/statusline'
@@ -31,6 +32,7 @@ export const register: Register = (on, options) => {
   registerPrompt(on)
   registerReply(on)
   registerTool(on)
+  registerSpinner(on)
   registerView(on)
 
   // the commands' values in the prompt box's typeahead
