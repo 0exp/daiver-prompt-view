@@ -80,7 +80,7 @@ after the command.
 | `/daiver-prompt-view:clodik:animate` | `on`, `off`, or nothing | `off` | Animate Clawd all the time (`on`) or only while Claude Code is busy (`off`); with no argument, toggles |
 | `/daiver-prompt-view:clodik:animation` | an animation name, or nothing | `random` | Pick the animation Clawd plays; with no argument, shows the current one and the list |
 | `/daiver-prompt-view:view:theme` | a theme name, or nothing | `default` | Pick the colors of every line (the agents line's included); with no argument, shows the current one and the list |
-| `/daiver-prompt-view:resources:show` | `on`, `off`, or nothing | `on` | Show (`on`) or hide (`off`) the RAM and CPU line; with no argument, shows whether it is on |
+| `/daiver-prompt-view:resources:show` | `on`, `off`, or nothing | `on` | Show (`on`) or hide (`off`) the RAM and CPU line; with no argument, toggles |
 
 ### `/daiver-prompt-view:clodik:animate [on|off]`
 
@@ -191,7 +191,7 @@ Option `resources` (Show RAM and CPU), default `true` (`on`).
 | --- | --- |
 | `/daiver-prompt-view:resources:show on` | `The status line now shows RAM and CPU.` |
 | `/daiver-prompt-view:resources:show off` | `The status line no longer shows RAM and CPU.` |
-| `/daiver-prompt-view:resources:show` | shows the current state: `The RAM and CPU line is on.` |
+| `/daiver-prompt-view:resources:show` | toggles: `The status line no longer shows RAM and CPU.` when it was on, `The status line now shows RAM and CPU.` when it was off |
 | `/daiver-prompt-view:resources:show maybe` | nothing changes: `Usage: /daiver-prompt-view:resources:show [on|off]` |
 
 `RAM` is used over total memory (GiB) and the used share; `CPU` is the busy

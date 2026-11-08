@@ -1,5 +1,5 @@
 ---
-description: Show or hide the RAM and CPU line of the status line
+description: Show or hide the RAM and CPU line of the status line; with no argument, toggle it
 argument-hint: "[on|off]"
 disable-model-invocation: true
 ---

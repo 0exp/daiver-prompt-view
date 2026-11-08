@@ -8,14 +8,13 @@ import { setOption } from '../shared/options'
 export const SHOW = command('resources', 'show')
 
 export function registerResources(on: On) {
-  // show [on|off]: the resources option; the current state when no argument
+  // show [on|off]: the resources option, toggled when no argument
   on('command.run', { command: SHOW }, async ($, e) => {
     const arg = e.args.trim().toLowerCase()
 
-    if (arg === '') return { text: `The RAM and CPU line is ${config.resources ? 'on' : 'off'}.` }
-    if (arg !== 'on' && arg !== 'off') return { text: `Usage: /${SHOW} [on|off]` }
+    if (arg !== '' && arg !== 'on' && arg !== 'off') return { text: `Usage: /${SHOW} [on|off]` }
 
-    const value = arg === 'on'
+    const value = arg === '' ? !config.resources : arg === 'on'
     const deny = await setOption($, 'resources', value)
 
     if (deny !== undefined) return { text: `The RAM and CPU line was not changed: ${deny}` }
