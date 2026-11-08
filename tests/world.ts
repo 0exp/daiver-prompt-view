@@ -5,7 +5,8 @@ export const DIR = '/home/me/.claude/daiver-prompt-view'
 
 // the world beneath the plugin: a filesystem in memory (the shipped script and
 // what the plugin writes), no agents, the plugin's /config rows and their changes
-export function world(on: On) {
+// `configRows: false`: the plugin's /config rows filtered out, as a plugin above may
+export function world(on: On, { configRows = true } = {}) {
   const files = new Map<string, string>()
   const sets: string[] = []
   const state = new Map<string, { value: unknown; version: number }>()
@@ -48,7 +49,7 @@ export function world(on: On) {
   })
   const provider = { plugin: 'daiver-prompt-view', tier: 'user' } as const
   on('config.list', $ => ({
-    value: [
+    value: !configRows ? [] : [
       { key: `${$.plugin.name}.clodikAnimate`, label: 'Animate Clawd always', kind: 'boolean', value: false, provider, isLocked: false },
       { key: `${$.plugin.name}.clodikAnimation`, label: "Clawd's animation", kind: 'choice', value: 'random', provider, isLocked: false },
       { key: `${$.plugin.name}.theme`, label: 'Color theme', kind: 'choice', value: 'default', provider, isLocked: false },

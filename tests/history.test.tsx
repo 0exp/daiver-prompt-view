@@ -120,6 +120,34 @@ test('the pane scrolls by messages under its header: the ones scrolled past are 
   await ui.unmount()
 })
 
+test('with no /config row the change holds for the session and a toast says so', async ($, on) => {
+  // another plugin above filters this mod's rows out of the list
+  const { toasts, config, sets } = world(on, { configRows: false })
+
+  await $.session.start(start)
+
+  expect((await $.command.run(run('history:show', 'on'))).text).toBe('The prompt history pane is now shown.')
+  expect(config()).toBe(conf(true, false, 'random', 'default', true, true))
+  expect(sets).toEqual([])
+  expect(toasts).toEqual(['daiver-prompt-view: the history option has no /config row to save to; the change holds for this session'])
+})
+
+test('the scrollbar stands at the list\'s right edge, its thumb where the list is', async ($, on) => {
+  const { state } = world(on)
+
+  await $.session.start(start)
+  for (const n of [1, 2, 3, 4, 5]) await $.prompt.submit(submit(`prompt ${n}`))
+  state.set('daiver-prompt-view.skip', { value: 4, version: 1 })
+
+  const ui = await $.ui.mount({ ...PANE, surface: 'terminal' })
+  const cells = (await ui.findAll({ type: 'Text' })).filter(one => one.text === '┃' || one.text === '│')
+
+  // bodyRows 20: an 18-row track; 4 of 5 messages fit, so the thumb is 14 rows, at the end for the oldest
+  expect(cells.length).toBe(18)
+  expect(cells.map(one => one.text).join('')).toBe('│'.repeat(4) + '┃'.repeat(14))
+  await ui.unmount()
+})
+
 test("an empty pane says so, in the theme's history frame", async ($, on) => {
   world(on)
 

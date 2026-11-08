@@ -206,8 +206,29 @@ export function registerHistory(on: On) {
     const past = Math.min(await read($, skip), Math.max(0, list.length - 1))
     const shown = [...list].reverse().slice(past)
     const theme = THEMES[config.theme]!
-
     const frame = list.length === 0 ? { borderStyle: 'round', borderColor: hexOf(theme.history) } : {}
+    // the scrollbar at the list's right edge: a track as tall as the body under
+    // the header, its thumb where the list stands (messages a rough 4 rows each)
+    const track = Math.max(3, e.props.scroll.bodyRows - 2)
+    const visible = Math.max(1, Math.floor(track / 4))
+    const thumb = Math.max(1, Math.round((track * Math.min(visible, list.length)) / Math.max(1, list.length)))
+    const thumbAt = list.length > 1 ? Math.round(((track - thumb) * past) / (list.length - 1)) : 0
+    const bar = Array.from({ length: track }, (_, row) => row >= thumbAt && row < thumbAt + thumb)
+    const message = (prompt: Prompt, i: number) => (
+      <Box
+        key={`m${i}`}
+        flexDirection="column"
+        borderStyle="round"
+        borderColor={hexOf(theme.prompt)}
+        paddingX={1}
+        hover={{ borderColor: hexOf(theme.hover) }}
+      >
+        <Text dimColor>{clock(prompt.at)}</Text>
+        <Button key={`p${i}`} plain hover={{ inverse: false }} onPress={() => jump($, prompt.text, prompt.uuid)}>
+          {prompt.text.trim()}
+        </Button>
+      </Box>
+    )
 
     return (
       <Box flexDirection="column" paddingX={1} {...frame}>
@@ -218,21 +239,18 @@ export function registerHistory(on: On) {
           <Button key="close" label="×" role="dismiss" hotkey="x" plain onPress={() => void $.ui.close({ id: PANE })} />
         </Box>
         {list.length === 0 && <Text dimColor>No prompts yet.</Text>}
-        {shown.map((prompt, i) => (
-          <Box
-            key={`m${i}`}
-            flexDirection="column"
-            borderStyle="round"
-            borderColor={hexOf(theme.prompt)}
-            paddingX={1}
-            hover={{ borderColor: hexOf(theme.hover) }}
-          >
-            <Text dimColor>{clock(prompt.at)}</Text>
-            <Button key={`p${i}`} plain hover={{ inverse: false }} onPress={() => jump($, prompt.text, prompt.uuid)}>
-              {prompt.text.trim()}
-            </Button>
+        {list.length > 0 && (
+          <Box flexDirection="row">
+            <Box flexDirection="column" flexGrow={1}>
+              {shown.map(message)}
+            </Box>
+            {list.length > 1 && (
+              <Box flexDirection="column" width={1} marginLeft={1}>
+                {bar.map(isThumb => (isThumb ? <Text color={hexOf(theme.history)}>┃</Text> : <Text dimColor>│</Text>))}
+              </Box>
+            )}
           </Box>
-        ))}
+        )}
       </Box>
     )
   })

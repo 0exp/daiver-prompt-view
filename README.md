@@ -91,6 +91,8 @@ theme's `command` color (gray in `default`).
 
 Every command sets the option of the same row in `/config` (so the choice stays
 across sessions and reloads), answers at once, and never starts a model turn.
+When the row cannot be reached (a plugin above filters the list, or this build
+has no such row) the change holds for the session alone and a toast says so.
 The prompt box's typeahead lists each command's values: type the command's
 prefix (`/daiver-prompt-view:clodik:`) for ready rows such as
 `/daiver-prompt-view:clodik:animation spin`, or the first letter of the value
@@ -244,7 +246,8 @@ the session start the list is read from Claude Code's own prompt log
 loaded are there too; from then on each prompt joins as it is sent. The list
 lives in the session's state, so it survives a reload of the mod. The wheel
 or the scroll keys move the list by messages while the header with the `×`
-stays put (`↑3` after the count says how many newer messages are above). While the list is empty the pane's body
+stays put (`↑3` after the count says how many newer messages are above); a
+scrollbar at the list's right edge shows where it stands. While the list is empty the pane's body
 is framed in the theme's `history` color (Clawd orange in `default`); with
 messages inside, each has its own frame and the body none. The `×` in the top
 right corner
