@@ -12,7 +12,7 @@ import type { Prompt } from '../../types'
 
 export const HISTORY = command('history', 'show')
 export const PANE = 'history'
-const KEEP = 200
+const KEEP = 1000
 
 // a new tag declines what an earlier shape of Prompt stored
 const prompts = atom({ plugin: 'daiver-prompt-view', key: 'prompts' } as const, [], { shape: 'prompts-1' })
@@ -35,9 +35,51 @@ async function show($: EngineInterface, value: boolean) {
   return value ? 'The prompt history pane is now shown.' : 'The prompt history pane is now hidden.'
 }
 
-// opens the pane on the session start when the option is on
+// the prompts of this session as Claude Code itself logged them, with their
+// times: ~/.claude/history.jsonl, a JSON line per prompt typed at any session
+// ({ display, timestamp, sessionId }); so the pane lists the prompts sent
+// before the mod loaded too
+async function logged($: EngineInterface) {
+  const path = `${await $.env.get('HOME')}/.claude/history.jsonl`
+
+  if (!(await $.fs.exists(path))) return []
+  const session = await $.session.id()
+  const list: Prompt[] = []
+
+  for (const line of (await $.fs.read(path)).split('\n')) {
+    if (line === '') continue
+    try {
+      const row = JSON.parse(line) as { display?: unknown; timestamp?: unknown; sessionId?: unknown }
+      if (row.sessionId === session && typeof row.display === 'string' && typeof row.timestamp === 'number' && !row.display.startsWith('/')) {
+        list.push({ text: row.display, at: row.timestamp })
+      }
+    } catch {
+      // a line that is not JSON (a write in progress) is skipped
+    }
+  }
+
+  return list
+}
+
+// on the session start: the list is seeded from Claude Code's own log (what
+// the mod collected itself is kept where the log has no row for it), and the
+// pane opens when the option is on
 export async function startHistory($: EngineInterface) {
+  const seed = await logged($)
+
+  if (seed.length > 0) {
+    await update($, prompts, mine => {
+      const known = new Set(seed.map(one => `${one.at}:${one.text}`))
+      return [...seed, ...mine.filter(one => !known.has(`${one.at}:${one.text}`))].sort((a, b) => a.at - b.at).slice(-KEEP)
+    })
+  }
   if (config.history) await open($)
+}
+
+// a prompt's time as the pane shows it: HH:MM:SS, local time
+const clock = (at: number) => {
+  const d = new Date(at)
+  return [d.getHours(), d.getMinutes(), d.getSeconds()].map(n => String(n).padStart(2, '0')).join(':')
 }
 
 // every prompt the person types (not a slash command, not a notification) joins
@@ -74,14 +116,11 @@ export function registerHistory(on: On) {
   }).catch(($, e, next) => next(e))
 
   // the pane: a frame in the theme's history color, the × in its top right
-  // corner, the newest prompts that fit, one line each
+  // corner, every prompt with its time, one line each (the body scrolls)
   on('ui.render', { component: 'Pane', requestId: PANE }, async ($, e) => {
     const { Box, Button, Text } = $.ui.resolve(e)
     const list = await read($, prompts)
-    const columns = Math.max(8, e.props.bodyColumns - 4)
-    const room = Math.max(1, (e.viewport?.rows ?? 24) - 5)
-    const shown = list.slice(-room)
-    const first = list.length - shown.length
+    const columns = Math.max(8, e.props.bodyColumns - 13)
     const line = (text: string) => {
       const one = text.split('\n')[0]!.trim()
       return one.length > columns ? `${one.slice(0, columns - 1)}…` : one
@@ -93,10 +132,10 @@ export function registerHistory(on: On) {
           <Text bold>Prompts ({list.length})</Text>
           <Button key="close" label="×" role="dismiss" hotkey="x" plain onPress={() => void $.ui.close({ id: PANE })} />
         </Box>
-        {shown.length === 0 && <Text dimColor>No prompts yet.</Text>}
-        {shown.map((prompt, i) => (
+        {list.length === 0 && <Text dimColor>No prompts yet.</Text>}
+        {list.map(prompt => (
           <Text>
-            <Text dimColor>{String(first + i + 1).padStart(3)} </Text>
+            <Text dimColor>{clock(prompt.at)} </Text>
             {line(prompt.text)}
           </Text>
         ))}

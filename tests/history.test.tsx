@@ -8,7 +8,19 @@ const PANE = {
   props: { title: 'Prompts', isFocused: false, bodyColumns: 40, placement: 'dock', scroll: { offset: 0, bodyRows: 20 }, view: {} },
 } as const
 
+// a time as the pane draws it, in this machine's zone
+const hms = (at: number) => {
+  const d = new Date(at)
+  return [d.getHours(), d.getMinutes(), d.getSeconds()].map(n => String(n).padStart(2, '0')).join(':')
+}
+
 const submit = (text: string) => ({ text, wait: false, origin: { kind: 'composer' } }) as const
+
+// Claude Code's own prompt log: two rows of this session (one a command), one of another
+const LOG =
+  '{"display":"logged before the mod","timestamp":3600000,"sessionId":"s1"}\n' +
+  '{"display":"/cost","timestamp":3601000,"sessionId":"s1"}\n' +
+  '{"display":"another session","timestamp":3602000,"sessionId":"s2"}\n'
 
 test('show toggles the history option, opens and closes the pane', async ($, on) => {
   const { sets, config, panes } = world(on)
@@ -35,8 +47,9 @@ test('the pane opens at the session start when the option is on', { options: { h
   expect(panes.open).toEqual(['history'])
 })
 
-test("the pane lists the session's prompts in the theme's history frame, with a × that closes it", async ($, on) => {
-  const { panes } = world(on)
+test("the pane lists the session's prompts with their times in the theme's history frame, with a × that closes it", async ($, on) => {
+  const { files, panes } = world(on)
+  files.set('/home/me/.claude/history.jsonl', LOG)
 
   await $.session.start(start)
   await $.prompt.submit(submit('first prompt'))
@@ -49,10 +62,12 @@ test("the pane lists the session's prompts in the theme's history frame, with a 
 
     expect(frame?.props.borderStyle).toBe('round')
     expect(frame?.props.borderColor).toBe('#d77757')
-    expect((await ui.find({ type: 'Text', text: /Prompts/ }))?.text).toBe('Prompts (2)')
-    expect((await ui.find({ type: 'Text', text: /first/ }))?.text).toBe('  1 first prompt')
-    expect((await ui.find({ type: 'Text', text: /second/ }))?.text).toBe('  2 second')
+    expect((await ui.find({ type: 'Text', text: /Prompts/ }))?.text).toBe('Prompts (3)')
+    expect((await ui.find({ type: 'Text', text: /logged/ }))?.text).toBe(`${hms(3600000)} logged before the mod`)
+    expect((await ui.find({ type: 'Text', text: /first/ }))?.text).toBe(`${hms(0)} first prompt`)
+    expect((await ui.find({ type: 'Text', text: /second/ }))?.text).toBe(`${hms(0)} second`)
     expect(await ui.find({ type: 'Text', text: /cost/ })).toBeUndefined()
+    expect(await ui.find({ type: 'Text', text: /another/ })).toBeUndefined()
     expect((await ui.find({ key: 'close' }))?.props.label).toBe('×')
     await ui.unmount()
   }

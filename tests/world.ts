@@ -13,6 +13,7 @@ export function world(on: On) {
 
   on('fs.exists', ($, e) => ({ value: files.has(e.path) || e.path.endsWith('/statusline/daiver-prompt-view.sh') }))
   on('fs.read', ($, e) => ({ value: files.get(e.path) ?? '#!/bin/sh\n' }))
+  mock.env(on, { HOME: '/home/me' })
   on('fs.write', ($, e) => {
     files.set(e.path, e.text)
     return { value: undefined }
@@ -54,7 +55,6 @@ export function world(on: On) {
   })
   on('session.start', ($, e) => ({ cwd: e.cwd }))
   on('prompt.autocomplete', () => ({ suggestions: [] }))
-  mock.env(on, { HOME: '/home/me' })
 
   return { files, sets, panes, config: () => files.get(`${DIR}/config`), agents: () => files.get(`${DIR}/agents/s1`) }
 }
