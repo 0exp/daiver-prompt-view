@@ -27,14 +27,14 @@ ctx ███░░░░░░░ 37% | lmt ████░░░░░░ 43% 
 | Status line script (source of truth) | `statusline/daiver-prompt-view.sh` |
 | Installed copy (what the status line runs) | `~/.claude/daiver-prompt-view/statusline.sh` |
 | State, per session | `~/.claude/daiver-prompt-view/agents/<session_id>`, `.../automemory/<session_id>`; options in `.../config`, colors in `.../theme.sh`; off macOS `.../cpu`, the last `/proc/stat` sample of the RAM/CPU segment |
-| Wiring | `statusLine.command` in `~/.claude/settings.json` = `sh "$HOME/.claude/daiver-prompt-view/statusline.sh"`, `refreshInterval: 1` |
+| Wiring | `statusLine.command` in `~/.claude/settings.json` = `sh "$HOME/.claude/daiver-prompt-view/statusline.sh"`, `refreshInterval: 1`, `padding: 0` (the frame reads `statusLine.padding` and keeps the same room on the right) |
 | Installed as | `daiver-prompt-view@daiver-prompt-view`, user scope; for development a `directory` marketplace pointing at the repo (read from the folder itself: never move it without reinstalling) |
 
 ## Invariants
 
 - The agents lines are printed by the script from `agents/<session_id>`, right after the modes line; the hooks module writes it only when its text changed.
 - The RAM/CPU segment (`resources` option) never runs `top` (half a second a call): `vm_stat` + `ps` on macOS, `/proc` elsewhere; a missing source drops its half, never the line.
-- The whole output goes through `frame()` (the theme's `c_frame`): `inner` = `$COLUMNS - 2*pad - 2` when known, never narrower than the widest line; Clawd's canvas ends at the right border (`col = inner - 11`).
+- The whole output goes through `frame()` (the theme's `c_frame`): `inner` = `$COLUMNS - 2*pad - 2` when known (`pad` = `statusLine.padding` from settings.json, default 2), never narrower than the widest line; Clawd's canvas ends at the right border (`col = inner - 11`).
 - The script is POSIX `sh` + `jq` + `git` and prints something even with `{"model":{"display_name":"X"},"cwd":"/tmp"}`. Private-use glyphs (U+E0A0) are `printf` octal escapes.
 - Colors live only in `hooks/shared/themes.ts` as SGR params. The script sources `theme.sh` (`c_gray`, `c_white`, `c_orange`, `c_session`, `c_ctx`, `c_lmt`, `c_rst`, `c_pch`, `c_sha`, `c_branch`, `c_flags`, `c_added`, `c_removed`, `c_matrix`, `c_frame`, `c_resources`, `c_values`, `c_effort`, `c_ostyle`); the agents line and the prompt, reply, tool, spinner, command and history-pane frames (`prompt`, `reply`, `tool`, `spinner`, `command`, `history`, `hover`, `paneBackground`, as #rrggbb via `hexOf`) use the same theme in TS. A new theme = an entry in `THEMES` + its name in `userConfig.theme.options` (`plugin.json`) + `argument-hint` of `commands/view/theme.md`. `tests/statusline.test.ts` and `tests/agents.test.ts` pin `default` byte for byte.
 - A new command = `commands/<feature>/<name>.md` (`description`, `argument-hint`, `disable-model-invocation: true`) + a `command.run` hook on `command('<feature>', '<name>')` whose `.catch` answers `failed(...)` (never `next`: that would send the .md body to the model) + its values in `register.ts`'s typeahead table.
@@ -61,7 +61,7 @@ ctx ███░░░░░░░ 37% | lmt ████░░░░░░ 43% 
 5. Bump `version` in `.claude-plugin/plugin.json` (patch fixes, minor features) and update `README.md`.
 6. Apply: ask the user to type `/reload-plugins` (Claude cannot run slash commands); the installed script copy refreshes on that start.
 
-**Wire the status line**: set `statusLine` to `{ "type": "command", "command": "sh \"$HOME/.claude/daiver-prompt-view/statusline.sh\"", "refreshInterval": 1 }` with python `json`/`jq`, backing up `settings.json` first (`settings.json.bak-daiver-prompt-view`).
+**Wire the status line**: set `statusLine` to `{ "type": "command", "command": "sh \"$HOME/.claude/daiver-prompt-view/statusline.sh\"", "refreshInterval": 1, "padding": 0 }` with python `json`/`jq`, backing up `settings.json` first (`settings.json.bak-daiver-prompt-view`).
 
 **Enable / disable / uninstall**
 ```sh
