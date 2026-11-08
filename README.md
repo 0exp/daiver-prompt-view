@@ -234,8 +234,9 @@ lists every prompt you sent this session, oldest first, each as a message of
 its own: a frame in the theme's `prompt` color, the time it was sent
 (`HH:MM:SS`, local) on top, the whole text under. A click on a message (or
 Enter on it while the pane has the keyboard) scrolls the transcript to that
-prompt; a prompt whose row the transcript no longer keeps drawn says so in a
-toast. Slash commands are left out. On
+prompt (the row's id comes with the row as the session stores it, or from the
+session's transcript file for prompts sent before the mod loaded); a prompt
+whose row cannot be found says so in a toast. Slash commands are left out. On
 the session start the list is read from Claude Code's own prompt log
 (`~/.claude/history.jsonl`, this session's rows), so prompts sent before the mod
 loaded are there too; from then on each prompt joins as it is sent. The list

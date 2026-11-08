@@ -21,6 +21,7 @@ export function world(on: On) {
   })
   on('agent.list', () => ({ value: [] }))
   on('session.id', () => ({ value: 's1' }))
+  on('session.cwd', () => ({ value: '/home/me/proj' }))
   on('clock.now', () => ({ value: 0 }))
   on('settings.read', () => ({ value: {} }))
   on('command.register', ($, e) => ({ value: { command: e.name } }))

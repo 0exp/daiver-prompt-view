@@ -80,8 +80,10 @@ test("the pane lists the session's prompts with their times in the theme's histo
 // every message is a press that scrolls the transcript to the prompt's row
 // ($.ui.scroll, which the test engine does not answer: the real one does); a
 // prompt whose row the transcript has not drawn says so in a toast
-test('every message is a press; one whose row is not drawn says so', async ($, on) => {
-  const { toasts } = world(on)
+test('every message is a press; one whose row is nowhere to be found says so', async ($, on) => {
+  const { files, toasts } = world(on)
+  // the session's transcript holds the first prompt's row
+  files.set('/home/me/.claude/projects/-home-me-proj/s1.jsonl', '{"type":"user","uuid":"u1","message":{"role":"user","content":"find me"}}\n{"type":"user","isMeta":true,"uuid":"u2","message":{"role":"user","content":"gone"}}\n')
 
   await $.session.start(start)
   await $.prompt.submit(submit('find me'))

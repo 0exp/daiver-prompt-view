@@ -14,14 +14,45 @@ export const HISTORY = command('history', 'show')
 export const PANE = 'history'
 const KEEP = 1000
 
-// the transcript row of each prompt, by its text, as the UserMessage render
-// hook (prompt.tsx) sees it: what a press on a message scrolls to. A module
-// variable: every drawn row renders again on a load, so it fills itself
+// the transcript row of a prompt, by its text, as the UserMessage render hook
+// (prompt.tsx) sees it while the row is on screen: the last resort of a jump
 const rows = new Map<string, string>()
 export const noteRow = (text: string, requestId: string) => void rows.set(text, requestId)
 
+// the text of a stored user row: its text blocks joined
+const textOf = (content: readonly { type: string; text?: string }[]) =>
+  content
+    .filter(block => block.type === 'text' && typeof block.text === 'string')
+    .map(block => block.text)
+    .join('\n')
+
+// the session's transcript file (~/.claude/projects/<cwd, every other
+// character a dash>/<session id>.jsonl): a JSON row per message, user rows
+// with the prompt as `message.content` and the row's `uuid`
+async function transcriptRows($: EngineInterface) {
+  const slug = (await $.session.cwd()).replace(/[^A-Za-z0-9]/g, '-')
+  const path = `${await $.env.get('HOME')}/.claude/projects/${slug}/${await $.session.id()}.jsonl`
+
+  if (!(await $.fs.exists(path))) return new Map<string, string>()
+  const found = new Map<string, string>()
+
+  for (const line of (await $.fs.read(path)).split('\n')) {
+    if (line === '') continue
+    try {
+      const row = JSON.parse(line) as { type?: unknown; uuid?: unknown; isMeta?: unknown; message?: { content?: unknown } }
+      if (row.type === 'user' && row.isMeta !== true && typeof row.uuid === 'string' && typeof row.message?.content === 'string') {
+        found.set(row.message.content, row.uuid)
+      }
+    } catch {
+      // a line that is not JSON (a write in progress) is skipped
+    }
+  }
+
+  return found
+}
+
 // a new tag declines what an earlier shape of Prompt stored
-const prompts = atom({ plugin: 'daiver-prompt-view', key: 'prompts' } as const, [], { shape: 'prompts-1' })
+const prompts = atom({ plugin: 'daiver-prompt-view', key: 'prompts' } as const, [], { shape: 'prompts-2' })
 
 function open($: EngineInterface) {
   return $.ui.open({ id: PANE, title: 'Prompts' })
@@ -84,8 +115,8 @@ export async function startHistory($: EngineInterface) {
 
 // a press on a message scrolls the transcript to the prompt's row; a row the
 // transcript no longer keeps drawn (or never drew) cannot be reached
-async function jump($: EngineInterface, text: string) {
-  const requestId = rows.get(text)
+async function jump($: EngineInterface, text: string, uuid: string | undefined) {
+  const requestId = uuid ?? rows.get(text) ?? (await transcriptRows($)).get(text)
 
   if (requestId === undefined) {
     $.ui.toast('That prompt is not on screen any more.')
@@ -120,6 +151,20 @@ export function registerHistory(on: On) {
 
     return { text: await show($, arg === '' ? !config.history : arg === 'on') }
   }).catch(($, e, next) => failed(next.error.message ?? next.error.kind))
+
+  // a prompt's row, as the session stores it: its uuid joins the prompt (the
+  // newest with that text and no uuid yet), what a press scrolls to
+  on('session.append', { door: 'prompt' }, async ($, e, next) => {
+    if (e.message.type === 'user' && e.message.isMeta !== true && (e.origin.kind === 'composer' || e.origin.kind === 'bridge')) {
+      const text = textOf(e.message.content)
+      await update($, prompts, list => {
+        const i = list.findLastIndex(one => one.text === text && one.uuid === undefined)
+        return i === -1 ? list : list.map((one, k) => (k === i ? { ...one, uuid: e.uuid } : one))
+      })
+    }
+
+    return next(e)
+  }).catch(($, e, next) => next(e))
 
   // the person's close (the × or ctrl+x x) turns the option off too
   on('ui.close', { id: PANE }, async ($, e, next) => {
@@ -156,7 +201,7 @@ export function registerHistory(on: On) {
         {list.map((prompt, i) => (
           <Box flexDirection="column" borderStyle="round" borderColor={hexOf(theme.prompt)} paddingX={1}>
             <Text dimColor>{clock(prompt.at)}</Text>
-            <Button key={`p${i}`} plain onPress={() => jump($, prompt.text)}>
+            <Button key={`p${i}`} plain onPress={() => jump($, prompt.text, prompt.uuid)}>
               {prompt.text.trim()}
             </Button>
           </Box>
