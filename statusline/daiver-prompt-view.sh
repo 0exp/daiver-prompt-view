@@ -92,8 +92,7 @@ case "$fast" in true | false) modes="$modes (${bold}fastmode${unbold}:$fast)" ;;
 # else /proc/meminfo's total - available; CPU is the sum of every process's %cpu
 # from ps (a decaying average of the last minute) over the cores, else the busy
 # share of /proc/stat since the previous run, kept in <mod>/cpu (none on the first).
-# The numbers are right-aligned in fixed widths, so the blocks keep their size
-# as the values change; the labels in white, the numbers a shade under it
+# The labels in white, the numbers a shade under it
 gb() { awk -v b="$1" 'BEGIN { printf "%.1f", b / 1073741824 }' | sed 's/\.0$//'; }
 res=''
 vals=$(esc "$c_values")
@@ -109,7 +108,7 @@ if ! grep -qx 'resources=false' "$mod/config" 2>/dev/null; then
   fi
   if [ -n "$mem" ]; then
     used=${mem% *} total=${mem#* }
-    res="[${bold}RAM:${unbold} ${vals}$(printf '%6s/%sG | %3d%%' "$(gb "$used")G" "$(gb "$total")" $((used * 100 / total)))${white}]"
+    res="[${bold}RAM:${unbold} ${vals}$(gb "$used")G/$(gb "$total")G | $((used * 100 / total))%${white}]"
   fi
   if [ -f /proc/stat ]; then
     ticks=$(awk 'NR == 1 { b = 0; for (i = 2; i <= NF; i++) b += $i; print b, $5 + $6 }' /proc/stat)
@@ -121,7 +120,7 @@ if ! grep -qx 'resources=false' "$mod/config" 2>/dev/null; then
   fi
   if [ -n "$cpu" ]; then
     set -- $(awk -v p="$cpu" -v n="$ncpu" 'BEGIN { if (p > 100) p = 100; printf "%.1f %.0f", p * n / 100, p }')
-    res="$res [${bold}CPU:${unbold} ${vals}$(printf '%4s/%s | %3d%%' "$(printf '%s' "$1" | sed 's/\.0$//')" "$ncpu" "$2")${white}]"
+    res="$res [${bold}CPU:${unbold} ${vals}$(printf '%s' "$1" | sed 's/\.0$//')/$ncpu | $2%${white}]"
   fi
   [ -n "$res" ] && res="${white}${res# }${reset}"
 fi
