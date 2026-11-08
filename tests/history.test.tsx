@@ -92,9 +92,10 @@ test('every message is a press; one whose row is nowhere to be found says so', a
   const ui = await $.ui.mount({ ...PANE, surface: 'terminal' })
   const buttons = (await ui.findAll({ type: 'Button' })).filter(one => one.key !== 'close')
 
-  expect(buttons.map(one => one.text)).toEqual(['find me', 'gone'])
+  // newest first
+  expect(buttons.map(one => one.text)).toEqual(['gone', 'find me'])
   expect(buttons.map(one => one.props.plain)).toEqual([true, true])
-  await ui.press({ key: buttons[1]!.key! })
+  await ui.press({ key: buttons[0]!.key! })
   expect(toasts).toEqual(['That prompt is not on screen any more.'])
   await ui.unmount()
 })

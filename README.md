@@ -230,7 +230,7 @@ memory is `/proc/meminfo`'s total minus available, and CPU the busy share of
 ### Prompt history pane
 
 With `history` on, a pane at the right (above the prompt in a narrow terminal)
-lists every prompt you sent this session, oldest first, each as a message of
+lists every prompt you sent this session, newest first, each as a message of
 its own: a frame in the theme's `prompt` color, the time it was sent
 (`HH:MM:SS`, local) on top, the whole text under. A click on a message (or
 Enter on it while the pane has the keyboard) scrolls the transcript to that
