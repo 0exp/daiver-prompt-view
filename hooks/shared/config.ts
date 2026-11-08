@@ -7,7 +7,7 @@ export const ANIMATIONS = ['random', 'jump', 'spin', 'sway', 'blink', 'cheer', '
 
 // the options the status line script reads, from the plugin's userConfig;
 // a change in /config reloads the module, and session.start fires again
-export const config = { clodik: true, animate: false, animation: 'random', theme: 'default', resources: true, history: false, borders: true, statuslineBorders: true }
+export const config = { clodik: true, animate: false, animation: 'random', theme: 'default', resources: true, history: false, borders: true, chatBorders: true, statuslineBorders: true }
 
 export function loadConfig(options: Record<string, unknown>) {
   config.clodik = options.clodik !== false
@@ -17,6 +17,7 @@ export function loadConfig(options: Record<string, unknown>) {
   config.resources = options.resources !== false
   config.history = options.history === true
   config.borders = options.borders !== false
+  config.chatBorders = options.chatBorders !== false
   config.statuslineBorders = options.statuslineBorders !== false
 }
 
@@ -24,6 +25,6 @@ export function loadConfig(options: Record<string, unknown>) {
 export async function writeConfig($: EngineInterface) {
   const dir = await home($)
 
-  await sync($, `${dir}/config`, `clodik=${config.clodik}\nanimate=${config.animate}\nanimation=${config.animation}\ntheme=${config.theme}\nresources=${config.resources}\nhistory=${config.history}\nborders=${config.borders}\nstatuslineBorders=${config.statuslineBorders}\n`)
+  await sync($, `${dir}/config`, `clodik=${config.clodik}\nanimate=${config.animate}\nanimation=${config.animation}\ntheme=${config.theme}\nresources=${config.resources}\nhistory=${config.history}\nborders=${config.borders}\nchatBorders=${config.chatBorders}\nstatuslineBorders=${config.statuslineBorders}\n`)
   await sync($, `${dir}/theme.sh`, themeShell(config.theme))
 }

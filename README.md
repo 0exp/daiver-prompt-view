@@ -73,7 +73,9 @@ random animation starts every 8 seconds, a frame per refresh.
 ## Your prompts, Claude's replies, tool calls, the spinner and command output
 
 All of these frames, and the status line's, follow the `borders` option
-(`/daiver-prompt-view:chat:show-borders`, see below).
+(`/daiver-prompt-view:chat:show-borders`, see below); these ones also follow
+`chatBorders` (`chat:show-chat-borders`), the status line's `statuslineBorders`
+(`chat:show-statusline-borders`).
 
 Every prompt you send is drawn in the transcript inside a rounded frame in the
 theme's `prompt` color (Clawd orange in `default`). Only your own prompts are
@@ -110,6 +112,7 @@ after the command.
 | `/daiver-prompt-view:resources:show` | `on`, `off`, or nothing | `on` | Show (`on`) or hide (`off`) the RAM and CPU line; with no argument, toggles |
 | `/daiver-prompt-view:history:show` | `on`, `off`, or nothing | `off` | Show (`on`) or hide (`off`) the pane with this session's prompts; with no argument, toggles |
 | `/daiver-prompt-view:chat:show-borders` | `on`, `off`, or nothing | `on` | Show (`on`) or hide (`off`) the frames around prompts, replies, tool calls, the spinner, command output and the status line; with no argument, toggles |
+| `/daiver-prompt-view:chat:show-chat-borders` | `on`, `off`, or nothing | `on` | Show (`on`) or hide (`off`) the frames around prompts, replies, tool calls, the spinner and command output, the status line's left as it is; with no argument, toggles |
 | `/daiver-prompt-view:chat:show-statusline-borders` | `on`, `off`, or nothing | `on` | Show (`on`) or hide (`off`) the frame around the status line alone; with no argument, toggles |
 
 ### `/daiver-prompt-view:clodik:animate [on|off]`
@@ -179,6 +182,7 @@ Every option is in `/config`, or in `~/.claude/settings.json` under
 | `resources` | Show RAM and CPU | boolean | `true` | `true`, `false` | `resources:show` |
 | `history` | Show the prompt history pane | boolean | `false` | `true`, `false` | `history:show` |
 | `borders` | Show the frames | boolean | `true` | `true`, `false` | `chat:show-borders` |
+| `chatBorders` | Show the chat's frames | boolean | `true` | `true`, `false` | `chat:show-chat-borders` |
 | `statuslineBorders` | Show the status line's frame | boolean | `true` | `true`, `false` | `chat:show-statusline-borders` |
 | `clodik` | Show Clawd | boolean | `true` | `true`, `false` | (none) |
 | `clodikAnimate` | Animate Clawd always | boolean | `false` | `true`, `false` | `clodik:animate` |
@@ -194,6 +198,7 @@ For example, in `~/.claude/settings.json`:
       "resources":         true,
       "history":           false,
       "borders":           true,
+      "chatBorders":       true,
       "statuslineBorders": true,
       "clodik":            true,
       "clodikAnimate":     false,
@@ -285,12 +290,21 @@ Option `history` (Show the prompt history pane), default `false` (`off`).
 Option `borders` (Show the frames), default `true` (`on`). It covers every
 frame the mod draws in the transcript (your prompts, Claude's replies, tool
 calls, the spinner, command output) and the frame around the status line; the
-history pane's own frames stay.
+history pane's own frames stay. Under it, `chatBorders` and `statuslineBorders`
+hide one half each:
+
+| `borders` | `chatBorders` | `statuslineBorders` | Transcript frames | Status line frame |
+| --- | --- | --- | --- | --- |
+| `on` | `on` | `on` | drawn | drawn |
+| `on` | `off` | `on` | hidden | drawn |
+| `on` | `on` | `off` | drawn | hidden |
+| `on` | `off` | `off` | hidden | hidden |
+| `off` | any | any | hidden | hidden |
 
 | Value | Effect |
 | --- | --- |
 | `on` | the frames are drawn |
-| `off` | every framed row is drawn as Claude Code draws it, the status line bare (whatever `statuslineBorders` says) |
+| `off` | every framed row is drawn as Claude Code draws it, the status line bare (whatever `chatBorders` and `statuslineBorders` say) |
 
 | Usage | Result |
 | --- | --- |
@@ -298,6 +312,26 @@ history pane's own frames stay.
 | `/daiver-prompt-view:chat:show-borders off` | `The frames are now hidden.` |
 | `/daiver-prompt-view:chat:show-borders` | toggles: `The frames are now hidden.` when they were on, `The frames are now shown.` when they were off |
 | `/daiver-prompt-view:chat:show-borders maybe` | nothing changes: `Usage: /daiver-prompt-view:chat:show-borders [on|off]` |
+
+### `/daiver-prompt-view:chat:show-chat-borders [on|off]`
+
+Option `chatBorders` (Show the chat's frames), default `true` (`on`). It
+covers the transcript's frames alone (your prompts, Claude's replies, tool
+calls, the spinner, command output) and is separate from `borders`: they are
+drawn while both are on, so `borders` off hides them whatever this one says,
+and this one off hides them while the status line's frame stays.
+
+| Value | Effect |
+| --- | --- |
+| `on` | the transcript's rows are framed (while `borders` is on too) |
+| `off` | every framed row is drawn as Claude Code draws it, the status line's frame as `borders` and `statuslineBorders` say |
+
+| Usage | Result |
+| --- | --- |
+| `/daiver-prompt-view:chat:show-chat-borders on` | `The chat's frames are now shown.` |
+| `/daiver-prompt-view:chat:show-chat-borders off` | `The chat's frames are now hidden.` |
+| `/daiver-prompt-view:chat:show-chat-borders` | toggles: `The chat's frames are now hidden.` when they were on, `The chat's frames are now shown.` when they were off |
+| `/daiver-prompt-view:chat:show-chat-borders maybe` | nothing changes: `Usage: /daiver-prompt-view:chat:show-chat-borders [on|off]` |
 
 ### `/daiver-prompt-view:chat:show-statusline-borders [on|off]`
 

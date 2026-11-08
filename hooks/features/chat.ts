@@ -1,19 +1,21 @@
 // chat: how the transcript is dressed; for now the frames: the `borders`
 // option over every frame (the person's prompts, Claude's replies, tool
 // calls, the spinner, command output, the status line), and
-// `statuslineBorders` over the status line's frame alone, which is drawn
-// while both are on
+// two options under it, each drawn while it and `borders` are both on:
+// `chatBorders` over the transcript's frames, `statuslineBorders` over the
+// status line's frame
 import type { EngineInterface, On } from 'claude-code'
 import { command, failed } from '../shared/commands'
 import { config, writeConfig } from '../shared/config'
 import { setOption } from '../shared/options'
 
 export const BORDERS = command('chat', 'show-borders')
+export const CHAT_BORDERS = command('chat', 'show-chat-borders')
 export const STATUSLINE_BORDERS = command('chat', 'show-statusline-borders')
 
 type Toggle = {
   name: string
-  field: 'borders' | 'statuslineBorders'
+  field: 'borders' | 'chatBorders' | 'statuslineBorders'
   what: string // the subject of the answers: 'The frames', "The status line's frame"
   plural: boolean
 }
@@ -40,6 +42,10 @@ async function toggle($: EngineInterface, args: string, t: Toggle) {
 export function registerChat(on: On) {
   on('command.run', { command: BORDERS }, ($, e) => toggle($, e.args, { name: BORDERS, field: 'borders', what: 'The frames', plural: true }))
     .catch(($, e, next) => failed(next.error.message ?? next.error.kind))
+
+  on('command.run', { command: CHAT_BORDERS }, ($, e) =>
+    toggle($, e.args, { name: CHAT_BORDERS, field: 'chatBorders', what: "The chat's frames", plural: true }),
+  ).catch(($, e, next) => failed(next.error.message ?? next.error.kind))
 
   on('command.run', { command: STATUSLINE_BORDERS }, ($, e) =>
     toggle($, e.args, { name: STATUSLINE_BORDERS, field: 'statuslineBorders', what: "The status line's frame", plural: false }),

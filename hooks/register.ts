@@ -4,7 +4,7 @@ import type { Register } from 'claude-code'
 import { choiceRows } from './shared/commands'
 import { ANIMATIONS, config, loadConfig } from './shared/config'
 import { THEME_NAMES } from './shared/themes'
-import { BORDERS, registerChat, STATUSLINE_BORDERS } from './features/chat'
+import { BORDERS, CHAT_BORDERS, registerChat, STATUSLINE_BORDERS } from './features/chat'
 import { forgetNotifiedTasks, registerAgents, startAgents } from './features/agents'
 import { ANIMATE, ANIMATION, registerClodik } from './features/clodik'
 import { registerCommand } from './features/command'
@@ -59,6 +59,7 @@ export const register: Register = (on, options) => {
       [SHOW]: { values: ['on', 'off'], current: config.resources ? 'on' : 'off' },
       [HISTORY]: { values: ['on', 'off'], current: config.history ? 'on' : 'off' },
       [BORDERS]: { values: ['on', 'off'], current: config.borders ? 'on' : 'off' },
+      [CHAT_BORDERS]: { values: ['on', 'off'], current: config.chatBorders ? 'on' : 'off' },
       [STATUSLINE_BORDERS]: { values: ['on', 'off'], current: config.statuslineBorders ? 'on' : 'off' },
     })
 

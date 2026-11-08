@@ -11,7 +11,7 @@ import { noteRow } from './history'
 export function registerPrompt(on: On) {
   on('ui.render', { component: 'UserMessage', props: { origin: { kind: 'composer' } } }, ($, e, next) => {
     noteRow(e.props.text, e.requestId)
-    if (!config.borders) return next(e)
+    if (!config.borders || !config.chatBorders) return next(e)
     const { Box, Text } = $.ui.resolve(e)
 
     return (

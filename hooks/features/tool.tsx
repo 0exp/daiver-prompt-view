@@ -7,7 +7,7 @@ import { hexOf, THEMES } from '../shared/themes'
 
 export function registerTool(on: On) {
   on('ui.render', { component: 'ToolUse' }, async ($, e, next) => {
-    if (!config.borders) return next(e)
+    if (!config.borders || !config.chatBorders) return next(e)
     const row = await next(e)
     const { Box } = $.ui.resolve(e)
 

@@ -1,6 +1,6 @@
 {
   "name": "daiver-prompt-view",
-  "version": "1.24.0",
+  "version": "1.25.0",
   "description": "A multi-line status line under the prompt: model, session, modes, agents, usage bars, git state and Clawd",
   "author": {
     "name": "Rustam Ibragimov",
@@ -13,6 +13,12 @@
       "type": "boolean",
       "title": "Show the frames",
       "description": "The frames around your prompts, Claude's replies, tool calls, the spinner, command output and the status line (also /daiver-prompt-view:chat:show-borders [on|off])",
+      "default": true
+    },
+    "chatBorders": {
+      "type": "boolean",
+      "title": "Show the chat's frames",
+      "description": "The frames around your prompts, Claude's replies, tool calls, the spinner and command output, on their own: drawn while this and the frames option are both on (also /daiver-prompt-view:chat:show-chat-borders [on|off])",
       "default": true
     },
     "statuslineBorders": {
