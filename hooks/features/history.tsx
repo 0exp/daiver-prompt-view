@@ -116,28 +116,25 @@ export function registerHistory(on: On) {
   }).catch(($, e, next) => next(e))
 
   // the pane: a frame in the theme's history color, the × in its top right
-  // corner, every prompt with its time, one line each (the body scrolls)
+  // corner, every prompt as a message of its own: a frame in the theme's prompt
+  // color, its time on top, its whole text under (the body scrolls)
   on('ui.render', { component: 'Pane', requestId: PANE }, async ($, e) => {
     const { Box, Button, Text } = $.ui.resolve(e)
     const list = await read($, prompts)
-    const columns = Math.max(8, e.props.bodyColumns - 13)
-    const line = (text: string) => {
-      const one = text.split('\n')[0]!.trim()
-      return one.length > columns ? `${one.slice(0, columns - 1)}…` : one
-    }
+    const theme = THEMES[config.theme]!
 
     return (
-      <Box flexDirection="column" borderStyle="round" borderColor={hexOf(THEMES[config.theme]!.history)} paddingX={1}>
+      <Box flexDirection="column" borderStyle="round" borderColor={hexOf(theme.history)} paddingX={1}>
         <Box justifyContent="space-between">
           <Text bold>Prompts ({list.length})</Text>
           <Button key="close" label="×" role="dismiss" hotkey="x" plain onPress={() => void $.ui.close({ id: PANE })} />
         </Box>
         {list.length === 0 && <Text dimColor>No prompts yet.</Text>}
         {list.map(prompt => (
-          <Text>
-            <Text dimColor>{clock(prompt.at)} </Text>
-            {line(prompt.text)}
-          </Text>
+          <Box flexDirection="column" borderStyle="round" borderColor={hexOf(theme.prompt)} paddingX={1}>
+            <Text dimColor>{clock(prompt.at)}</Text>
+            <Text>{prompt.text.trim()}</Text>
+          </Box>
         ))}
       </Box>
     )

@@ -230,8 +230,9 @@ memory is `/proc/meminfo`'s total minus available, and CPU the busy share of
 ### Prompt history pane
 
 With `history` on, a pane at the right (above the prompt in a narrow terminal)
-lists every prompt you sent this session, oldest first, one line each, with the
-time it was sent (`HH:MM:SS`, local) in front. Slash commands are left out. On
+lists every prompt you sent this session, oldest first, each as a message of
+its own: a frame in the theme's `prompt` color, the time it was sent
+(`HH:MM:SS`, local) on top, the whole text under. Slash commands are left out. On
 the session start the list is read from Claude Code's own prompt log
 (`~/.claude/history.jsonl`, this session's rows), so prompts sent before the mod
 loaded are there too; from then on each prompt joins as it is sent. The list
