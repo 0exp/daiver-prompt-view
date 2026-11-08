@@ -172,7 +172,7 @@ CPU use:
 
 | `resources` | Line under the bars |
 | --- | --- |
-| `true` | `[RAM: 12.5G/16G | 78%] [CPU: 1.2/8 | 15%]` |
+| `true` | `[RAM: 12.5G/16G \| 78%] [CPU: 1.2/8 \| 15%]` |
 | `false` | no such line: the git line follows the bars |
 
 `RAM` is used over total memory (GiB) and the used share; `CPU` is the busy
