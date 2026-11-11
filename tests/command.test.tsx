@@ -22,7 +22,7 @@ test("a slash command's output is framed in the theme's command color, the engin
     const ui = await $.ui.mount({ ...ROW, surface })
     const box = await ui.find({ type: 'Box' })
 
-    expect(box?.props.borderStyle).toBe('round')
+    expect(box?.props.borderStyle).toBe('dashed')
     expect(box?.props.borderColor).toBe('#808080')
     expect((await ui.find({ type: 'Text', text: /Reloaded/ }))?.text).toBe('Reloaded: 1 plugin')
     await ui.unmount()

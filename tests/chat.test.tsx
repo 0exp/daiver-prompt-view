@@ -95,3 +95,42 @@ test("with the chat's frames off every framed site is left to the engine", { opt
     await ui.unmount()
   }
 })
+
+test('border-style sets the frames style, shows it with no argument', async ($, on) => {
+  const { sets, config } = world(on)
+
+  await $.session.start(start)
+
+  expect((await $.command.run(run('chat:border-style'))).text).toBe('Frame style: dotted (one of dotted, line)')
+  expect((await $.command.run(run('chat:border-style', 'line'))).text).toBe('The frames are now line.')
+  expect(config()).toBe(conf(true, false, 'random', 'default', true, false, true, true, true, 'line'))
+  expect((await $.command.run(run('chat:border-style', 'dotted'))).text).toBe('The frames are now dotted.')
+  expect(sets).toEqual(['borderStyle=line', 'borderStyle=dotted'])
+  expect((await $.command.run(run('chat:border-style', 'wavy'))).text).toBe('Usage: /daiver-prompt-view:chat:border-style [dotted|line]')
+})
+
+test('every framed site is dashed by default', async ($, on) => {
+  world(on)
+
+  await $.session.start(start)
+
+  for (const target of SITES) {
+    const ui = await $.ui.mount(target)
+
+    expect((await ui.find({ type: 'Box' }))?.props.borderStyle).toBe('dashed')
+    await ui.unmount()
+  }
+})
+
+test('with the line style every framed site is a solid rounded frame', { options: { borderStyle: 'line' } }, async ($, on) => {
+  world(on)
+
+  await $.session.start(start)
+
+  for (const target of SITES) {
+    const ui = await $.ui.mount(target)
+
+    expect((await ui.find({ type: 'Box' }))?.props.borderStyle).toBe('round')
+    await ui.unmount()
+  }
+})

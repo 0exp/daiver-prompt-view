@@ -4,7 +4,7 @@
 // a frame would stretch into a highlight. Task notifications, peers and
 // channels are not framed (the matcher picks the composer's rows alone)
 import type { On } from 'claude-code'
-import { config } from '../shared/config'
+import { config, frameStyle } from '../shared/config'
 import { hexOf, THEMES } from '../shared/themes'
 import { noteRow } from './history'
 
@@ -15,7 +15,7 @@ export function registerPrompt(on: On) {
     const { Box, Text } = $.ui.resolve(e)
 
     return (
-      <Box borderStyle="round" borderColor={hexOf(THEMES[config.theme]!.prompt)} paddingX={1}>
+      <Box borderStyle={frameStyle()} borderColor={hexOf(THEMES[config.theme]!.prompt)} paddingX={1}>
         <Text>{e.props.text}</Text>
       </Box>
     )

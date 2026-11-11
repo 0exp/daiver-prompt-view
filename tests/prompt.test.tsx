@@ -23,7 +23,7 @@ test("the person's prompt is framed in the theme's prompt color, on every surfac
     expect(await ui.find({ type: 'Text', text: /> hello/ })).toBeUndefined()
     const box = await ui.find({ type: 'Box' })
 
-    expect(box?.props.borderStyle).toBe('round')
+    expect(box?.props.borderStyle).toBe('dashed')
     expect(box?.props.borderColor).toBe('#d77757')
     const text = await ui.find({ type: 'Text', text: /hello/ })
     expect(text?.text).toBe('hello')

@@ -63,6 +63,7 @@ export function world(on: On, { configRows = true } = {}) {
       { key: `${$.plugin.name}.borders`, label: 'Show the frames', kind: 'boolean', value: true, provider, isLocked: false },
       { key: `${$.plugin.name}.chatBorders`, label: "Show the chat's frames", kind: 'boolean', value: true, provider, isLocked: false },
       { key: `${$.plugin.name}.statuslineBorders`, label: "Show the status line's frame", kind: 'boolean', value: true, provider, isLocked: false },
+      { key: `${$.plugin.name}.borderStyle`, label: 'Frame style', kind: 'choice', value: 'dotted', provider, isLocked: false },
     ],
   }))
   on('config.set', ($, e) => {
@@ -91,5 +92,5 @@ export const typed = (text: string) => {
   return { text, cursor: text.length, token: text.slice(start), start }
 }
 
-export const conf = (clodik: boolean, animate: boolean, animation: string, theme = 'default', resources = true, history = false, borders = true, statuslineBorders = true, chatBorders = true) =>
-  `clodik=${clodik}\nanimate=${animate}\nanimation=${animation}\ntheme=${theme}\nresources=${resources}\nhistory=${history}\nborders=${borders}\nchatBorders=${chatBorders}\nstatuslineBorders=${statuslineBorders}\n`
+export const conf = (clodik: boolean, animate: boolean, animation: string, theme = 'default', resources = true, history = false, borders = true, statuslineBorders = true, chatBorders = true, borderStyle = 'dotted') =>
+  `clodik=${clodik}\nanimate=${animate}\nanimation=${animation}\ntheme=${theme}\nresources=${resources}\nhistory=${history}\nborders=${borders}\nchatBorders=${chatBorders}\nstatuslineBorders=${statuslineBorders}\nborderStyle=${borderStyle}\n`

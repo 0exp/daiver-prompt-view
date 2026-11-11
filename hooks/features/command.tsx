@@ -3,7 +3,7 @@
 // theme's `command` color (gray by default). The engine's row goes inside the
 // frame as it is
 import type { On } from 'claude-code'
-import { config } from '../shared/config'
+import { config, frameStyle } from '../shared/config'
 import { hexOf, THEMES } from '../shared/themes'
 
 export function registerCommand(on: On) {
@@ -13,7 +13,7 @@ export function registerCommand(on: On) {
     const { Box } = $.ui.resolve(e)
 
     return (
-      <Box borderStyle="round" borderColor={hexOf(THEMES[config.theme]!.command)} paddingX={1}>
+      <Box borderStyle={frameStyle()} borderColor={hexOf(THEMES[config.theme]!.command)} paddingX={1}>
         {row}
       </Box>
     )

@@ -22,7 +22,7 @@ test("the spinner is framed in the theme's spinner color, the engine's line insi
     const ui = await $.ui.mount({ ...LINE, surface })
     const box = await ui.find({ type: 'Box' })
 
-    expect(box?.props.borderStyle).toBe('round')
+    expect(box?.props.borderStyle).toBe('dashed')
     expect(box?.props.borderColor).toBe('#e6c86e')
     expect((await ui.find({ type: 'Text', text: /Sauteing/ }))?.text).toBe('Sauteing…')
     await ui.unmount()

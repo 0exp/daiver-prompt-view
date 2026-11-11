@@ -22,7 +22,7 @@ test("a reply block is framed in the theme's reply color, the engine's drawing i
     const ui = await $.ui.mount({ ...BLOCK, surface })
     const box = await ui.find({ type: 'Box' })
 
-    expect(box?.props.borderStyle).toBe('round')
+    expect(box?.props.borderStyle).toBe('dashed')
     expect(box?.props.borderColor).toBe('#00c8ff')
     expect((await ui.find({ type: 'Text', text: /Done/ }))?.text).toBe('● Done.')
     await ui.unmount()

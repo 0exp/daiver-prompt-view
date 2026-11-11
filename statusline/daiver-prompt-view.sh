@@ -223,16 +223,24 @@ frame() {
 $body
 EOF
   fc=$(esc "$c_frame")
-  bar=$(printf '%*s' "$fw" '' | sed 's/ /─/g')
-  printf '%s\n' "${fc}╭${bar}╮${reset}"
+  # the borderStyle option (/daiver-prompt-view:chat:border-style): `line` a
+  # solid rounded frame, else `dotted`, a dashed one with open corners (as the
+  # transcript's dashed frames are drawn)
+  if grep -qx 'borderStyle=line' "$mod/config" 2>/dev/null; then
+    fh='─' fv='│' ftl='╭' ftr='╮' fbl='╰' fbr='╯'
+  else
+    fh='╌' fv='╎' ftl=' ' ftr=' ' fbl=' ' fbr=' '
+  fi
+  bar=$(printf '%*s' "$fw" '' | sed "s/ /$fh/g")
+  printf '%s\n' "${fc}${ftl}${bar}${ftr}${reset}"
   while IFS= read -r l; do
     fill=$((fw - $(vis "$l")))
     [ $fill -lt 0 ] && fill=0
-    printf '%s%s%*s%s\n' "${fc}│${reset}" "$l" $fill '' "${fc}│${reset}"
+    printf '%s%s%*s%s\n' "${fc}${fv}${reset}" "$l" $fill '' "${fc}${fv}${reset}"
   done <<EOF
 $body
 EOF
-  printf '%s\n' "${fc}╰${bar}╯${reset}"
+  printf '%s\n' "${fc}${fbl}${bar}${fbr}${reset}"
 }
 
 # Clawd is the mod's option (userConfig `clodik`, on by default): the hooks

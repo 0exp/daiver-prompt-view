@@ -2,9 +2,9 @@
 // agents, usage bars, git state, Clawd) as one mod, a file per feature
 import type { Register } from 'claude-code'
 import { choiceRows } from './shared/commands'
-import { ANIMATIONS, config, loadConfig } from './shared/config'
+import { ANIMATIONS, BORDER_STYLES, config, loadConfig } from './shared/config'
 import { THEME_NAMES } from './shared/themes'
-import { BORDERS, CHAT_BORDERS, registerChat, STATUSLINE_BORDERS } from './features/chat'
+import { BORDER_STYLE, BORDERS, CHAT_BORDERS, registerChat, STATUSLINE_BORDERS } from './features/chat'
 import { forgetNotifiedTasks, registerAgents, startAgents } from './features/agents'
 import { ANIMATE, ANIMATION, registerClodik } from './features/clodik'
 import { registerCommand } from './features/command'
@@ -61,6 +61,7 @@ export const register: Register = (on, options) => {
       [BORDERS]: { values: ['on', 'off'], current: config.borders ? 'on' : 'off' },
       [CHAT_BORDERS]: { values: ['on', 'off'], current: config.chatBorders ? 'on' : 'off' },
       [STATUSLINE_BORDERS]: { values: ['on', 'off'], current: config.statuslineBorders ? 'on' : 'off' },
+      [BORDER_STYLE]: { values: BORDER_STYLES, current: config.borderStyle },
     })
 
     if (rows.length === 0) return next(e)

@@ -157,7 +157,7 @@ test("an empty pane says so, in the theme's history frame", async ($, on) => {
   const ui = await $.ui.mount({ ...PANE, surface: 'terminal' })
   const body = await ui.find({ type: 'Box' })
 
-  expect(body?.props.borderStyle).toBe('round')
+  expect(body?.props.borderStyle).toBe('dashed')
   expect(body?.props.borderColor).toBe('#d77757')
   expect((await ui.find({ type: 'Text', text: /No prompts/ }))?.text).toBe('No prompts yet.')
   await ui.unmount()

@@ -5,7 +5,7 @@
 import { atom, read, update } from 'claude-code'
 import type { EngineInterface, On, PromptSubmitInput } from 'claude-code'
 import { command, failed } from '../shared/commands'
-import { config, writeConfig } from '../shared/config'
+import { config, frameStyle, writeConfig } from '../shared/config'
 import { setOption } from '../shared/options'
 import { hexOf, THEMES } from '../shared/themes'
 import type { Prompt } from '../../types'
@@ -206,7 +206,7 @@ export function registerHistory(on: On) {
     const past = Math.min(await read($, skip), Math.max(0, list.length - 1))
     const shown = [...list].reverse().slice(past)
     const theme = THEMES[config.theme]!
-    const frame = list.length === 0 ? { borderStyle: 'round', borderColor: hexOf(theme.history) } : {}
+    const frame = list.length === 0 ? { borderStyle: frameStyle(), borderColor: hexOf(theme.history) } : {}
     // the scrollbar at the list's right edge: a track as tall as the body under
     // the header, its thumb where the list stands (messages a rough 4 rows each)
     const track = Math.max(3, e.props.scroll.bodyRows - 2)
@@ -218,7 +218,7 @@ export function registerHistory(on: On) {
       <Box
         key={`m${i}`}
         flexDirection="column"
-        borderStyle="round"
+        borderStyle={frameStyle()}
         borderColor={hexOf(theme.prompt)}
         paddingX={1}
         hover={{ borderColor: hexOf(theme.hover) }}
