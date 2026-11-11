@@ -163,7 +163,11 @@ e=$(printf '\033')
 # the visible width of a line: no color escapes, one cell per UTF-8 character
 vis() { printf '%s' "$1" | sed "s/$e\[[0-9;]*m//g" | LC_ALL=C tr -d '\200-\277' | wc -c | tr -d ' '; }
 
-pad=2 # the status line's left indent
+# the status line's indent on each side: Claude Code's own 2 columns plus
+# statusLine.padding in settings.json, which is added to them (so -1 leaves 1
+# column, -2 none; a positive one widens the indent)
+pad=$(jq -r '((.statusLine.padding // 0) + 2) | floor | if . < 0 then 0 else . end' "$HOME/.claude/settings.json" 2>/dev/null)
+case "$pad" in '' | *[!0-9]*) pad=2 ;; esac
 # the frame around the whole status line, in the theme's frame color: as wide
 # as the terminal less the indent on both sides when $COLUMNS is known, else
 # as wide as the widest line; `inner` is the room between its borders
