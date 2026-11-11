@@ -24,6 +24,9 @@ test("the spinner is framed in the theme's spinner color, the engine's line insi
 
     expect(box?.props.borderStyle).toBe('dashed')
     expect(box?.props.borderColor).toBe('#e6c86e')
+    expect(box?.props.marginTop).toBe(1)
+    // the engine's own top margin pulled back inside, no blank row under the border
+    expect((box?.children[0] as { props: { marginTop?: number } }).props.marginTop).toBe(-1)
     expect((await ui.find({ type: 'Text', text: /Sauteing/ }))?.text).toBe('Sauteing…')
     await ui.unmount()
   }

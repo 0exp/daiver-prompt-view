@@ -24,6 +24,9 @@ test("a tool call's row is framed in the theme's tool color, the engine's row in
 
     expect(box?.props.borderStyle).toBe('dashed')
     expect(box?.props.borderColor).toBe('#6a34a3')
+    expect(box?.props.marginTop).toBe(1)
+    // the engine's own top margin pulled back inside, no blank row under the border
+    expect((box?.children[0] as { props: { marginTop?: number } }).props.marginTop).toBe(-1)
     expect((await ui.find({ type: 'Text', text: /Bash/ }))?.text).toBe('Bash(ls)')
     await ui.unmount()
   }
