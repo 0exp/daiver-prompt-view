@@ -16,6 +16,14 @@ test('the agents line is written for the session in the default colors', async (
   expect(agents()).toBe(IDLE)
 })
 
+test('the idle line is kept for a session with no agents file yet', async ($, on) => {
+  const { files } = world(on)
+
+  await $.session.start(start)
+
+  expect(files.get('/home/me/.claude/daiver-prompt-view/agents.idle')).toBe(IDLE)
+})
+
 test('a theme change draws the agents line again', async ($, on) => {
   const { agents, files } = world(on)
 

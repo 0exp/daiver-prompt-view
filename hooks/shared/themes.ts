@@ -29,8 +29,6 @@ export type Theme = {
   history: string // the frame of the prompt history pane
   hover: string // the frame of the history pane's message under the pointer, brighter
   paneBackground: string // what is painted under the history pane's body, darker than the terminal's
-  resources: string // the RAM/CPU line's brackets and labels, a shade under white
-  values: string // the RAM/CPU numbers, a shade under that
   effort: string // the effort level on the modes line
   ostyle: string // the output style on the modes line
   // the agents line
@@ -65,8 +63,6 @@ export const THEMES: Record<string, Theme> = {
     history: '38;2;215;119;87',
     hover: '38;2;255;170;120',
     paneBackground: '38;2;16;16;22',
-    resources: '38;2;200;200;200',
-    values: '38;2;165;165;165',
     effort: '38;2;215;119;87',
     ostyle: '38;2;230;200;110',
     elapsed: '38;2;144;238;144',
@@ -91,7 +87,7 @@ export const hexOf = (params: string) => {
 export const sgr = (params: string) => `\x1b[${params}m`
 
 // the status line's colors as the script sources them: c_<name>='<params>'
-const SHELL_KEYS = ['gray', 'white', 'orange', 'session', 'ctx', 'lmt', 'rst', 'pch', 'sha', 'branch', 'flags', 'added', 'removed', 'matrix', 'frame', 'resources', 'values', 'effort', 'ostyle'] as const
+const SHELL_KEYS = ['gray', 'white', 'orange', 'session', 'ctx', 'lmt', 'rst', 'pch', 'sha', 'branch', 'flags', 'added', 'removed', 'matrix', 'frame', 'effort', 'ostyle'] as const
 
 export const themeShell = (name: string) =>
   `# daiver-prompt-view theme: ${name}\n` + SHELL_KEYS.map(key => `c_${key}='${THEMES[name][key]}'\n`).join('')

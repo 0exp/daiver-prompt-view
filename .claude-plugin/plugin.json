@@ -1,6 +1,6 @@
 {
   "name": "daiver-prompt-view",
-  "version": "1.27.0",
+  "version": "1.30.0",
   "description": "A multi-line status line under the prompt: model, session, modes, agents, usage bars, git state and Clawd",
   "author": {
     "name": "Rustam Ibragimov",
@@ -42,12 +42,6 @@
       "title": "Show the prompt history pane",
       "description": "A pane at the right with the prompts you sent this session, framed in the theme's history color; its × closes it (also /daiver-prompt-view:history:show [on|off])",
       "default": false
-    },
-    "resources": {
-      "type": "boolean",
-      "title": "Show RAM and CPU",
-      "description": "The machine's memory and CPU use, on a line under the usage bars: [RAM: used/total | %] [CPU: busy cores/cores | %]",
-      "default": true
     },
     "clodik": {
       "type": "boolean",

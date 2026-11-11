@@ -1,7 +1,7 @@
 # daiver-prompt-view
 
 A Claude Code mod that ships a multi-line status line for under the prompt:
-model, RAM and CPU, session, modes, the session's agents, usage bars, git state,
+model, session, modes, the session's agents, usage bars, git state,
 and Clawd, Claude's mascot, at the right edge.
 
 ```
@@ -10,7 +10,6 @@ Opus 5.5 -> [demo] (sid:419e75ee) <stime:1h23m> <automemory:on>
 ⚙ main:thinking (1m13s) │ agents:2 (sub:1 sh:1 mon:0) -> pending:0 running:2 waiting:0 idle:0  ▝▜█████▛▘
 -> Explore (time:1m01s) [Find lock index usages]                                                 ▘▘ ▝▝
 ctx ███░░░░░░░ 37% | lmt ████░░░░░░ 43% | rst ██████░░░░ 1h56m (at 17h48m) | pch ████████░░ 85%  2.1.303
-[RAM: 12.5G/16G | 78%] [CPU: 1.2/8 | 15%]
  (08d3788a) main [+#?] | ~/Projects/demo
 ```
 
@@ -44,6 +43,11 @@ else as wide as the widest line, Clawd inside it at the right border.
      been listed (from the first poll that listed it; starts over on a reload),
      and the Agent call's `description`, cut to 60 characters.
 
+   The line is always there: while a session has no state of its own yet (its
+   start hook has not run, nothing was launched), the status line shows an idle
+   main loop and zeros everywhere:
+   `⚙ main:idle │ agents:0 (sub:0 sh:0 mon:0) -> pending:0 running:0 waiting:0 idle:0`.
+
    Agents come from `$.agent.list()`, polled every second. Shells and monitors
    are tracked from their `Bash` / `Monitor` calls and dropped on their task
    notification, `TaskStop`, or the `Stop` hook's `background_tasks` snapshot.
@@ -52,8 +56,7 @@ else as wide as the widest line, Clawd inside it at the right border.
    cache hits of the last request. All four show from the start: before the
    first response (or once the 5-hour window has reset) `lmt` is 0%, `rst` a
    whole 5h00m window and `pch` 0%.
-5. The machine's RAM and CPU (the `resources` option, see below).
-6. Git: short sha, branch, flags (`+` staged, `#` untracked, `?` unstaged),
+5. Git: short sha, branch, flags (`+` staged, `#` untracked, `?` unstaged),
    the lines added and removed in the diff against HEAD (`+12/-3`; `+N/-N`
    when the tree is clean) and the working directory.
 
@@ -110,7 +113,6 @@ after the command.
 | `/daiver-prompt-view:clodik:animate` | `on`, `off`, or nothing | `off` | Animate Clawd all the time (`on`) or only while Claude Code is busy (`off`); with no argument, toggles |
 | `/daiver-prompt-view:clodik:animation` | an animation name, or nothing | `random` | Pick the animation Clawd plays; with no argument, shows the current one and the list |
 | `/daiver-prompt-view:view:theme` | a theme name, or nothing | `default` | Pick the colors of every line (the agents line's included); with no argument, shows the current one and the list |
-| `/daiver-prompt-view:resources:show` | `on`, `off`, or nothing | `on` | Show (`on`) or hide (`off`) the RAM and CPU line; with no argument, toggles |
 | `/daiver-prompt-view:history:show` | `on`, `off`, or nothing | `off` | Show (`on`) or hide (`off`) the pane with this session's prompts; with no argument, toggles |
 | `/daiver-prompt-view:chat:show-borders` | `on`, `off`, or nothing | `on` | Show (`on`) or hide (`off`) the frames around prompts, replies, tool calls, the spinner, command output and the status line; with no argument, toggles |
 | `/daiver-prompt-view:chat:show-chat-borders` | `on`, `off`, or nothing | `on` | Show (`on`) or hide (`off`) the frames around prompts, replies, tool calls, the spinner and command output, the status line's left as it is; with no argument, toggles |
@@ -181,7 +183,6 @@ Every option is in `/config`, or in `~/.claude/settings.json` under
 
 | Option | `/config` label | Type | Default | Values | Command |
 | --- | --- | --- | --- | --- | --- |
-| `resources` | Show RAM and CPU | boolean | `true` | `true`, `false` | `resources:show` |
 | `history` | Show the prompt history pane | boolean | `false` | `true`, `false` | `history:show` |
 | `borders` | Show the frames | boolean | `true` | `true`, `false` | `chat:show-borders` |
 | `chatBorders` | Show the chat's frames | boolean | `true` | `true`, `false` | `chat:show-chat-borders` |
@@ -198,7 +199,6 @@ For example, in `~/.claude/settings.json`:
 "pluginConfigs": {
   "daiver-prompt-view@daiver-prompt-view": {
     "options": {
-      "resources":         true,
       "history":           false,
       "borders":           true,
       "chatBorders":       true,
@@ -212,41 +212,6 @@ For example, in `~/.claude/settings.json`:
   }
 }
 ```
-
-### RAM and CPU
-
-With `resources` on, the line under the bars shows the machine's memory and
-CPU use:
-
-| `resources` | Line under the bars |
-| --- | --- |
-| `true` | `[RAM: 12.5G/16G \| 78%] [CPU: 1.2/8 \| 15%]` |
-| `false` | no such line: the git line follows the bars |
-
-### `/daiver-prompt-view:resources:show [on|off]`
-
-Option `resources` (Show RAM and CPU), default `true` (`on`).
-
-| Value | Effect |
-| --- | --- |
-| `on` | the RAM and CPU line is drawn under the bars |
-| `off` | no such line |
-
-| Usage | Result |
-| --- | --- |
-| `/daiver-prompt-view:resources:show on` | `The status line now shows RAM and CPU.` |
-| `/daiver-prompt-view:resources:show off` | `The status line no longer shows RAM and CPU.` |
-| `/daiver-prompt-view:resources:show` | toggles: `The status line no longer shows RAM and CPU.` when it was on, `The status line now shows RAM and CPU.` when it was off |
-| `/daiver-prompt-view:resources:show maybe` | nothing changes: `Usage: /daiver-prompt-view:resources:show [on|off]` |
-
-`RAM` is used over total memory (GiB) and the used share; `CPU` is the busy
-cores over all cores and the busy share. On macOS, memory is Activity Monitor's
-"Memory Used" (`vm_stat`: anonymous minus purgeable, wired and compressor
-pages) and CPU the sum of every process's `%cpu` from `ps`, a decaying average
-of the last minute (`top` would take half a second per refresh). Elsewhere,
-memory is `/proc/meminfo`'s total minus available, and CPU the busy share of
-`/proc/stat` since the previous refresh, kept in
-`~/.claude/daiver-prompt-view/cpu` (so the first refresh shows RAM alone).
 
 ### Prompt history pane
 
@@ -422,8 +387,8 @@ Requires `jq` and `git`; the branch glyph needs a Nerd Font. The script uses
 macOS `stat -f`; elsewhere `stime` falls back to the session's duration.
 
 What the mod keeps in `~/.claude/daiver-prompt-view/`: `statusline.sh`, `config`
-(the options), `theme.sh` (the active theme's colors), `agents/<session_id>`,
-`automemory/<session_id>` and, off macOS, `cpu` (the last CPU sample).
+(the options), `theme.sh` (the active theme's colors), `agents/<session_id>`, `agents.idle` (the agents line of a session with no state yet),
+and `automemory/<session_id>`.
 
 ## Develop
 

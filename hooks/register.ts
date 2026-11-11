@@ -13,7 +13,6 @@ import { registerPrompt } from './features/prompt'
 import { registerReply } from './features/reply'
 import { registerSpinner } from './features/spinner'
 import { registerTool } from './features/tool'
-import { registerResources, SHOW } from './features/resources'
 import { registerStatusline, startStatusline } from './features/statusline'
 import { registerView, THEME } from './features/view'
 
@@ -40,7 +39,6 @@ export const register: Register = (on, options) => {
   registerStatusline(on)
   registerAgents(on)
   registerClodik(on)
-  registerResources(on)
   registerPrompt(on)
   registerReply(on)
   registerTool(on)
@@ -56,7 +54,6 @@ export const register: Register = (on, options) => {
       [ANIMATE]: { values: ['on', 'off'], current: config.animate ? 'on' : 'off' },
       [ANIMATION]: { values: ANIMATIONS, current: config.animation },
       [THEME]: { values: THEME_NAMES, current: config.theme },
-      [SHOW]: { values: ['on', 'off'], current: config.resources ? 'on' : 'off' },
       [HISTORY]: { values: ['on', 'off'], current: config.history ? 'on' : 'off' },
       [BORDERS]: { values: ['on', 'off'], current: config.borders ? 'on' : 'off' },
       [CHAT_BORDERS]: { values: ['on', 'off'], current: config.chatBorders ? 'on' : 'off' },

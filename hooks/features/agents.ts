@@ -3,7 +3,7 @@
 // which the status line script prints after the modes line
 import type { AgentStatus, EngineInterface, On, PromptSubmitInput } from 'claude-code'
 import { config } from '../shared/config'
-import { home } from '../shared/files'
+import { home, sync } from '../shared/files'
 import { sgr, THEMES } from '../shared/themes'
 
 type State = 'pending' | 'running' | 'waiting' | 'idle'
@@ -48,6 +48,37 @@ const kindPair = (key: Group, value: number | 'main') => {
   return `${label}:${value !== 0 ? `${sgr(kind[key])}${value}${sgr(gray)}` : value}`
 }
 
+type Summary = { label: string; time: string; agents: number | 'main'; byKind: Record<Kind, number>; byState: Record<State, number> }
+
+// the line itself: the main loop's state, the work by kind, then by state
+const summary = ({ label, time, agents, byKind, byState }: Summary) => {
+  const theme = THEMES[config.theme]
+  const GRAY = sgr(theme.gray)
+
+  return (
+    `${GRAY}⚙ ${BOLD}main${UNBOLD}:${label}${time}${GRAY} │ ${kindPair('agents', agents)} ` +
+    `(${kindPair('sub', byKind.agent)} ${kindPair('sh', byKind.shell)} ${kindPair('mon', byKind.monitor)}) -> ` +
+    STATES.map(state => pair(state, byState[state], byState[state] > 0 ? sgr(theme.state[state]) : '')).join(' ') +
+    RESET
+  )
+}
+
+// the line of a session nothing is known of yet: an idle main loop, zeros
+// everywhere. The script prints it (<mod dir>/agents.idle) while the session
+// has no agents file of its own: before its start hook ran, or when it never did
+const idleLine = () =>
+  `${summary({
+    label: `${sgr(THEMES[config.theme].main.idle)}idle`,
+    time: '',
+    agents: 0,
+    byKind: { agent: 0, shell: 0, monitor: 0 },
+    byState: { pending: 0, running: 0, waiting: 0, idle: 0 },
+  })}\n`
+
+async function writeIdle($: EngineInterface) {
+  await sync($, `${await home($)}/agents.idle`, idleLine())
+}
+
 // shells and monitors have no listing API: tracked from their tool calls,
 // dropped on their task-notification, TaskStop, or the Stop hook's snapshot
 const tasks = new Map<string, Task>()
@@ -79,7 +110,6 @@ async function refresh($: EngineInterface) {
   const GRAY = sgr(theme.gray)
   const WHITE = sgr(theme.white)
   const ELAPSED_COLOR = sgr(theme.elapsed)
-  const COLOR = (state: State) => sgr(theme.state[state])
   const KIND_COLOR = (kind: Group) => sgr(theme.kind[kind])
   const MAIN_COLOR = (state: keyof typeof theme.main) => sgr(theme.main[state])
   const tool = mainTools.at(-1)
@@ -98,11 +128,7 @@ async function refresh($: EngineInterface) {
   const total = byKind.agent + byKind.shell + byKind.monitor
   // only the main loop at work (thinking or in a tool call): `agents:main` instead of a zero
   const agentsValue = total === 0 && (tool !== undefined || main !== 'idle') ? 'main' : total
-  const line =
-    `${GRAY}⚙ ${BOLD}main${UNBOLD}:${mainLabel}${mainTime}${GRAY} │ ${kindPair('agents', agentsValue)} ` +
-    `(${kindPair('sub', byKind.agent)} ${kindPair('sh', byKind.shell)} ${kindPair('mon', byKind.monitor)}) -> ` +
-    STATES.map(state => pair(state, byState[state], byState[state] > 0 ? COLOR(state) : '')).join(' ') +
-    RESET
+  const line = summary({ label: mainLabel, time: mainTime, agents: agentsValue, byKind, byState })
 
   const live = new Set(agents.map(agent => agent.id))
   for (const id of agentSince.keys()) if (!live.has(id)) agentSince.delete(id)
@@ -131,6 +157,7 @@ async function refresh($: EngineInterface) {
 // draws the line again at once, in the current theme
 export async function redrawAgents($: EngineInterface) {
   shown = ''
+  await writeIdle($)
   await refresh($)
 }
 
@@ -143,6 +170,7 @@ export async function startAgents($: EngineInterface) {
   mainSince = undefined
   mainLast = undefined
   agentSince.clear()
+  await writeIdle($)
   await refresh($)
   $.clock.every(1000, () => refresh($))
 }

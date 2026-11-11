@@ -18,11 +18,6 @@ test('the typeahead offers each command its values', async ($, on) => {
   expect((await rows('/daiver-prompt-view:clodik:animation s')).map(row => row.text)).toEqual(['spin', 'sway', 'stretch', 'shiver'])
   expect((await rows('/daiver-prompt-view:clodik:a')).length).toBe(2 + 13)
   expect(await rows('/daiver-prompt-view:clodik:animation spin')).toEqual([])
-  expect(await rows('/daiver-prompt-view:resources:s')).toEqual([
-    { text: '/daiver-prompt-view:resources:show on', description: 'current' },
-    { text: '/daiver-prompt-view:resources:show off', description: '' },
-  ])
-  expect(await rows('/daiver-prompt-view:resources:show of')).toEqual([{ text: 'off', description: '' }])
   expect(await rows('/daiver-prompt-view:chat:s')).toEqual([
     { text: '/daiver-prompt-view:chat:show-borders on', description: 'current' },
     { text: '/daiver-prompt-view:chat:show-borders off', description: '' },
