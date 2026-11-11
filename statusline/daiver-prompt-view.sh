@@ -224,7 +224,7 @@ $body
 EOF
   fc=$(esc "$c_frame")
   # the borderStyle option (/daiver-prompt-view:chat:border-style): `line` a
-  # solid rounded frame, else `dotted`, a dashed one with open corners (as the
+  # solid rounded frame, else `dashed`, one with open corners (as the
   # transcript's dashed frames are drawn)
   if grep -qx 'borderStyle=line' "$mod/config" 2>/dev/null; then
     fh='─' fv='│' ftl='╭' ftr='╮' fbl='╰' fbr='╯'

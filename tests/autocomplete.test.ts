@@ -32,7 +32,7 @@ test('the typeahead offers each command its values', async ($, on) => {
     { text: '/daiver-prompt-view:chat:show-statusline-borders off', description: '' },
   ])
   expect(await rows('/daiver-prompt-view:chat:b')).toEqual([
-    { text: '/daiver-prompt-view:chat:border-style dotted', description: 'current' },
+    { text: '/daiver-prompt-view:chat:border-style dashed', description: 'current' },
     { text: '/daiver-prompt-view:chat:border-style line', description: '' },
   ])
   expect(await rows('/daiver-prompt-view:chat:border-style l')).toEqual([{ text: 'line', description: '' }])

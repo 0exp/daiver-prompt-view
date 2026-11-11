@@ -101,12 +101,12 @@ test('border-style sets the frames style, shows it with no argument', async ($, 
 
   await $.session.start(start)
 
-  expect((await $.command.run(run('chat:border-style'))).text).toBe('Frame style: dotted (one of dotted, line)')
+  expect((await $.command.run(run('chat:border-style'))).text).toBe('Frame style: dashed (one of dashed, line)')
   expect((await $.command.run(run('chat:border-style', 'line'))).text).toBe('The frames are now line.')
   expect(config()).toBe(conf(true, false, 'random', 'default', true, false, true, true, true, 'line'))
-  expect((await $.command.run(run('chat:border-style', 'dotted'))).text).toBe('The frames are now dotted.')
-  expect(sets).toEqual(['borderStyle=line', 'borderStyle=dotted'])
-  expect((await $.command.run(run('chat:border-style', 'wavy'))).text).toBe('Usage: /daiver-prompt-view:chat:border-style [dotted|line]')
+  expect((await $.command.run(run('chat:border-style', 'dashed'))).text).toBe('The frames are now dashed.')
+  expect(sets).toEqual(['borderStyle=line', 'borderStyle=dashed'])
+  expect((await $.command.run(run('chat:border-style', 'wavy'))).text).toBe('Usage: /daiver-prompt-view:chat:border-style [dashed|line]')
 })
 
 test('every framed site is dashed by default', async ($, on) => {

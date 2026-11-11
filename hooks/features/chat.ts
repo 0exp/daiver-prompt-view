@@ -3,8 +3,8 @@
 // calls, the spinner, command output, the status line), and
 // two options under it, each drawn while it and `borders` are both on:
 // `chatBorders` over the transcript's frames, `statuslineBorders` over the
-// status line's frame; and their style, the `borderStyle` option: `dotted`
-// (a dashed line, the default) or `line` (a solid one)
+// status line's frame; and their style, the `borderStyle` option: `dashed`
+// (the default) or `line` (a solid one)
 import type { EngineInterface, On } from 'claude-code'
 import { command, failed } from '../shared/commands'
 import { BORDER_STYLES, config, writeConfig } from '../shared/config'
@@ -53,7 +53,7 @@ export function registerChat(on: On) {
     toggle($, e.args, { name: STATUSLINE_BORDERS, field: 'statuslineBorders', what: "The status line's frame", plural: false }),
   ).catch(($, e, next) => failed(next.error.message ?? next.error.kind))
 
-  // border-style <dotted|line>: the borderStyle option; the current one when no argument
+  // border-style <dashed|line>: the borderStyle option; the current one when no argument
   on('command.run', { command: BORDER_STYLE }, async ($, e) => {
     const arg = e.args.trim().toLowerCase()
 

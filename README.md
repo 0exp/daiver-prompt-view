@@ -19,7 +19,7 @@ and [agent-count](https://github.com/0exp/claude-agent-count), with their histor
 
 ## The lines
 
-The whole status line sits in a frame (dotted by default, a solid rounded line with `borderStyle` `line`) in the theme's `frame` color
+The whole status line sits in a frame (dashed by default, a solid rounded line with `borderStyle` `line`) in the theme's `frame` color
 (Clawd orange in `default`): as wide as the terminal when its width is known,
 else as wide as the widest line, Clawd inside it at the right border.
 
@@ -75,7 +75,7 @@ random animation starts every 8 seconds, a frame per refresh.
 All of these frames, and the status line's, follow the `borders` option
 (`/daiver-prompt-view:chat:show-borders`, see below); these ones also follow
 `chatBorders` (`chat:show-chat-borders`), the status line's `statuslineBorders`
-(`chat:show-statusline-borders`). How they are drawn, dotted (the default) or a
+(`chat:show-statusline-borders`). How they are drawn, dashed (the default) or a
 solid line, is the `borderStyle` option (`chat:border-style`).
 
 Every prompt you send is drawn in the transcript inside a frame in the
@@ -115,7 +115,7 @@ after the command.
 | `/daiver-prompt-view:chat:show-borders` | `on`, `off`, or nothing | `on` | Show (`on`) or hide (`off`) the frames around prompts, replies, tool calls, the spinner, command output and the status line; with no argument, toggles |
 | `/daiver-prompt-view:chat:show-chat-borders` | `on`, `off`, or nothing | `on` | Show (`on`) or hide (`off`) the frames around prompts, replies, tool calls, the spinner and command output, the status line's left as it is; with no argument, toggles |
 | `/daiver-prompt-view:chat:show-statusline-borders` | `on`, `off`, or nothing | `on` | Show (`on`) or hide (`off`) the frame around the status line alone; with no argument, toggles |
-| `/daiver-prompt-view:chat:border-style` | `dotted`, `line`, or nothing | `dotted` | Draw every frame dotted (`dotted`) or as a solid line (`line`); with no argument, shows the current one and the list |
+| `/daiver-prompt-view:chat:border-style` | `dashed`, `line`, or nothing | `dashed` | Draw every frame dashed (`dashed`) or as a solid line (`line`); with no argument, shows the current one and the list |
 
 ### `/daiver-prompt-view:clodik:animate [on|off]`
 
@@ -186,7 +186,7 @@ Every option is in `/config`, or in `~/.claude/settings.json` under
 | `borders` | Show the frames | boolean | `true` | `true`, `false` | `chat:show-borders` |
 | `chatBorders` | Show the chat's frames | boolean | `true` | `true`, `false` | `chat:show-chat-borders` |
 | `statuslineBorders` | Show the status line's frame | boolean | `true` | `true`, `false` | `chat:show-statusline-borders` |
-| `borderStyle` | Frame style | choice | `dotted` | `dotted`, `line` | `chat:border-style` |
+| `borderStyle` | Frame style | choice | `dashed` | `dashed`, `line` | `chat:border-style` |
 | `clodik` | Show Clawd | boolean | `true` | `true`, `false` | (none) |
 | `clodikAnimate` | Animate Clawd always | boolean | `false` | `true`, `false` | `clodik:animate` |
 | `clodikAnimation` | Clawd's animation | choice | `random` | `random`, `jump`, `spin`, `sway`, `blink`, `cheer`, `wave`, `stretch`, `hop`, `tap`, `shiver`, `pixels`, `matrix` | `clodik:animation` |
@@ -203,7 +203,7 @@ For example, in `~/.claude/settings.json`:
       "borders":           true,
       "chatBorders":       true,
       "statuslineBorders": true,
-      "borderStyle":       "dotted",
+      "borderStyle":       "dashed",
       "clodik":            true,
       "clodikAnimate":     false,
       "clodikAnimation":   "pixels",
@@ -356,9 +356,9 @@ one says, and this one off hides it while the transcript's frames stay.
 | `/daiver-prompt-view:chat:show-statusline-borders` | toggles: `The status line's frame is now hidden.` when it was on, `The status line's frame is now shown.` when it was off |
 | `/daiver-prompt-view:chat:show-statusline-borders maybe` | nothing changes: `Usage: /daiver-prompt-view:chat:show-statusline-borders [on|off]` |
 
-### `/daiver-prompt-view:chat:border-style [dotted|line]`
+### `/daiver-prompt-view:chat:border-style [dashed|line]`
 
-Option `borderStyle` (Frame style), default `dotted`. It sets how every frame
+Option `borderStyle` (Frame style), default `dashed`. It sets how every frame
 the mod draws looks: the transcript's (your prompts, Claude's replies, tool
 calls, the spinner, command output), the history pane's and the status line's.
 Whether a frame is drawn at all is still up to `borders`, `chatBorders` and
@@ -366,22 +366,22 @@ Whether a frame is drawn at all is still up to `borders`, `chatBorders` and
 
 | Value | What the frames look like |
 | --- | --- |
-| `dotted` (default) | a dashed line with open corners: `╌` across, `╎` down |
+| `dashed` (default) | a dashed line with open corners: `╌` across, `╎` down |
 | `line` | a solid line with rounded corners: `─` across, `│` down, `╭╮╰╯` |
 
 ```
  ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌        ╭───────────────────╮
 ╎ fix the login bug ╎       │ fix the login bug │
  ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌        ╰───────────────────╯
-       dotted                       line
+       dashed                       line
 ```
 
 | You type | What happens |
 | --- | --- |
 | `/daiver-prompt-view:chat:border-style line` | every frame is redrawn at once: `The frames are now line.` |
-| `/daiver-prompt-view:chat:border-style dotted` | every frame is redrawn at once: `The frames are now dotted.` |
-| `/daiver-prompt-view:chat:border-style` | shows the current one: `Frame style: dotted (one of dotted, line)` |
-| `/daiver-prompt-view:chat:border-style wavy` | nothing changes: `Usage: /daiver-prompt-view:chat:border-style [dotted|line]` |
+| `/daiver-prompt-view:chat:border-style dashed` | every frame is redrawn at once: `The frames are now dashed.` |
+| `/daiver-prompt-view:chat:border-style` | shows the current one: `Frame style: dashed (one of dashed, line)` |
+| `/daiver-prompt-view:chat:border-style wavy` | nothing changes: `Usage: /daiver-prompt-view:chat:border-style [dashed|line]` |
 
 ### Adding a theme
 

@@ -6,13 +6,13 @@ import { themeOf, themeShell } from './themes'
 export const ANIMATIONS = ['random', 'jump', 'spin', 'sway', 'blink', 'cheer', 'wave', 'stretch', 'hop', 'tap', 'shiver', 'pixels', 'matrix']
 
 // the frames' styles, as the borderStyle option names them, and the Box
-// border each one is drawn with: `dotted` a dashed line, `line` a solid one
-export const BORDER_STYLES = ['dotted', 'line']
+// border each one is drawn with: `dashed`, or `line` a solid one
+export const BORDER_STYLES = ['dashed', 'line']
 export const frameStyle = () => (config.borderStyle === 'line' ? 'round' : 'dashed')
 
 // the options the status line script reads, from the plugin's userConfig;
 // a change in /config reloads the module, and session.start fires again
-export const config = { clodik: true, animate: false, animation: 'random', theme: 'default', resources: true, history: false, borders: true, chatBorders: true, statuslineBorders: true, borderStyle: 'dotted' }
+export const config = { clodik: true, animate: false, animation: 'random', theme: 'default', resources: true, history: false, borders: true, chatBorders: true, statuslineBorders: true, borderStyle: 'dashed' }
 
 export function loadConfig(options: Record<string, unknown>) {
   config.clodik = options.clodik !== false
@@ -24,7 +24,7 @@ export function loadConfig(options: Record<string, unknown>) {
   config.borders = options.borders !== false
   config.chatBorders = options.chatBorders !== false
   config.statuslineBorders = options.statuslineBorders !== false
-  config.borderStyle = BORDER_STYLES.includes(String(options.borderStyle)) ? String(options.borderStyle) : 'dotted'
+  config.borderStyle = BORDER_STYLES.includes(String(options.borderStyle)) ? String(options.borderStyle) : 'dashed'
 }
 
 // the config file and the active theme's colors, next to the script

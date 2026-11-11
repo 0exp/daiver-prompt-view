@@ -1,6 +1,6 @@
 {
   "name": "daiver-prompt-view",
-  "version": "1.26.0",
+  "version": "1.27.0",
   "description": "A multi-line status line under the prompt: model, session, modes, agents, usage bars, git state and Clawd",
   "author": {
     "name": "Rustam Ibragimov",
@@ -30,10 +30,10 @@
     "borderStyle": {
       "type": "string",
       "title": "Frame style",
-      "description": "How every frame is drawn: dotted (a dashed line) or line (a solid one) (also /daiver-prompt-view:chat:border-style <dotted|line>)",
-      "default": "dotted",
+      "description": "How every frame is drawn: dashed or line (a solid one) (also /daiver-prompt-view:chat:border-style <dashed|line>)",
+      "default": "dashed",
       "options": [
-        "dotted",
+        "dashed",
         "line"
       ]
     },
