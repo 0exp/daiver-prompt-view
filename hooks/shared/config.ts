@@ -9,6 +9,9 @@ export const ANIMATIONS = ['random', 'jump', 'spin', 'sway', 'blink', 'cheer', '
 // border each one is drawn with: `dashed`, or `line` a solid one
 export const BORDER_STYLES = ['dashed', 'line']
 export const frameStyle = () => (config.borderStyle === 'line' ? 'round' : 'dashed')
+// the history pane's message under the pointer: dashed, its dots, over solid
+// frames; over dashed frames (dots already) the solid one, so the change shows
+export const hoverStyle = () => (frameStyle() === 'dashed' ? 'round' : 'dashed')
 
 // what the history pane lists, as the historyMode option names it: the whole
 // story (prompts and answers), the person's prompts alone, Claude's answers alone

@@ -1,4 +1,5 @@
 import { expect, test } from 'claude-code/testing'
+import { frameStyle, hoverStyle, loadConfig } from '../hooks/shared/config'
 import { conf, run, start, world } from './world'
 
 const PANE = {
@@ -261,3 +262,12 @@ test('mode sets the historyMode option, shows it with no argument', async ($, on
   expect(sets).toEqual(['historyMode=answers', 'historyMode=fullstory'])
 })
 
+// the kit's drawing leaves hover styles out, so the style under the pointer is pinned on hoverStyle:
+// the other one of the frames' (dashed over solid, solid over dashed)
+test('the message under the pointer takes the other frame style', async () => {
+  loadConfig({})
+  expect([frameStyle(), hoverStyle()]).toEqual(['dashed', 'round'])
+  loadConfig({ borderStyle: 'line' })
+  expect([frameStyle(), hoverStyle()]).toEqual(['round', 'dashed'])
+  loadConfig({})
+})

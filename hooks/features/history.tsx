@@ -8,7 +8,7 @@
 import { atom, read, update } from 'claude-code'
 import type { EngineInterface, On, PromptSubmitInput } from 'claude-code'
 import { command, failed } from '../shared/commands'
-import { config, frameStyle, HISTORY_MODES, writeConfig } from '../shared/config'
+import { config, frameStyle, HISTORY_MODES, hoverStyle, writeConfig } from '../shared/config'
 import { setOption } from '../shared/options'
 import { hexOf, THEMES } from '../shared/themes'
 import type { Answer, Prompt } from '../../types'
@@ -320,8 +320,9 @@ export function registerHistory(on: On) {
   // in the reply color, its first lines; a tool call in the tool color, one
   // line, as the transcript frames them. In the whole story the prompts are
   // pushed from the left and the answers from the right. Under the pointer a
-  // message's frame turns the theme's hover color and its text stays as it
-  // is; the frame in the theme's history color is drawn around the body only
+  // message's frame turns the theme's hover color and the other style (dashed
+  // over solid frames, solid over dashed ones), back as the pointer leaves;
+  // its text stays as it is; the frame in the theme's history color is drawn around the body only
   // while it holds no message
   on('ui.render', { component: 'Pane', requestId: PANE }, async ($, e) => {
     const { Box, Button, Text } = $.ui.resolve(e)
@@ -352,7 +353,7 @@ export function registerHistory(on: On) {
           borderStyle={frameStyle()}
           borderColor={hexOf(color)}
           paddingX={1}
-          hover={{ borderColor: hexOf(theme.hover) }}
+          hover={{ borderColor: hexOf(theme.hover), borderStyle: hoverStyle() }}
           {...side}
         >
           <Text dimColor>{clock(item.at)}</Text>
