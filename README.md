@@ -96,6 +96,17 @@ the tool calls' rows (`Bash(ls)` and the result), in the theme's `tool` color
 of a slash command (`/reload-plugins`, `/cost`, this mod's own commands), in the
 theme's `command` color (gray in `default`).
 
+## Toasts
+
+Claude Code's own toast (on its notification bar, for 4 seconds) when your work
+is done, so a look at the terminal is enough. The `toasts` option
+(`/daiver-prompt-view:toasts:show`) turns them off.
+
+| Toast | When |
+| --- | --- |
+| `Task complete` | Claude's turn ends with its answer: the task is done, or Claude waits for your reply. An interrupted turn, an API error and a subagent's turn raise none |
+| `/-Command complete` | a slash command you ran has finished (a built-in one, another plugin's or this mod's own); a command that starts a turn for Claude ends with `Task complete` too |
+
 ## Commands
 
 Every command sets the option of the same row in `/config` (so the choice stays
@@ -114,6 +125,7 @@ after the command.
 | `/daiver-prompt-view:clodik:animation` | an animation name, or nothing | `random` | Pick the animation Clawd plays; with no argument, shows the current one and the list |
 | `/daiver-prompt-view:view:theme` | a theme name, or nothing | `default` | Pick the colors of every line (the agents line's included); with no argument, shows the current one and the list |
 | `/daiver-prompt-view:history:show` | `on`, `off`, or nothing | `off` | Show (`on`) or hide (`off`) the pane with this session's prompts; with no argument, toggles |
+| `/daiver-prompt-view:toasts:show` | `on`, `off`, or nothing | `on` | Show (`on`) or hide (`off`) the toasts (`Task complete`, `/-Command complete`); with no argument, toggles |
 | `/daiver-prompt-view:history:mode` | `fullstory`, `questions`, `answers`, or nothing | `fullstory` | Pick what the history pane lists: prompts and Claude's answers, prompts alone, or answers alone; with no argument, shows the current one and the list |
 | `/daiver-prompt-view:chat:show-borders` | `on`, `off`, or nothing | `on` | Show (`on`) or hide (`off`) the frames around prompts, replies, tool calls, the spinner, command output and the status line; with no argument, toggles |
 | `/daiver-prompt-view:chat:show-chat-borders` | `on`, `off`, or nothing | `on` | Show (`on`) or hide (`off`) the frames around prompts, replies, tool calls, the spinner and command output, the status line's left as it is; with no argument, toggles |
@@ -185,6 +197,7 @@ Every option is in `/config`, or in `~/.claude/settings.json` under
 | Option | `/config` label | Type | Default | Values | Command |
 | --- | --- | --- | --- | --- | --- |
 | `history` | Show the prompt history pane | boolean | `false` | `true`, `false` | `history:show` |
+| `toasts` | Show the toasts | boolean | `true` | `true`, `false` | `toasts:show` |
 | `historyMode` | Prompt history pane's messages | choice | `fullstory` | `fullstory`, `questions`, `answers` | `history:mode` |
 | `borders` | Show the frames | boolean | `true` | `true`, `false` | `chat:show-borders` |
 | `chatBorders` | Show the chat's frames | boolean | `true` | `true`, `false` | `chat:show-chat-borders` |
@@ -204,6 +217,7 @@ For example, in `~/.claude/settings.json`:
     "options": {
       "history":           false,
       "historyMode":       "fullstory",
+      "toasts":            true,
       "borders":           true,
       "chatBorders":       true,
       "statuslineBorders": true,
@@ -273,6 +287,22 @@ Option `history` (Show the prompt history pane), default `false` (`off`).
 | `/daiver-prompt-view:history:show off` | `The prompt history pane is now hidden.` |
 | `/daiver-prompt-view:history:show` | toggles: `The prompt history pane is now shown.` when it was off, `The prompt history pane is now hidden.` when it was on |
 | `/daiver-prompt-view:history:show maybe` | nothing changes: `Usage: /daiver-prompt-view:history:show [on|off]` |
+
+### `/daiver-prompt-view:toasts:show [on|off]`
+
+Option `toasts` (Show the toasts), default `true` (`on`).
+
+| Value | Effect |
+| --- | --- |
+| `on` | `Task complete` and `/-Command complete` show as Claude Code's toasts |
+| `off` | no toasts |
+
+| Usage | Result |
+| --- | --- |
+| `/daiver-prompt-view:toasts:show on` | `The toasts are now shown.` |
+| `/daiver-prompt-view:toasts:show off` | `The toasts are now hidden.` |
+| `/daiver-prompt-view:toasts:show` | toggles: `The toasts are now shown.` when they were off, `The toasts are now hidden.` when they were on |
+| `/daiver-prompt-view:toasts:show maybe` | nothing changes: `Usage: /daiver-prompt-view:toasts:show [on\|off]` |
 
 ### `/daiver-prompt-view:history:mode [fullstory|questions|answers]`
 

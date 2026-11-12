@@ -122,7 +122,7 @@ test('the pane scrolls by messages under its header: the ones scrolled past are 
   await ui.unmount()
 })
 
-test('with no /config row the change holds for the session, noted in the debug log, no toast', async ($, on) => {
+test('with no /config row the change holds for the session, noted in the debug log, no toast of its own', async ($, on) => {
   // another plugin above filters this mod's rows out of the list
   const { toasts, logs, config, sets } = world(on, { configRows: false })
 
@@ -131,7 +131,8 @@ test('with no /config row the change holds for the session, noted in the debug l
   expect((await $.command.run(run('history:show', 'on'))).text).toBe('The prompt history pane is now shown.')
   expect(config()).toBe(conf(true, false, 'random', 'default', true))
   expect(sets).toEqual([])
-  expect(toasts).toEqual([])
+  // the command's own /-Command complete alone (toasts.ts)
+  expect(toasts).toEqual(['/-Command complete'])
   expect(logs).toEqual(['the history option has no /config row to save to; the change holds for this session'])
 })
 

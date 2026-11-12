@@ -13,6 +13,7 @@ import { registerPrompt } from './features/prompt'
 import { registerReply } from './features/reply'
 import { registerSpinner } from './features/spinner'
 import { registerTool } from './features/tool'
+import { registerToasts, TOASTS } from './features/toasts'
 import { registerStatusline, startStatusline } from './features/statusline'
 import { registerView, THEME } from './features/view'
 
@@ -36,6 +37,8 @@ export const register: Register = (on, options) => {
     return next(e)
   }).catch(($, e, next) => next(e))
 
+  // first: its command.run wraps every command, this mod's own included (they answer without next)
+  registerToasts(on)
   registerStatusline(on)
   registerAgents(on)
   registerClodik(on)
@@ -56,6 +59,7 @@ export const register: Register = (on, options) => {
       [THEME]: { values: THEME_NAMES, current: config.theme },
       [HISTORY]: { values: ['on', 'off'], current: config.history ? 'on' : 'off' },
       [HISTORY_MODE]: { values: HISTORY_MODES, current: config.historyMode },
+      [TOASTS]: { values: ['on', 'off'], current: config.toasts ? 'on' : 'off' },
       [BORDERS]: { values: ['on', 'off'], current: config.borders ? 'on' : 'off' },
       [CHAT_BORDERS]: { values: ['on', 'off'], current: config.chatBorders ? 'on' : 'off' },
       [STATUSLINE_BORDERS]: { values: ['on', 'off'], current: config.statuslineBorders ? 'on' : 'off' },
