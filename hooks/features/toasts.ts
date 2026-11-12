@@ -2,8 +2,8 @@
 // at the terminal is enough: `Task complete` when Claude's turn on the main
 // loop ends with its answer (done, or waiting for the person's reply),
 // `/-Command complete` when a slash command the person ran has finished. An
-// interrupted turn, an error and a subagent's turn raise none. The `toasts`
-// option (/daiver-prompt-view:toasts:show) turns them off
+// interrupted turn, an error and a subagent's turn raise none. Off by default:
+// the `toasts` option (/daiver-prompt-view:toasts:show) turns them on
 import type { CommandRunInput, EngineInterface, On } from 'claude-code'
 import { command, failed } from '../shared/commands'
 import { config, writeConfig } from '../shared/config'

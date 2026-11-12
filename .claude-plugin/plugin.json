@@ -1,6 +1,6 @@
 {
   "name": "daiver-prompt-view",
-  "version": "1.37.0",
+  "version": "1.37.1",
   "description": "A multi-line status line under the prompt: model, session, modes, agents, usage bars, git state and Clawd",
   "author": {
     "name": "Rustam Ibragimov",
@@ -66,7 +66,7 @@
       "type": "boolean",
       "title": "Show the toasts",
       "description": "Claude Code's own toast: Task complete when Claude's turn ends with its answer, /-Command complete when a slash command you ran has finished (also /daiver-prompt-view:toasts:show [on|off])",
-      "default": true
+      "default": false
     },
     "clodik": {
       "type": "boolean",

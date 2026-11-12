@@ -99,8 +99,8 @@ theme's `command` color (gray in `default`).
 ## Toasts
 
 Claude Code's own toast (on its notification bar, for 4 seconds) when your work
-is done, so a look at the terminal is enough. The `toasts` option
-(`/daiver-prompt-view:toasts:show`) turns them off.
+is done, so a look at the terminal is enough. Off by default: the `toasts`
+option (`/daiver-prompt-view:toasts:show on`) turns them on.
 
 | Toast | When |
 | --- | --- |
@@ -125,7 +125,7 @@ after the command.
 | `/daiver-prompt-view:clodik:animation` | an animation name, or nothing | `random` | Pick the animation Clawd plays; with no argument, shows the current one and the list |
 | `/daiver-prompt-view:view:theme` | a theme name, or nothing | `default` | Pick the colors of every line (the agents line's included); with no argument, shows the current one and the list |
 | `/daiver-prompt-view:history:show` | `on`, `off`, or nothing | `off` | Show (`on`) or hide (`off`) the pane with this session's prompts; with no argument, toggles |
-| `/daiver-prompt-view:toasts:show` | `on`, `off`, or nothing | `on` | Show (`on`) or hide (`off`) the toasts (`Task complete`, `/-Command complete`); with no argument, toggles |
+| `/daiver-prompt-view:toasts:show` | `on`, `off`, or nothing | `off` | Show (`on`) or hide (`off`) the toasts (`Task complete`, `/-Command complete`); with no argument, toggles |
 | `/daiver-prompt-view:history:mode` | `fullstory`, `questions`, `answers`, or nothing | `fullstory` | Pick what the history pane lists: prompts, commands and Claude's answers, prompts and commands alone, or answers alone; with no argument, shows the current one and the list |
 | `/daiver-prompt-view:chat:show-borders` | `on`, `off`, or nothing | `on` | Show (`on`) or hide (`off`) the frames around prompts, replies, tool calls, the spinner, command output and the status line; with no argument, toggles |
 | `/daiver-prompt-view:chat:show-chat-borders` | `on`, `off`, or nothing | `on` | Show (`on`) or hide (`off`) the frames around prompts, replies, tool calls, the spinner and command output, the status line's left as it is; with no argument, toggles |
@@ -197,7 +197,7 @@ Every option is in `/config`, or in `~/.claude/settings.json` under
 | Option | `/config` label | Type | Default | Values | Command |
 | --- | --- | --- | --- | --- | --- |
 | `history` | Show the prompt history pane | boolean | `false` | `true`, `false` | `history:show` |
-| `toasts` | Show the toasts | boolean | `true` | `true`, `false` | `toasts:show` |
+| `toasts` | Show the toasts | boolean | `false` | `true`, `false` | `toasts:show` |
 | `historyMode` | Prompt history pane's messages | choice | `fullstory` | `fullstory`, `questions`, `answers` | `history:mode` |
 | `borders` | Show the frames | boolean | `true` | `true`, `false` | `chat:show-borders` |
 | `chatBorders` | Show the chat's frames | boolean | `true` | `true`, `false` | `chat:show-chat-borders` |
@@ -217,7 +217,7 @@ For example, in `~/.claude/settings.json`:
     "options": {
       "history":           false,
       "historyMode":       "fullstory",
-      "toasts":            true,
+      "toasts":            false,
       "borders":           true,
       "chatBorders":       true,
       "statuslineBorders": true,
@@ -293,7 +293,7 @@ Option `history` (Show the prompt history pane), default `false` (`off`).
 
 ### `/daiver-prompt-view:toasts:show [on|off]`
 
-Option `toasts` (Show the toasts), default `true` (`on`).
+Option `toasts` (Show the toasts), default `false` (`off`).
 
 | Value | Effect |
 | --- | --- |

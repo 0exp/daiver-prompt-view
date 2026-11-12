@@ -63,7 +63,7 @@ export function world(on: On, { configRows = true } = {}) {
       { key: `${$.plugin.name}.clodikAnimation`, label: "Clawd's animation", kind: 'choice', value: 'random', provider, isLocked: false },
       { key: `${$.plugin.name}.theme`, label: 'Color theme', kind: 'choice', value: 'default', provider, isLocked: false },
       { key: `${$.plugin.name}.history`, label: 'Show the prompt history pane', kind: 'boolean', value: false, provider, isLocked: false },
-      { key: `${$.plugin.name}.toasts`, label: 'Show the toasts', kind: 'boolean', value: true, provider, isLocked: false },
+      { key: `${$.plugin.name}.toasts`, label: 'Show the toasts', kind: 'boolean', value: false, provider, isLocked: false },
       { key: `${$.plugin.name}.historyMode`, label: "Prompt history pane's messages", kind: 'choice', value: 'fullstory', provider, isLocked: false },
       { key: `${$.plugin.name}.borders`, label: 'Show the frames', kind: 'boolean', value: true, provider, isLocked: false },
       { key: `${$.plugin.name}.chatBorders`, label: "Show the chat's frames", kind: 'boolean', value: true, provider, isLocked: false },

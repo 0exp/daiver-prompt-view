@@ -4,7 +4,7 @@ import { run, start, world } from './world'
 const turn = (fields: Record<string, unknown> = {}) =>
   ({ answer: 'Done.', durationMs: 1200, isAborted: false, turnId: 't1', reason: 'answer', ...fields }) as const
 
-test("Claude's answer on the main loop raises Task complete; an interrupted, failed or subagent's turn none", async ($, on) => {
+test("Claude's answer on the main loop raises Task complete; an interrupted, failed or subagent's turn none", { options: { toasts: true } }, async ($, on) => {
   const { toasts } = world(on)
   on('turn.complete', () => ({ text: '' }))
 
@@ -18,7 +18,7 @@ test("Claude's answer on the main loop raises Task complete; an interrupted, fai
   expect(toasts).toEqual(['Task complete'])
 })
 
-test("a command the person ran raises /-Command complete, this mod's own and another's alike; a plugin's run none", async ($, on) => {
+test("a command the person ran raises /-Command complete, this mod's own and another's alike; a plugin's run none", { options: { toasts: true } }, async ($, on) => {
   const { toasts } = world(on)
   on('command.run', () => ({ text: 'Total cost: $0.00' }))
 
@@ -31,7 +31,7 @@ test("a command the person ran raises /-Command complete, this mod's own and ano
   expect(toasts).toEqual(['/-Command complete', '/-Command complete'])
 })
 
-test('toasts:show toggles the toasts option; off raises none', async ($, on) => {
+test('toasts:show toggles the toasts option; off raises none', { options: { toasts: true } }, async ($, on) => {
   const { toasts, sets } = world(on)
   on('turn.complete', () => ({ text: '' }))
 
@@ -46,3 +46,16 @@ test('toasts:show toggles the toasts option; off raises none', async ($, on) => 
   // the two commands that ran with the toasts on (the first turned them off before it ended)
   expect(toasts).toEqual(['/-Command complete', '/-Command complete'])
 })
+
+test('the toasts are off by default: no toast for a turn or a command', async ($, on) => {
+  const { toasts } = world(on)
+  on('turn.complete', () => ({ text: '' }))
+  on('command.run', () => ({ text: 'Total cost: $0.00' }))
+
+  await $.session.start(start)
+  await $.turn.complete(turn())
+  await $.command.run({ ...run('history:mode'), command: 'cost' })
+
+  expect(toasts).toEqual([])
+})
+

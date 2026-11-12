@@ -44,8 +44,8 @@ test('the typeahead offers each command its values', async ($, on) => {
   ])
   expect(await rows('/daiver-prompt-view:history:mode a')).toEqual([{ text: 'answers', description: '' }])
   expect(await rows('/daiver-prompt-view:toasts:s')).toEqual([
-    { text: '/daiver-prompt-view:toasts:show on', description: 'current' },
-    { text: '/daiver-prompt-view:toasts:show off', description: '' },
+    { text: '/daiver-prompt-view:toasts:show on', description: '' },
+    { text: '/daiver-prompt-view:toasts:show off', description: 'current' },
   ])
   expect(await rows('/daiver')).toEqual([])
   expect(await rows('hello /daiver-prompt-view:view:theme')).toEqual([])
