@@ -15,6 +15,8 @@ export function world(on: On, { configRows = true } = {}) {
   const logs: string[] = []
   // the settings beneath the plugin, as the files hold them; a test sets `settings.value`
   const settings = { value: {} as Record<string, unknown> }
+  // the time $.clock.now answers; a test sets `clock.now`
+  const clock = { now: 0 }
 
   on('fs.exists', ($, e) => ({ value: files.has(e.path) || e.path.endsWith('/statusline/daiver-prompt-view.sh') }))
   on('fs.read', ($, e) => ({ value: files.get(e.path) ?? '#!/bin/sh\n' }))
@@ -26,7 +28,7 @@ export function world(on: On, { configRows = true } = {}) {
   on('agent.list', () => ({ value: [] }))
   on('session.id', () => ({ value: 's1' }))
   on('session.cwd', () => ({ value: '/home/me/proj' }))
-  on('clock.now', () => ({ value: 0 }))
+  on('clock.now', () => ({ value: clock.now }))
   on('settings.read', () => ({ value: settings.value }))
   on('command.register', ($, e) => ({ value: { command: e.name } }))
   on('state.get', ($, e) => ({ value: state.get(`${e.plugin}.${e.key}`) ?? { value: undefined, version: 0 } }))
@@ -61,6 +63,7 @@ export function world(on: On, { configRows = true } = {}) {
       { key: `${$.plugin.name}.clodikAnimation`, label: "Clawd's animation", kind: 'choice', value: 'random', provider, isLocked: false },
       { key: `${$.plugin.name}.theme`, label: 'Color theme', kind: 'choice', value: 'default', provider, isLocked: false },
       { key: `${$.plugin.name}.history`, label: 'Show the prompt history pane', kind: 'boolean', value: false, provider, isLocked: false },
+      { key: `${$.plugin.name}.historyMode`, label: "Prompt history pane's messages", kind: 'choice', value: 'fullstory', provider, isLocked: false },
       { key: `${$.plugin.name}.borders`, label: 'Show the frames', kind: 'boolean', value: true, provider, isLocked: false },
       { key: `${$.plugin.name}.chatBorders`, label: "Show the chat's frames", kind: 'boolean', value: true, provider, isLocked: false },
       { key: `${$.plugin.name}.statuslineBorders`, label: "Show the status line's frame", kind: 'boolean', value: true, provider, isLocked: false },
@@ -74,7 +77,7 @@ export function world(on: On, { configRows = true } = {}) {
   on('session.start', ($, e) => ({ cwd: e.cwd }))
   on('prompt.autocomplete', () => ({ suggestions: [] }))
 
-  return { files, settings, sets, panes, toasts, logs, state, config: () => files.get(`${DIR}/config`), agents: () => files.get(`${DIR}/agents/s1`) }
+  return { files, settings, clock, sets, panes, toasts, logs, state, config: () => files.get(`${DIR}/config`), agents: () => files.get(`${DIR}/agents/s1`) }
 }
 
 export const start = { cwd: '/tmp', surface: 'terminal', isInteractive: true } as const

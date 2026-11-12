@@ -37,6 +37,12 @@ test('the typeahead offers each command its values', async ($, on) => {
     { text: '/daiver-prompt-view:history:show on', description: '' },
     { text: '/daiver-prompt-view:history:show off', description: 'current' },
   ])
+  expect(await rows('/daiver-prompt-view:history:m')).toEqual([
+    { text: '/daiver-prompt-view:history:mode fullstory', description: 'current' },
+    { text: '/daiver-prompt-view:history:mode questions', description: '' },
+    { text: '/daiver-prompt-view:history:mode answers', description: '' },
+  ])
+  expect(await rows('/daiver-prompt-view:history:mode a')).toEqual([{ text: 'answers', description: '' }])
   expect(await rows('/daiver')).toEqual([])
   expect(await rows('hello /daiver-prompt-view:view:theme')).toEqual([])
 })

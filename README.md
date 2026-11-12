@@ -114,6 +114,7 @@ after the command.
 | `/daiver-prompt-view:clodik:animation` | an animation name, or nothing | `random` | Pick the animation Clawd plays; with no argument, shows the current one and the list |
 | `/daiver-prompt-view:view:theme` | a theme name, or nothing | `default` | Pick the colors of every line (the agents line's included); with no argument, shows the current one and the list |
 | `/daiver-prompt-view:history:show` | `on`, `off`, or nothing | `off` | Show (`on`) or hide (`off`) the pane with this session's prompts; with no argument, toggles |
+| `/daiver-prompt-view:history:mode` | `fullstory`, `questions`, `answers`, or nothing | `fullstory` | Pick what the history pane lists: prompts and Claude's answers, prompts alone, or answers alone; with no argument, shows the current one and the list |
 | `/daiver-prompt-view:chat:show-borders` | `on`, `off`, or nothing | `on` | Show (`on`) or hide (`off`) the frames around prompts, replies, tool calls, the spinner, command output and the status line; with no argument, toggles |
 | `/daiver-prompt-view:chat:show-chat-borders` | `on`, `off`, or nothing | `on` | Show (`on`) or hide (`off`) the frames around prompts, replies, tool calls, the spinner and command output, the status line's left as it is; with no argument, toggles |
 | `/daiver-prompt-view:chat:show-statusline-borders` | `on`, `off`, or nothing | `on` | Show (`on`) or hide (`off`) the frame around the status line alone; with no argument, toggles |
@@ -167,7 +168,7 @@ Option `theme` (Color theme), default `default`.
 
 | Value | Colors |
 | --- | --- |
-| `default` (default) | white, gray, fuchsia (ctx), sky blue (lmt), light green (rst), Clawd orange, gray-green (pch), khaki (sha), violet (branch), coral (flags), light green (+added), coral (-removed), Clawd orange (the matrix rain, the frame around your prompts and the frame around the status line too), neon blue (the frame around Claude's replies), dark violet (the frame around the tool calls), yellow (the frame around the spinner, as the output style), gray (the frame around a command's output), Clawd orange (the prompt history pane's frame too), bright orange (the history message under the pointer), near black (the history pane's background) |
+| `default` (default) | white, gray, fuchsia (ctx), sky blue (lmt), light green (rst), Clawd orange, gray-green (pch), khaki (sha), violet (branch), coral (flags), light green (+added), coral (-removed), Clawd orange (the matrix rain, the frame around your prompts and the frame around the status line too), neon blue (the frame around Claude's replies), dark violet (the frame around the tool calls), yellow (the frame around the spinner, as the output style), gray (the frame around a command's output), Clawd orange (the prompt history pane's frame too), white (the history message's frame under the pointer), near black (the history pane's background) |
 
 | Usage | Result |
 | --- | --- |
@@ -184,6 +185,7 @@ Every option is in `/config`, or in `~/.claude/settings.json` under
 | Option | `/config` label | Type | Default | Values | Command |
 | --- | --- | --- | --- | --- | --- |
 | `history` | Show the prompt history pane | boolean | `false` | `true`, `false` | `history:show` |
+| `historyMode` | Prompt history pane's messages | choice | `fullstory` | `fullstory`, `questions`, `answers` | `history:mode` |
 | `borders` | Show the frames | boolean | `true` | `true`, `false` | `chat:show-borders` |
 | `chatBorders` | Show the chat's frames | boolean | `true` | `true`, `false` | `chat:show-chat-borders` |
 | `statuslineBorders` | Show the status line's frame | boolean | `true` | `true`, `false` | `chat:show-statusline-borders` |
@@ -201,6 +203,7 @@ For example, in `~/.claude/settings.json`:
   "daiver-prompt-view@daiver-prompt-view": {
     "options": {
       "history":           false,
+      "historyMode":       "fullstory",
       "borders":           true,
       "chatBorders":       true,
       "statuslineBorders": true,
@@ -218,15 +221,29 @@ For example, in `~/.claude/settings.json`:
 ### Prompt history pane
 
 With `history` on, a pane at the right (above the prompt in a narrow terminal)
-lists every prompt you sent this session, newest first, each as a message of
-its own: a frame in the theme's `prompt` color, the time it was sent
-(`HH:MM:SS`, local) on top, the whole text under. A click on a message (or
-Enter on it while the pane has the keyboard) scrolls the transcript to that
-prompt; under the pointer a message's frame turns the theme's `hover` color
-(a brighter orange in `default`); the pane's body sits on the theme's
+lists the session's story, newest first, each message on its own: the time
+(`HH:MM:SS`, local) on top, the text under. What it lists is the `historyMode`
+option (`/daiver-prompt-view:history:mode`):
+
+| `historyMode` | The pane lists | Header |
+| --- | --- | --- |
+| `fullstory` (default) | your prompts pushed to the right (8 columns in from the left) and Claude's answers pushed to the left (8 columns in from the right), by time, as in a chat | `History (n)` |
+| `questions` | your prompts alone, the pane's whole width | `Prompts (n)` |
+| `answers` | Claude's answers alone, the pane's whole width | `Answers (n)` |
+
+Each message is framed in the color the transcript frames it with: a prompt in
+the theme's `prompt` color (its whole text), Claude's text in the `reply` color
+(its first 8 lines, `…` for the rest), a tool call in the `tool` color, one
+line with the tool and its main argument (`Bash(ls -la)`, `Read(/src/a.ts)`).
+Answers are Claude's own on the main conversation (a subagent's are left out),
+read on the session start from the session's transcript file and joining as
+the session stores them. A click on a message (or Enter on it while the pane
+has the keyboard) scrolls the transcript to it: a prompt's or a text's row, a
+tool call's own row; under the pointer a message's frame turns the theme's `hover` color
+(white in `default`); the pane's body sits on the theme's
 `paneBackground`, darker than the terminal's own (near black in `default`) (the row's id comes with the row as the session stores it, or from the
 session's transcript file for prompts sent before the mod loaded); a prompt
-whose row cannot be found is noted in the debug log, nothing on screen. Slash commands are left out. On
+or answer whose row cannot be found is noted in the debug log, nothing on screen. Slash commands are left out. On
 the session start the list is read from Claude Code's own prompt log
 (`~/.claude/history.jsonl`, this session's rows), so prompts sent before the mod
 loaded are there too; from then on each prompt joins as it is sent. The list
@@ -255,6 +272,25 @@ Option `history` (Show the prompt history pane), default `false` (`off`).
 | `/daiver-prompt-view:history:show off` | `The prompt history pane is now hidden.` |
 | `/daiver-prompt-view:history:show` | toggles: `The prompt history pane is now shown.` when it was off, `The prompt history pane is now hidden.` when it was on |
 | `/daiver-prompt-view:history:show maybe` | nothing changes: `Usage: /daiver-prompt-view:history:show [on|off]` |
+
+### `/daiver-prompt-view:history:mode [fullstory|questions|answers]`
+
+Option `historyMode` (Prompt history pane's messages), default `fullstory`.
+The pane draws again at once, scrolled back to the newest message.
+
+| Value | Effect |
+| --- | --- |
+| `fullstory` | your prompts at the right and Claude's answers and tool calls at the left, by time |
+| `questions` | your prompts alone, the pane's whole width |
+| `answers` | Claude's answers and tool calls alone, the pane's whole width |
+
+| Usage | Result |
+| --- | --- |
+| `/daiver-prompt-view:history:mode questions` | `The history pane now lists your prompts alone.` |
+| `/daiver-prompt-view:history:mode answers` | `The history pane now lists Claude's answers alone.` |
+| `/daiver-prompt-view:history:mode fullstory` | `The history pane now lists your prompts and Claude's answers.` |
+| `/daiver-prompt-view:history:mode` | shows the current one: `The history pane lists: fullstory (one of fullstory, questions, answers)` |
+| `/daiver-prompt-view:history:mode everything` | nothing changes: `Usage: /daiver-prompt-view:history:mode [fullstory\|questions\|answers]` |
 
 ### `/daiver-prompt-view:chat:show-borders [on|off]`
 

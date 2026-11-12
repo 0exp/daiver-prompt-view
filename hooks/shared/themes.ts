@@ -27,7 +27,7 @@ export type Theme = {
   spinner: string // the frame around the spinner line of a running turn (the output style's yellow by default)
   command: string // the frame around a slash command's output row
   history: string // the frame of the prompt history pane
-  hover: string // the frame of the history pane's message under the pointer, brighter
+  hover: string // the frame of the history pane's message under the pointer
   paneBackground: string // what is painted under the history pane's body, darker than the terminal's
   effort: string // the effort level on the modes line
   ostyle: string // the output style on the modes line
@@ -61,7 +61,7 @@ export const THEMES: Record<string, Theme> = {
     spinner: '38;2;230;200;110',
     command: '38;2;128;128;128',
     history: '38;2;215;119;87',
-    hover: '38;2;255;170;120',
+    hover: '38;2;255;255;255',
     paneBackground: '38;2;16;16;22',
     effort: '38;2;215;119;87',
     ostyle: '38;2;230;200;110',

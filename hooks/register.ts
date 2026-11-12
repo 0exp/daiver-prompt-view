@@ -2,13 +2,13 @@
 // agents, usage bars, git state, Clawd) as one mod, a file per feature
 import type { Register } from 'claude-code'
 import { choiceRows } from './shared/commands'
-import { ANIMATIONS, BORDER_STYLES, config, loadConfig } from './shared/config'
+import { ANIMATIONS, BORDER_STYLES, config, HISTORY_MODES, loadConfig } from './shared/config'
 import { THEME_NAMES } from './shared/themes'
 import { BORDER_STYLE, BORDERS, CHAT_BORDERS, registerChat, STATUSLINE_BORDERS } from './features/chat'
 import { forgetNotifiedTasks, registerAgents, startAgents } from './features/agents'
 import { ANIMATE, ANIMATION, registerClodik } from './features/clodik'
 import { registerCommand } from './features/command'
-import { collectPrompt, HISTORY, registerHistory, startHistory } from './features/history'
+import { collectPrompt, HISTORY, HISTORY_MODE, registerHistory, startHistory } from './features/history'
 import { registerPrompt } from './features/prompt'
 import { registerReply } from './features/reply'
 import { registerSpinner } from './features/spinner'
@@ -55,6 +55,7 @@ export const register: Register = (on, options) => {
       [ANIMATION]: { values: ANIMATIONS, current: config.animation },
       [THEME]: { values: THEME_NAMES, current: config.theme },
       [HISTORY]: { values: ['on', 'off'], current: config.history ? 'on' : 'off' },
+      [HISTORY_MODE]: { values: HISTORY_MODES, current: config.historyMode },
       [BORDERS]: { values: ['on', 'off'], current: config.borders ? 'on' : 'off' },
       [CHAT_BORDERS]: { values: ['on', 'off'], current: config.chatBorders ? 'on' : 'off' },
       [STATUSLINE_BORDERS]: { values: ['on', 'off'], current: config.statuslineBorders ? 'on' : 'off' },

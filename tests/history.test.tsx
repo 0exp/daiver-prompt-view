@@ -63,7 +63,7 @@ test("the pane lists the session's prompts with their times in the theme's histo
 
     // with messages inside, the body has no frame of its own, each message has
     expect(body?.props.borderStyle).toBeUndefined()
-    expect((await ui.find({ type: 'Text', text: /Prompts/ }))?.text).toBe('Prompts (3)')
+    expect((await ui.find({ type: 'Text', text: /History/ }))?.text).toBe('History (3)')
     expect((await ui.find({ type: 'Text', text: hms(3600000) }))?.text).toBe(hms(3600000))
     expect((await ui.find({ type: 'Button', text: /logged/ }))?.text).toBe('logged before the mod')
     expect((await ui.find({ type: 'Button', text: /first/ }))?.text).toBe('first prompt')
@@ -117,7 +117,7 @@ test('the pane scrolls by messages under its header: the ones scrolled past are 
   const buttons = (await ui.findAll({ type: 'Button' })).filter(one => one.key !== 'close')
 
   expect(buttons.map(one => one.text)).toEqual(['older'])
-  expect((await ui.find({ type: 'Text', text: /Prompts/ }))?.text).toBe('Prompts (2) ↑1')
+  expect((await ui.find({ type: 'Text', text: /History/ }))?.text).toBe('History (2) ↑1')
   await ui.unmount()
 })
 
@@ -159,6 +159,105 @@ test("an empty pane says so, in the theme's history frame", async ($, on) => {
 
   expect(body?.props.borderStyle).toBe('dashed')
   expect(body?.props.borderColor).toBe('#d77757')
-  expect((await ui.find({ type: 'Text', text: /No prompts/ }))?.text).toBe('No prompts yet.')
+  expect((await ui.find({ type: 'Text', text: /No messages/ }))?.text).toBe('No messages yet.')
   await ui.unmount()
 })
+
+// Claude's rows: one in the transcript before the mod loaded (a text and a tool
+// call), one a subagent's (left out), and the prompt that opened them
+const STORY =
+  '{"type":"user","uuid":"u1","timestamp":"1970-01-01T01:00:00.000Z","message":{"role":"user","content":"look around"}}\n' +
+  '{"type":"assistant","uuid":"r1","timestamp":"1970-01-01T01:00:01.000Z","message":{"role":"assistant","content":[{"type":"thinking","thinking":"hm"},{"type":"text","text":"Looking."},{"type":"tool_use","id":"t1","name":"Bash","input":{"command":"ls -la\\necho done"}}]}}\n' +
+  '{"type":"assistant","uuid":"r2","isSidechain":true,"timestamp":"1970-01-01T01:00:02.000Z","message":{"role":"assistant","content":[{"type":"text","text":"a subagent"}]}}\n'
+const LOOK = '{"display":"look around","timestamp":3600000,"sessionId":"s1"}\n'
+
+// Claude's row as the session stores it, live
+const response = (uuid: string, content: { type: string; [field: string]: unknown }[], agentId?: string) =>
+  ({ message: { type: 'assistant', role: 'assistant', content }, door: 'response', origin: { kind: 'model', model: 'claude-opus-5-5' }, uuid, ...(agentId ? { agentId } : {}) }) as const
+
+const messages = async (ui: { findAll: (q: { type: string }) => Promise<{ key?: string; text?: string; props: Record<string, unknown> }[]> }) =>
+  (await ui.findAll({ type: 'Box' })).filter(one => one.key?.startsWith('m'))
+
+test("the whole story: prompts pushed to the right in the prompt color, answers to the left in the reply and tool colors", async ($, on) => {
+  const { files, clock } = world(on)
+  files.set('/home/me/.claude/history.jsonl', LOOK)
+  files.set('/home/me/.claude/projects/-home-me-proj/s1.jsonl', STORY)
+
+  await $.session.start(start)
+  clock.now = 3610000
+  // a live answer on main, and one of a subagent (left out)
+  await $.session.append(response('r3', [{ type: 'text', text: 'All done.' }, { type: 'tool_use', id: 't2', name: 'Read', input: { file_path: '/src/a.ts' } }]))
+  await $.session.append(response('r4', [{ type: 'text', text: 'from a subagent' }], 'agent-1'))
+
+  for (const surface of ['terminal', 'desktop', 'vscode', 'mobile'] as const) {
+    const ui = await $.ui.mount({ ...PANE, surface })
+    const boxes = await messages(ui)
+    const buttons = (await ui.findAll({ type: 'Button' })).filter(one => one.key !== 'close')
+
+    expect((await ui.find({ type: 'Text', text: /History/ }))?.text).toBe('History (5)')
+    // newest first
+    expect(buttons.map(one => one.text)).toEqual(['Read(/src/a.ts)', 'All done.', 'Bash(ls -la)', 'Looking.', 'look around'])
+    expect(boxes.map(one => one.props.borderColor)).toEqual(['#6a34a3', '#00c8ff', '#6a34a3', '#00c8ff', '#d77757'])
+    expect(boxes.map(one => [one.props.marginLeft, one.props.marginRight])).toEqual([
+      [undefined, 8],
+      [undefined, 8],
+      [undefined, 8],
+      [undefined, 8],
+      [8, undefined],
+    ])
+    await ui.unmount()
+  }
+})
+
+test('questions lists the prompts alone, answers the answers alone, each at the full width', async ($, on) => {
+  const { files } = world(on)
+  files.set('/home/me/.claude/history.jsonl', LOOK)
+  files.set('/home/me/.claude/projects/-home-me-proj/s1.jsonl', STORY)
+
+  await $.session.start(start)
+
+  expect((await $.command.run(run('history:mode', 'questions'))).text).toBe('The history pane now lists your prompts alone.')
+  let ui = await $.ui.mount({ ...PANE, surface: 'terminal' })
+  expect((await ui.find({ type: 'Text', text: /Prompts/ }))?.text).toBe('Prompts (1)')
+  expect((await messages(ui)).map(one => [one.props.marginLeft, one.props.marginRight, one.text])).toEqual([[undefined, undefined, `${hms(3600000)}look around`]])
+  await ui.unmount()
+
+  expect((await $.command.run(run('history:mode', 'answers'))).text).toBe("The history pane now lists Claude's answers alone.")
+  ui = await $.ui.mount({ ...PANE, surface: 'terminal' })
+  expect((await ui.find({ type: 'Text', text: /Answers/ }))?.text).toBe('Answers (2)')
+  expect((await messages(ui)).map(one => [one.props.marginLeft, one.props.marginRight])).toEqual([
+    [undefined, undefined],
+    [undefined, undefined],
+  ])
+  await ui.unmount()
+})
+
+test('a long answer shows its first lines; an empty answers pane says so', { options: { historyMode: 'answers' } }, async ($, on) => {
+  world(on)
+
+  await $.session.start(start)
+  let ui = await $.ui.mount({ ...PANE, surface: 'terminal' })
+  expect((await ui.find({ type: 'Text', text: /No answers/ }))?.text).toBe('No answers yet.')
+  await ui.unmount()
+
+  const long = Array.from({ length: 12 }, (_, n) => `line ${n + 1}`).join('\n')
+  await $.session.append(response('r1', [{ type: 'text', text: long }, { type: 'tool_use', id: 't1', name: 'TaskList', input: {} }]))
+  ui = await $.ui.mount({ ...PANE, surface: 'terminal' })
+  const buttons = (await ui.findAll({ type: 'Button' })).filter(one => one.key !== 'close')
+
+  expect(buttons.map(one => one.text)).toEqual(['TaskList', `${long.split('\n').slice(0, 8).join('\n')}\n…`])
+  await ui.unmount()
+})
+
+test('mode sets the historyMode option, shows it with no argument', async ($, on) => {
+  const { sets } = world(on)
+
+  await $.session.start(start)
+
+  expect((await $.command.run(run('history:mode'))).text).toBe('The history pane lists: fullstory (one of fullstory, questions, answers)')
+  expect((await $.command.run(run('history:mode', 'answers'))).text).toBe("The history pane now lists Claude's answers alone.")
+  expect((await $.command.run(run('history:mode', 'fullstory'))).text).toBe("The history pane now lists your prompts and Claude's answers.")
+  expect((await $.command.run(run('history:mode', 'everything'))).text).toBe('Usage: /daiver-prompt-view:history:mode [fullstory|questions|answers]')
+  expect(sets).toEqual(['historyMode=answers', 'historyMode=fullstory'])
+})
+

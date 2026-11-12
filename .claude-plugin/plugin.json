@@ -1,6 +1,6 @@
 {
   "name": "daiver-prompt-view",
-  "version": "1.32.0",
+  "version": "1.33.2",
   "description": "A multi-line status line under the prompt: model, session, modes, agents, usage bars, git state and Clawd",
   "author": {
     "name": "Rustam Ibragimov",
@@ -50,6 +50,17 @@
       "title": "Show the prompt history pane",
       "description": "A pane at the right with the prompts you sent this session, framed in the theme's history color; its × closes it (also /daiver-prompt-view:history:show [on|off])",
       "default": false
+    },
+    "historyMode": {
+      "type": "string",
+      "title": "Prompt history pane's messages",
+      "description": "What the prompt history pane lists: fullstory (your prompts at the right, Claude's answers and tool calls at the left), questions (your prompts alone) or answers (Claude's answers and tool calls alone) (also /daiver-prompt-view:history:mode <fullstory|questions|answers>)",
+      "default": "fullstory",
+      "options": [
+        "fullstory",
+        "questions",
+        "answers"
+      ]
     },
     "clodik": {
       "type": "boolean",

@@ -10,6 +10,10 @@ export const ANIMATIONS = ['random', 'jump', 'spin', 'sway', 'blink', 'cheer', '
 export const BORDER_STYLES = ['dashed', 'line']
 export const frameStyle = () => (config.borderStyle === 'line' ? 'round' : 'dashed')
 
+// what the history pane lists, as the historyMode option names it: the whole
+// story (prompts and answers), the person's prompts alone, Claude's answers alone
+export const HISTORY_MODES = ['fullstory', 'questions', 'answers']
+
 // statusLine.padding, as the statuslinePadding option holds it: the columns
 // added to Claude Code's own 2 on each side of the status line, -2 the least
 export const PADDING = { min: -2, max: 20, default: -1 }
@@ -20,7 +24,7 @@ export function paddingOf(value: unknown) {
 
 // the options the status line script reads, from the plugin's userConfig;
 // a change in /config reloads the module, and session.start fires again
-export const config = { clodik: true, animate: false, animation: 'random', theme: 'default', history: false, borders: true, chatBorders: true, statuslineBorders: true, borderStyle: 'dashed', padding: PADDING.default }
+export const config = { clodik: true, animate: false, animation: 'random', theme: 'default', history: false, historyMode: 'fullstory', borders: true, chatBorders: true, statuslineBorders: true, borderStyle: 'dashed', padding: PADDING.default }
 
 export function loadConfig(options: Record<string, unknown>) {
   config.clodik = options.clodik !== false
@@ -28,6 +32,7 @@ export function loadConfig(options: Record<string, unknown>) {
   config.animation = ANIMATIONS.includes(String(options.clodikAnimation)) ? String(options.clodikAnimation) : 'random'
   config.theme = themeOf(options.theme)
   config.history = options.history === true
+  config.historyMode = HISTORY_MODES.includes(String(options.historyMode)) ? String(options.historyMode) : 'fullstory'
   config.borders = options.borders !== false
   config.chatBorders = options.chatBorders !== false
   config.statuslineBorders = options.statuslineBorders !== false
