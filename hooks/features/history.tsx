@@ -1,17 +1,18 @@
 // history: the session's story in a pane at the right (the `history` option,
-// /daiver-prompt-view:history:show): the prompts the person sent and Claude's
-// answers (its text and its tool calls), as the `historyMode` option picks
-// (/daiver-prompt-view:history:mode): `fullstory` both, the prompts pushed to
-// the right and the answers to the left, `questions` or `answers` one side
+// /daiver-prompt-view:history:show): the prompts the person sent, the slash
+// commands the person ran, and Claude's answers (its text and its tool calls),
+// as the `historyMode` option picks
+// (/daiver-prompt-view:history:mode): `fullstory` both, the prompts and
+// commands pushed to the right and the answers to the left, `questions` or `answers` one side
 // alone, the pane's whole width. A × in its corner closes it; the messages
 // live in $.state, so they outlive a reload
 import { atom, read, update } from 'claude-code'
-import type { EngineInterface, On, PromptSubmitInput } from 'claude-code'
+import type { CommandRunInput, CommandRunResult, EngineInterface, On, PromptSubmitInput } from 'claude-code'
 import { command, failed } from '../shared/commands'
 import { config, frameStyle, HISTORY_MODES, hoverStyle, writeConfig } from '../shared/config'
 import { setOption } from '../shared/options'
 import { hexOf, THEMES } from '../shared/themes'
-import type { Answer, Prompt } from '../../types'
+import type { Answer, Prompt, Ran } from '../../types'
 
 export const HISTORY = command('history', 'show')
 export const HISTORY_MODE = command('history', 'mode')
@@ -22,6 +23,11 @@ const KEEP = 1000
 // (prompt.tsx) sees it while the row is on screen: the last resort of a jump
 const rows = new Map<string, string>()
 export const noteRow = (text: string, requestId: string) => void rows.set(text, requestId)
+// a command's output row, by `/name args`, as the CommandOutput render hook
+// (command.tsx) sees it: where a press on the command scrolls first
+const commandRows = new Map<string, string>()
+const commandLine = (name: string, args: string) => `/${name}${args.trim() === '' ? '' : ` ${args.trim()}`}`
+export const noteCommandRow = (name: string, args: string, requestId: string) => void commandRows.set(commandLine(name, args), requestId)
 
 // the text of a stored user row: its text blocks joined
 const textOf = (content: readonly { type: string; text?: string }[]) =>
@@ -65,7 +71,7 @@ export function answersOf(content: readonly { type: string; [field: string]: unk
 async function transcriptRows($: EngineInterface) {
   const slug = (await $.session.cwd()).replace(/[^A-Za-z0-9]/g, '-')
   const path = `${await $.env.get('HOME')}/.claude/projects/${slug}/${await $.session.id()}.jsonl`
-  const found = { prompts: new Map<string, string>(), answers: [] as Answer[] }
+  const found = { prompts: new Map<string, string>(), answers: [] as Answer[], commands: [] as Ran[] }
 
   if (!(await $.fs.exists(path))) return found
 
@@ -74,8 +80,23 @@ async function transcriptRows($: EngineInterface) {
     try {
       const row = JSON.parse(line) as { type?: unknown; uuid?: unknown; isMeta?: unknown; isSidechain?: unknown; timestamp?: unknown; message?: { content?: unknown } }
       if (typeof row.uuid !== 'string' || row.isSidechain === true) continue
-      if (row.type === 'user' && row.isMeta !== true && typeof row.message?.content === 'string') {
-        found.prompts.set(row.message.content, row.uuid)
+      const content = row.message?.content
+      // a slash command's echo: a user row (a built-in command) or a local_command
+      // row (a plugin's) with its name and arguments; its output, the next
+      // local_command row's stdout
+      const local = row.type === 'system' && (row as { subtype?: unknown }).subtype === 'local_command' ? (row as { content?: unknown }).content : undefined
+      const echo = row.type === 'user' && row.isMeta !== true && typeof content === 'string' ? content : typeof local === 'string' ? local : ''
+      const name = /<command-name>\/?([^<]*)<\/command-name>/.exec(echo)
+      const output = typeof local === 'string' ? /<local-command-stdout>([\s\S]*?)<\/local-command-stdout>/.exec(local)?.[1] : undefined
+      if (name !== null) {
+        const args = /<command-args>([\s\S]*?)<\/command-args>/.exec(echo)?.[1] ?? ''
+        const at = typeof row.timestamp === 'string' ? Date.parse(row.timestamp) : NaN
+        if (!Number.isNaN(at)) found.commands.push({ name: name[1]!.trim(), args: args.trim(), output: '', at, uuid: row.uuid })
+      } else if (output !== undefined) {
+        const last = found.commands.at(-1)
+        if (last !== undefined && last.output === '') last.output = output.trim()
+      } else if (row.type === 'user' && row.isMeta !== true && typeof content === 'string') {
+        found.prompts.set(content, row.uuid)
       } else if (row.type === 'assistant' && Array.isArray(row.message?.content)) {
         const at = typeof row.timestamp === 'string' ? Date.parse(row.timestamp) : NaN
         if (!Number.isNaN(at)) found.answers.push(...answersOf(row.message.content as { type: string }[], row.uuid, at))
@@ -94,6 +115,7 @@ const answerKey = (one: Answer) => `${one.uuid}:${one.toolUseId ?? one.text}`
 // a new tag declines what an earlier shape of Prompt stored
 const prompts = atom({ plugin: 'daiver-prompt-view', key: 'prompts' } as const, [], { shape: 'prompts-2' })
 const answers = atom({ plugin: 'daiver-prompt-view', key: 'answers' } as const, [], { shape: 'answers-1' })
+const commands = atom({ plugin: 'daiver-prompt-view', key: 'commands' } as const, [], { shape: 'commands-1' })
 // the pane scrolls by messages, itself: how many of the newest it scrolled past
 const skip = atom({ plugin: 'daiver-prompt-view', key: 'skip' } as const, 0)
 
@@ -154,12 +176,21 @@ export async function startHistory($: EngineInterface) {
       return [...seed, ...mine.filter(one => !known.has(`${one.at}:${one.text}`))].sort((a, b) => a.at - b.at).slice(-KEEP)
     })
   }
-  const story = (await transcriptRows($)).answers
+  const transcript = await transcriptRows($)
+  const story = transcript.answers
 
   if (story.length > 0) {
     await update($, answers, mine => {
       const known = new Set(story.map(answerKey))
       return [...story, ...mine.filter(one => !known.has(answerKey(one)))].sort((a, b) => a.at - b.at).slice(-KEEP)
+    })
+  }
+  // the transcript's commands, and the ones collected live that it has no row
+  // for yet (the same command, within 10 seconds)
+  if (transcript.commands.length > 0) {
+    await update($, commands, mine => {
+      const known = (one: Ran) => transcript.commands.some(row => row.name === one.name && row.args === one.args && Math.abs(row.at - one.at) < 10000)
+      return [...transcript.commands, ...mine.filter(one => one.uuid === undefined && !known(one))].sort((a, b) => a.at - b.at).slice(-KEEP)
     })
   }
   if (config.history) await open($)
@@ -190,13 +221,32 @@ async function jumpToAnswer($: EngineInterface, answer: Answer) {
   }
 }
 
-// what the pane lists in the historyMode picked, oldest first: the person's
-// prompts, Claude's answers, or both by time
-type Item = { who: 'me'; at: number; prompt: Prompt } | { who: 'claude'; at: number; answer: Answer }
+// a press on a command scrolls to its output row (noted while drawn), else to
+// its echo's row in the transcript (the newest of that line)
+async function jumpToCommand($: EngineInterface, ran: Ran) {
+  const line = commandLine(ran.name, ran.args)
+  const echo = ran.uuid ?? (await transcriptRows($)).commands.findLast(one => commandLine(one.name, one.args) === line)?.uuid
 
-function itemsOf(mode: string, mine: readonly Prompt[], theirs: readonly Answer[]) {
+  for (const requestId of [commandRows.get(line), echo]) {
+    if (requestId === undefined) continue
+    const moved = await $.ui.scroll({ to: { requestId }, block: 'start' })
+    if (moved.deny === undefined) return
+    $.ui.log(`history: could not scroll to the command: ${moved.deny}`, { to: 'debug' })
+  }
+  $.ui.log('history: the command has no transcript row to scroll to', { to: 'debug' })
+}
+
+// what the pane lists in the historyMode picked, oldest first: the person's
+// prompts and commands, Claude's answers, or both by time
+type Item =
+  | { who: 'me'; at: number; prompt: Prompt }
+  | { who: 'me'; at: number; ran: Ran }
+  | { who: 'claude'; at: number; answer: Answer }
+
+function itemsOf(mode: string, mine: readonly Prompt[], ran: readonly Ran[], theirs: readonly Answer[]) {
   const items: Item[] = [
     ...(mode === 'answers' ? [] : mine.map(prompt => ({ who: 'me' as const, at: prompt.at, prompt }))),
+    ...(mode === 'answers' ? [] : ran.map(one => ({ who: 'me' as const, at: one.at, ran: one }))),
     ...(mode === 'questions' ? [] : theirs.map(answer => ({ who: 'claude' as const, at: answer.at, answer }))),
   ]
 
@@ -205,18 +255,20 @@ function itemsOf(mode: string, mine: readonly Prompt[], theirs: readonly Answer[
 
 // an answer's text as its message shows it: the first lines, the rest a press away
 const LINES = 8
-const brief = (text: string) => {
+const brief = (text: string, max = LINES) => {
   const lines = text.split('\n')
-  const head = cut(lines.slice(0, LINES).join('\n'), 800)
-  return lines.length > LINES && !head.endsWith('…') ? `${head}\n…` : head
+  const head = cut(lines.slice(0, max).join('\n'), 800)
+  return lines.length > max && !head.endsWith('…') ? `${head}\n…` : head
 }
+// a command's output under its line: the first lines, dim
+const OUTPUT_LINES = 3
 
 // the pane's header and its empty body, per historyMode
 const HEADERS: Record<string, string> = { fullstory: 'History', questions: 'Prompts', answers: 'Answers' }
 const EMPTY: Record<string, string> = { fullstory: 'No messages yet.', questions: 'No prompts yet.', answers: 'No answers yet.' }
 const MODE_SET: Record<string, string> = {
-  fullstory: "The history pane now lists your prompts and Claude's answers.",
-  questions: 'The history pane now lists your prompts alone.',
+  fullstory: "The history pane now lists your prompts, your commands and Claude's answers.",
+  questions: 'The history pane now lists your prompts and commands alone.',
   answers: "The history pane now lists Claude's answers alone.",
 }
 // how far a side is pushed in the whole story: the prompts from the left, the answers from the right
@@ -235,6 +287,14 @@ export async function collectPrompt($: EngineInterface, e: PromptSubmitInput) {
   if (e.command !== undefined || e.isMeta === true || e.text.trim() === '') return
   const prompt: Prompt = { text: e.text, at: await $.clock.now() }
   await update($, prompts, list => [...list, prompt].slice(-KEEP))
+}
+
+// every slash command the person runs joins the list once it has run, its
+// output with it (called from the one matcherless command.run hook, in register.ts)
+export async function collectCommand($: EngineInterface, e: CommandRunInput, result: CommandRunResult) {
+  if (e.origin.kind !== 'composer' && e.origin.kind !== 'bridge') return
+  const ran: Ran = { name: e.command, args: e.args.trim(), output: (result.text ?? '').trim(), at: await $.clock.now() }
+  await update($, commands, list => [...list, ran].slice(-KEEP))
 }
 
 export function registerHistory(on: On) {
@@ -307,7 +367,7 @@ export function registerHistory(on: On) {
   // `next`), the list under the header moves by messages instead, so the
   // header with the × stays put; a rough 4 rows a message
   on('ui.scroll', { requestId: PANE }, async ($, e) => {
-    const count = itemsOf(config.historyMode, await read($, prompts), await read($, answers)).length
+    const count = itemsOf(config.historyMode, await read($, prompts), await read($, commands), await read($, answers)).length
     const step = e.by === 0 ? 0 : Math.sign(e.by) * Math.max(1, Math.round(Math.abs(e.by) / 4))
     await update($, skip, n => Math.min(Math.max(0, (n ?? 0) + step), Math.max(0, count - 1)))
 
@@ -316,7 +376,9 @@ export function registerHistory(on: On) {
 
   // the pane: the × in its top right corner, every message of its own (its
   // time on top, its text under), newest first, less the ones scrolled past: a
-  // prompt framed in the theme's prompt color, its whole text; an answer's text
+  // prompt framed in the theme's prompt color, its whole text; a slash command
+  // in the command color, `/name args` and its output's first lines, dim, on
+  // the prompts' side; an answer's text
   // in the reply color, its first lines; a tool call in the tool color, one
   // line, as the transcript frames them. In the whole story the prompts are
   // pushed from the left and the answers from the right. Under the pointer a
@@ -327,7 +389,7 @@ export function registerHistory(on: On) {
   on('ui.render', { component: 'Pane', requestId: PANE }, async ($, e) => {
     const { Box, Button, Text } = $.ui.resolve(e)
     const mode = config.historyMode
-    const list = itemsOf(mode, await read($, prompts), await read($, answers))
+    const list = itemsOf(mode, await read($, prompts), await read($, commands), await read($, answers))
     const past = Math.min(await read($, skip), Math.max(0, list.length - 1))
     const shown = [...list].reverse().slice(past)
     const theme = THEMES[config.theme]!
@@ -341,10 +403,15 @@ export function registerHistory(on: On) {
     const bar = Array.from({ length: track }, (_, row) => row >= thumbAt && row < thumbAt + thumb)
     const message = (item: Item, i: number) => {
       const isMine = item.who === 'me'
-      const color = isMine ? theme.prompt : item.answer.kind === 'tool' ? theme.tool : theme.reply
+      const color = 'ran' in item ? theme.command : 'prompt' in item ? theme.prompt : item.answer.kind === 'tool' ? theme.tool : theme.reply
       const side = mode !== 'fullstory' ? {} : isMine ? { marginLeft: SHIFT } : { marginRight: SHIFT }
-      const text = isMine ? item.prompt.text.trim() : item.answer.kind === 'tool' ? item.answer.text : brief(item.answer.text)
-      const press = () => (isMine ? jump($, item.prompt.text, item.prompt.uuid) : jumpToAnswer($, item.answer))
+      const text =
+        'ran' in item ? commandLine(item.ran.name, item.ran.args)
+        : 'prompt' in item ? item.prompt.text.trim()
+        : item.answer.kind === 'tool' ? item.answer.text
+        : brief(item.answer.text)
+      const press = () =>
+        'ran' in item ? jumpToCommand($, item.ran) : 'prompt' in item ? jump($, item.prompt.text, item.prompt.uuid) : jumpToAnswer($, item.answer)
 
       return (
         <Box
@@ -360,6 +427,7 @@ export function registerHistory(on: On) {
           <Button key={`p${i}`} plain hover={{ inverse: false }} onPress={() => void press()}>
             {text}
           </Button>
+          {'ran' in item && item.ran.output !== '' && <Text dimColor>{brief(item.ran.output, OUTPUT_LINES)}</Text>}
         </Box>
       )
     }

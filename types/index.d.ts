@@ -6,9 +6,13 @@ export type Prompt = { text: string; at: number; uuid?: string }
 // the transcript row's id, toolUseId the call's (the ToolUse row a press scrolls to)
 export type Answer = { kind: 'text' | 'tool'; text: string; at: number; uuid: string; toolUseId?: string }
 
+// a slash command the person ran: its name (no slash), arguments, output, and
+// the echo row's uuid once the transcript file has it
+export type Ran = { name: string; args: string; output: string; at: number; uuid?: string }
+
 declare module 'claude-code' {
   interface PluginState {
     // skip: how many of the newest messages the history pane scrolled past (its header stays)
-    'daiver-prompt-view': { prompts: Shaped<Prompt[]>; answers: Shaped<Answer[]>; skip: number }
+    'daiver-prompt-view': { prompts: Shaped<Prompt[]>; answers: Shaped<Answer[]>; commands: Shaped<Ran[]>; skip: number }
   }
 }

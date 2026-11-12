@@ -8,12 +8,12 @@ import { BORDER_STYLE, BORDERS, CHAT_BORDERS, registerChat, STATUSLINE_BORDERS }
 import { forgetNotifiedTasks, registerAgents, startAgents } from './features/agents'
 import { ANIMATE, ANIMATION, registerClodik } from './features/clodik'
 import { registerCommand } from './features/command'
-import { collectPrompt, HISTORY, HISTORY_MODE, registerHistory, startHistory } from './features/history'
+import { collectCommand, collectPrompt, HISTORY, HISTORY_MODE, registerHistory, startHistory } from './features/history'
 import { registerPrompt } from './features/prompt'
 import { registerReply } from './features/reply'
 import { registerSpinner } from './features/spinner'
 import { registerTool } from './features/tool'
-import { registerToasts, TOASTS } from './features/toasts'
+import { commandToast, registerToasts, TOASTS } from './features/toasts'
 import { registerStatusline, startStatusline } from './features/statusline'
 import { registerView, THEME } from './features/view'
 
@@ -37,7 +37,18 @@ export const register: Register = (on, options) => {
     return next(e)
   }).catch(($, e, next) => next(e))
 
-  // first: its command.run wraps every command, this mod's own included (they answer without next)
+  // one command.run for every feature, first, so it wraps every command, this
+  // mod's own included (they answer without next): once a command has run, the
+  // toast and the history pane's row
+  on('command.run', async ($, e, next) => {
+    const result = await next(e)
+
+    commandToast($, e)
+    await collectCommand($, e, result)
+
+    return result
+  }).catch(($, e, next) => next(e))
+
   registerToasts(on)
   registerStatusline(on)
   registerAgents(on)

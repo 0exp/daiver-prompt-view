@@ -126,7 +126,7 @@ after the command.
 | `/daiver-prompt-view:view:theme` | a theme name, or nothing | `default` | Pick the colors of every line (the agents line's included); with no argument, shows the current one and the list |
 | `/daiver-prompt-view:history:show` | `on`, `off`, or nothing | `off` | Show (`on`) or hide (`off`) the pane with this session's prompts; with no argument, toggles |
 | `/daiver-prompt-view:toasts:show` | `on`, `off`, or nothing | `on` | Show (`on`) or hide (`off`) the toasts (`Task complete`, `/-Command complete`); with no argument, toggles |
-| `/daiver-prompt-view:history:mode` | `fullstory`, `questions`, `answers`, or nothing | `fullstory` | Pick what the history pane lists: prompts and Claude's answers, prompts alone, or answers alone; with no argument, shows the current one and the list |
+| `/daiver-prompt-view:history:mode` | `fullstory`, `questions`, `answers`, or nothing | `fullstory` | Pick what the history pane lists: prompts, commands and Claude's answers, prompts and commands alone, or answers alone; with no argument, shows the current one and the list |
 | `/daiver-prompt-view:chat:show-borders` | `on`, `off`, or nothing | `on` | Show (`on`) or hide (`off`) the frames around prompts, replies, tool calls, the spinner, command output and the status line; with no argument, toggles |
 | `/daiver-prompt-view:chat:show-chat-borders` | `on`, `off`, or nothing | `on` | Show (`on`) or hide (`off`) the frames around prompts, replies, tool calls, the spinner and command output, the status line's left as it is; with no argument, toggles |
 | `/daiver-prompt-view:chat:show-statusline-borders` | `on`, `off`, or nothing | `on` | Show (`on`) or hide (`off`) the frame around the status line alone; with no argument, toggles |
@@ -241,12 +241,15 @@ option (`/daiver-prompt-view:history:mode`):
 
 | `historyMode` | The pane lists | Header |
 | --- | --- | --- |
-| `fullstory` (default) | your prompts pushed to the right (8 columns in from the left) and Claude's answers pushed to the left (8 columns in from the right), by time, as in a chat | `History (n)` |
-| `questions` | your prompts alone, the pane's whole width | `Prompts (n)` |
+| `fullstory` (default) | your prompts and slash commands pushed to the right (8 columns in from the left) and Claude's answers pushed to the left (8 columns in from the right), by time, as in a chat | `History (n)` |
+| `questions` | your prompts and slash commands alone, the pane's whole width | `Prompts (n)` |
 | `answers` | Claude's answers alone, the pane's whole width | `Answers (n)` |
 
 Each message is framed in the color the transcript frames it with: a prompt in
-the theme's `prompt` color (its whole text), Claude's text in the `reply` color
+the theme's `prompt` color (its whole text), a slash command in the `command`
+color (`/name args`, its output's first 3 lines dim under it; a built-in
+command, another plugin's or this mod's own, read on the session start from
+the transcript file and joining as each one runs), Claude's text in the `reply` color
 (its first 8 lines, `…` for the rest), a tool call in the `tool` color, one
 line with the tool and its main argument (`Bash(ls -la)`, `Read(/src/a.ts)`).
 Answers are Claude's own on the main conversation (a subagent's are left out),
@@ -311,15 +314,15 @@ The pane draws again at once, scrolled back to the newest message.
 
 | Value | Effect |
 | --- | --- |
-| `fullstory` | your prompts at the right and Claude's answers and tool calls at the left, by time |
-| `questions` | your prompts alone, the pane's whole width |
+| `fullstory` | your prompts and commands at the right and Claude's answers and tool calls at the left, by time |
+| `questions` | your prompts and commands alone, the pane's whole width |
 | `answers` | Claude's answers and tool calls alone, the pane's whole width |
 
 | Usage | Result |
 | --- | --- |
-| `/daiver-prompt-view:history:mode questions` | `The history pane now lists your prompts alone.` |
+| `/daiver-prompt-view:history:mode questions` | `The history pane now lists your prompts and commands alone.` |
 | `/daiver-prompt-view:history:mode answers` | `The history pane now lists Claude's answers alone.` |
-| `/daiver-prompt-view:history:mode fullstory` | `The history pane now lists your prompts and Claude's answers.` |
+| `/daiver-prompt-view:history:mode fullstory` | `The history pane now lists your prompts, your commands and Claude's answers.` |
 | `/daiver-prompt-view:history:mode` | shows the current one: `The history pane lists: fullstory (one of fullstory, questions, answers)` |
 | `/daiver-prompt-view:history:mode everything` | nothing changes: `Usage: /daiver-prompt-view:history:mode [fullstory\|questions\|answers]` |
 

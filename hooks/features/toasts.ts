@@ -4,7 +4,7 @@
 // `/-Command complete` when a slash command the person ran has finished. An
 // interrupted turn, an error and a subagent's turn raise none. The `toasts`
 // option (/daiver-prompt-view:toasts:show) turns them off
-import type { EngineInterface, On } from 'claude-code'
+import type { CommandRunInput, EngineInterface, On } from 'claude-code'
 import { command, failed } from '../shared/commands'
 import { config, writeConfig } from '../shared/config'
 import { setOption } from '../shared/options'
@@ -13,22 +13,18 @@ export const TOASTS = command('toasts', 'show')
 export const TASK_DONE = 'Task complete'
 export const COMMAND_DONE = '/-Command complete'
 
-const raise = ($: EngineInterface, text: string) => {
+function raise($: EngineInterface, text: string) {
   if (config.toasts) $.ui.toast(text)
 }
 
+// a command the person typed (or sent over the bridge) has run (called from the
+// one matcherless command.run hook, in register.ts): a command that starts a
+// model turn ends with Task complete too
+export function commandToast($: EngineInterface, e: CommandRunInput) {
+  if (e.origin.kind === 'composer' || e.origin.kind === 'bridge') raise($, COMMAND_DONE)
+}
+
 export function registerToasts(on: On) {
-  // first, so it wraps every command, toasts:show below included: every
-  // command the person typed (or sent over the bridge), once it has run:
-  // a command that starts a model turn ends with Task complete too
-  on('command.run', async ($, e, next) => {
-    const result = await next(e)
-
-    if (e.origin.kind === 'composer' || e.origin.kind === 'bridge') raise($, COMMAND_DONE)
-
-    return result
-  }).catch(($, e, next) => next(e))
-
   // toasts:show [on|off]: the toasts option, toggled when no argument
   on('command.run', { command: TOASTS }, async ($, e) => {
     const arg = e.args.trim().toLowerCase()

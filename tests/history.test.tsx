@@ -218,10 +218,15 @@ test('questions lists the prompts alone, answers the answers alone, each at the 
 
   await $.session.start(start)
 
-  expect((await $.command.run(run('history:mode', 'questions'))).text).toBe('The history pane now lists your prompts alone.')
+  expect((await $.command.run(run('history:mode', 'questions'))).text).toBe('The history pane now lists your prompts and commands alone.')
   let ui = await $.ui.mount({ ...PANE, surface: 'terminal' })
-  expect((await ui.find({ type: 'Text', text: /Prompts/ }))?.text).toBe('Prompts (1)')
-  expect((await messages(ui)).map(one => [one.props.marginLeft, one.props.marginRight, one.text])).toEqual([[undefined, undefined, `${hms(3600000)}look around`]])
+  // the prompt and the command that picked the mode, both the person's
+  expect((await ui.find({ type: 'Text', text: /Prompts/ }))?.text).toBe('Prompts (2)')
+  expect((await messages(ui)).map(one => [one.props.marginLeft, one.props.marginRight, one.text])).toEqual([
+    [undefined, undefined, `${hms(3600000)}look around`],
+    // the test's clock stands at 0: the command is the older one
+    [undefined, undefined, `${hms(0)}/daiver-prompt-view:history:mode questionsThe history pane now lists your prompts and commands alone.`],
+  ])
   await ui.unmount()
 
   expect((await $.command.run(run('history:mode', 'answers'))).text).toBe("The history pane now lists Claude's answers alone.")
@@ -258,7 +263,7 @@ test('mode sets the historyMode option, shows it with no argument', async ($, on
 
   expect((await $.command.run(run('history:mode'))).text).toBe('The history pane lists: fullstory (one of fullstory, questions, answers)')
   expect((await $.command.run(run('history:mode', 'answers'))).text).toBe("The history pane now lists Claude's answers alone.")
-  expect((await $.command.run(run('history:mode', 'fullstory'))).text).toBe("The history pane now lists your prompts and Claude's answers.")
+  expect((await $.command.run(run('history:mode', 'fullstory'))).text).toBe("The history pane now lists your prompts, your commands and Claude's answers.")
   expect((await $.command.run(run('history:mode', 'everything'))).text).toBe('Usage: /daiver-prompt-view:history:mode [fullstory|questions|answers]')
   expect(sets).toEqual(['historyMode=answers', 'historyMode=fullstory'])
 })
@@ -272,3 +277,51 @@ test('the message under the pointer takes the other frame style', async () => {
   expect([frameStyle(), hoverStyle()]).toEqual(['round', 'dashed'])
   loadConfig({})
 })
+
+// two slash commands in the transcript before the mod loaded: their echo rows and output rows
+const COMMANDS =
+  '{"type":"user","uuid":"c1","timestamp":"1970-01-01T01:00:00.000Z","message":{"role":"user","content":"<command-name>/reload-plugins</command-name>\\n<command-message>reload-plugins</command-message>\\n<command-args></command-args>"}}\n' +
+  '{"type":"system","subtype":"local_command","uuid":"o1","timestamp":"1970-01-01T01:00:00.100Z","content":"<local-command-stdout>Reloaded: 1 plugin\\nre-read from its folder</local-command-stdout>"}\n' +
+  '{"type":"user","isMeta":true,"uuid":"m1","timestamp":"1970-01-01T01:00:00.100Z","message":{"role":"user","content":"<local-command-caveat>not the person\'s</local-command-caveat>"}}\n' +
+  '{"type":"user","uuid":"c2","timestamp":"1970-01-01T01:00:05.000Z","message":{"role":"user","content":"<command-name>/model</command-name>\\n<command-message>model</command-message>\\n<command-args>opus</command-args>"}}\n' +
+  // a plugin's command: its echo is a local_command row too
+  '{"type":"system","subtype":"local_command","uuid":"c3","timestamp":"1970-01-01T01:00:06.000Z","content":"<command-name>/daiver-prompt-view:history:show</command-name>\\n<command-args></command-args>"}\n' +
+  '{"type":"system","subtype":"local_command","uuid":"o3","timestamp":"1970-01-01T01:00:06.000Z","content":"<local-command-stdout>daiver-prompt-view: The prompt history pane is now shown.</local-command-stdout>"}\n'
+
+test("slash commands join the person's side in the command color: the transcript's, then each one run live, its output dim under it", async ($, on) => {
+  const { files, clock } = world(on)
+  files.set('/home/me/.claude/projects/-home-me-proj/s1.jsonl', COMMANDS)
+  on('command.run', () => ({ text: 'Total cost: $0.42' }))
+
+  await $.session.start(start)
+  clock.now = 3610000
+  await $.command.run({ ...run('history:mode'), command: 'cost' })
+  // a plugin's run is not the person's
+  await $.command.run({ ...run('history:mode'), command: 'cost', args: 'quiet', origin: { kind: 'plugin', name: 'other' } })
+
+  const ui = await $.ui.mount({ ...PANE, surface: 'terminal' })
+  const boxes = await messages(ui)
+  const buttons = (await ui.findAll({ type: 'Button' })).filter(one => one.key !== 'close')
+
+  expect((await ui.find({ type: 'Text', text: /History/ }))?.text).toBe('History (4)')
+  expect(buttons.map(one => one.text)).toEqual(['/cost', '/daiver-prompt-view:history:show', '/model opus', '/reload-plugins'])
+  expect(boxes.map(one => one.props.borderColor)).toEqual(['#808080', '#808080', '#808080', '#808080'])
+  // the person's side in the whole story
+  expect(boxes.map(one => one.props.marginLeft)).toEqual([8, 8, 8, 8])
+  expect((await ui.find({ type: 'Text', text: /now shown/ }))?.text).toBe('daiver-prompt-view: The prompt history pane is now shown.')
+  expect((await ui.find({ type: 'Text', text: /Total cost/ }))?.text).toBe('Total cost: $0.42')
+  expect((await ui.find({ type: 'Text', text: /Reloaded/ }))?.text).toBe('Reloaded: 1 plugin\nre-read from its folder')
+  await ui.unmount()
+})
+
+test('answers leaves the commands out', { options: { historyMode: 'answers' } }, async ($, on) => {
+  const { files } = world(on)
+  files.set('/home/me/.claude/projects/-home-me-proj/s1.jsonl', COMMANDS)
+
+  await $.session.start(start)
+  const ui = await $.ui.mount({ ...PANE, surface: 'terminal' })
+
+  expect((await ui.find({ type: 'Text', text: /No answers/ }))?.text).toBe('No answers yet.')
+  await ui.unmount()
+})
+
