@@ -2,10 +2,12 @@
 // plugin's folder moves with each GitHub update: the status line runs a copy at
 // a stable path (<mod dir>/statusline.sh), refreshed on every session start
 import type { EngineInterface, On } from 'claude-code'
-import { writeConfig } from '../shared/config'
+import { config, writeConfig } from '../shared/config'
 import { home, sync } from '../shared/files'
 
 const SCRIPT = 'statusline/daiver-prompt-view.sh'
+// how statusLine.command names the script: the installed copy's path
+const SCRIPT_COPY = 'daiver-prompt-view/statusline.sh'
 // the status line's input has no auto memory state: <mod dir>/automemory holds
 // it, a file per session (`on` or `off`), for the script's <automemory:…> segment
 const AUTO_MEMORY_KEY = 'autoMemoryEnabled'
@@ -41,7 +43,26 @@ export async function startStatusline($: EngineInterface) {
   $.clock.every(1000, () => writeAutoMemory($))
 }
 
+// the settings as the engine merges them, with statusLine.padding set to the
+// statuslinePadding option while statusLine runs this mod's script (nothing
+// is written to settings.json: every reader of the merged settings, the status
+// line's own Box included, reads the padding from here). A read of one source
+// is left as that file holds it
+export function withPadding(settings: Readonly<Record<string, unknown>>) {
+  const line = settings.statusLine as { command?: unknown } | undefined
+
+  if (typeof line !== 'object' || line === null || typeof line.command !== 'string' || !line.command.includes(SCRIPT_COPY)) return settings
+
+  return { ...settings, statusLine: { ...line, padding: config.padding } }
+}
+
 export function registerStatusline(on: On) {
+  on('settings.read', async ($, e, next) => {
+    const result = await next(e)
+
+    return e.source === undefined && result.deny === undefined ? { value: withPadding(result.value) } : result
+  }).catch(($, e, next) => next(e))
+
   // the prompt's memory section is the engine's own answer for this session
   on('prompt.section', { name: 'memory' }, async ($, e, next) => {
     const result = await next(e)

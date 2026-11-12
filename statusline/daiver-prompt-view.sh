@@ -164,9 +164,15 @@ e=$(printf '\033')
 vis() { printf '%s' "$1" | sed "s/$e\[[0-9;]*m//g" | LC_ALL=C tr -d '\200-\277' | wc -c | tr -d ' '; }
 
 # the status line's indent on each side: Claude Code's own 2 columns plus
-# statusLine.padding in settings.json, which is added to them (so -1 leaves 1
-# column, -2 none; a positive one widens the indent)
-pad=$(jq -r '((.statusLine.padding // 0) + 2) | floor | if . < 0 then 0 else . end' "$HOME/.claude/settings.json" 2>/dev/null)
+# statusLine.padding, which is added to them (so -1 leaves 1 column, -2 none;
+# a positive one widens the indent). The mod sets the padding from its
+# statuslinePadding option and writes it to its config (`padding=`); with no
+# such line, the one in settings.json
+padding=$(sed -n 's/^padding=//p' "$mod/config" 2>/dev/null)
+case "$padding" in
+  [0-9] | [0-9][0-9] | -[0-9] | -[0-9][0-9]) pad=$((padding + 2)); [ "$pad" -lt 0 ] && pad=0 ;;
+  *) pad=$(jq -r '((.statusLine.padding // 0) + 2) | floor | if . < 0 then 0 else . end' "$HOME/.claude/settings.json" 2>/dev/null) ;;
+esac
 case "$pad" in '' | *[!0-9]*) pad=2 ;; esac
 # the frame around the whole status line, in the theme's frame color: as wide
 # as the terminal less the indent on both sides when $COLUMNS is known, else

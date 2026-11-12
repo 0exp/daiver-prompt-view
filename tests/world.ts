@@ -13,6 +13,8 @@ export function world(on: On, { configRows = true } = {}) {
   const panes = { open: [] as string[], closed: [] as string[], background: undefined as unknown }
   const toasts: string[] = []
   const logs: string[] = []
+  // the settings beneath the plugin, as the files hold them; a test sets `settings.value`
+  const settings = { value: {} as Record<string, unknown> }
 
   on('fs.exists', ($, e) => ({ value: files.has(e.path) || e.path.endsWith('/statusline/daiver-prompt-view.sh') }))
   on('fs.read', ($, e) => ({ value: files.get(e.path) ?? '#!/bin/sh\n' }))
@@ -25,7 +27,7 @@ export function world(on: On, { configRows = true } = {}) {
   on('session.id', () => ({ value: 's1' }))
   on('session.cwd', () => ({ value: '/home/me/proj' }))
   on('clock.now', () => ({ value: 0 }))
-  on('settings.read', () => ({ value: {} }))
+  on('settings.read', () => ({ value: settings.value }))
   on('command.register', ($, e) => ({ value: { command: e.name } }))
   on('state.get', ($, e) => ({ value: state.get(`${e.plugin}.${e.key}`) ?? { value: undefined, version: 0 } }))
   on('state.set', ($, e) => {
@@ -72,7 +74,7 @@ export function world(on: On, { configRows = true } = {}) {
   on('session.start', ($, e) => ({ cwd: e.cwd }))
   on('prompt.autocomplete', () => ({ suggestions: [] }))
 
-  return { files, sets, panes, toasts, logs, state, config: () => files.get(`${DIR}/config`), agents: () => files.get(`${DIR}/agents/s1`) }
+  return { files, settings, sets, panes, toasts, logs, state, config: () => files.get(`${DIR}/config`), agents: () => files.get(`${DIR}/agents/s1`) }
 }
 
 export const start = { cwd: '/tmp', surface: 'terminal', isInteractive: true } as const
@@ -91,5 +93,5 @@ export const typed = (text: string) => {
   return { text, cursor: text.length, token: text.slice(start), start }
 }
 
-export const conf = (clodik: boolean, animate: boolean, animation: string, theme = 'default', history = false, borders = true, statuslineBorders = true, chatBorders = true, borderStyle = 'dashed') =>
-  `clodik=${clodik}\nanimate=${animate}\nanimation=${animation}\ntheme=${theme}\nhistory=${history}\nborders=${borders}\nchatBorders=${chatBorders}\nstatuslineBorders=${statuslineBorders}\nborderStyle=${borderStyle}\n`
+export const conf = (clodik: boolean, animate: boolean, animation: string, theme = 'default', history = false, borders = true, statuslineBorders = true, chatBorders = true, borderStyle = 'dashed', padding = -1) =>
+  `clodik=${clodik}\nanimate=${animate}\nanimation=${animation}\ntheme=${theme}\nhistory=${history}\nborders=${borders}\nchatBorders=${chatBorders}\nstatuslineBorders=${statuslineBorders}\nborderStyle=${borderStyle}\npadding=${padding}\n`

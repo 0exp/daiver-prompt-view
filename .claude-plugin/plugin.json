@@ -1,6 +1,6 @@
 {
   "name": "daiver-prompt-view",
-  "version": "1.31.5",
+  "version": "1.32.0",
   "description": "A multi-line status line under the prompt: model, session, modes, agents, usage bars, git state and Clawd",
   "author": {
     "name": "Rustam Ibragimov",
@@ -36,6 +36,14 @@
         "dashed",
         "line"
       ]
+    },
+    "statuslinePadding": {
+      "type": "number",
+      "title": "Status line padding",
+      "description": "Columns added to Claude Code's own 2 on each side of the status line: -1 leaves 1, -2 none, 1 leaves 3. The mod sets statusLine.padding to it while the status line runs its script, and the frame widens to match",
+      "default": -1,
+      "min": -2,
+      "max": 20
     },
     "history": {
       "type": "boolean",

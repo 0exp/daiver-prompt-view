@@ -192,6 +192,7 @@ Every option is in `/config`, or in `~/.claude/settings.json` under
 | `clodikAnimate` | Animate Clawd always | boolean | `false` | `true`, `false` | `clodik:animate` |
 | `clodikAnimation` | Clawd's animation | choice | `random` | `random`, `jump`, `spin`, `sway`, `blink`, `cheer`, `wave`, `stretch`, `hop`, `tap`, `shiver`, `pixels`, `matrix` | `clodik:animation` |
 | `theme` | Color theme | choice | `default` | `default` | `view:theme` |
+| `statuslinePadding` | Status line padding | number | `-1` | whole numbers from `-2` to `20` | (none) |
 
 For example, in `~/.claude/settings.json`:
 
@@ -207,7 +208,8 @@ For example, in `~/.claude/settings.json`:
       "clodik":            true,
       "clodikAnimate":     false,
       "clodikAnimation":   "pixels",
-      "theme":             "default"
+      "theme":             "default",
+      "statuslinePadding": -1
     }
   }
 }
@@ -379,21 +381,23 @@ plugin updates. Point `statusLine` in `~/.claude/settings.json` at it:
 "statusLine": {
   "type": "command",
   "command": "sh \"$HOME/.claude/daiver-prompt-view/statusline.sh\"",
-  "refreshInterval": 1,
-  "padding": -1
+  "refreshInterval": 1
 }
 ```
 
-`padding` is optional. Claude Code draws the status line 2 columns in from each
-edge of the terminal and adds `padding` to that, so a negative one brings the
-frame closer to the edges; the frame reads it from `~/.claude/settings.json`
-and widens to match:
+The padding comes from the mod: Claude Code draws the status line 2 columns in
+from each edge of the terminal and adds `statusLine.padding` to that, and while
+`statusLine` runs this script the mod sets that padding to its
+`statuslinePadding` option (`-1` by default), in the settings as Claude Code
+merges them: nothing is written to `settings.json`, and a `padding` there is
+overridden. The frame reads the same value and widens to match. Another status
+line's `padding` is left as it is.
 
-| `padding` | Free columns on each side of the frame |
+| `statuslinePadding` | Free columns on each side of the frame |
 | --- | --- |
-| not set, or `0` | 2 |
-| `-1` | 1 |
+| `-1` (default) | 1 |
 | `-2` | 0: from edge to edge |
+| `0` | 2, Claude Code's own indent |
 | `1` | 3 |
 
 Requires `jq` and `git`; the branch glyph needs a Nerd Font. The script uses
