@@ -20,14 +20,14 @@ export type Theme = {
   added: string // +N lines added in the diff
   removed: string // -N lines removed in the diff
   matrix: string // the matrix rain Clawd dissolves into (Clawd orange by default)
-  prompt: string // the frame around the person's prompts in the transcript
+  prompt: string // the frame around the person's prompts, in the transcript and in the history pane alike
   frame: string // the frame around the whole status line
-  reply: string // the frame around Claude's replies in the transcript
-  tool: string // the frame around the tool calls' rows in the transcript
+  reply: string // the frame around Claude's replies, in the transcript and in the history pane alike
+  tool: string // the frame around the tool calls' rows, in the transcript and in the history pane alike
   spinner: string // the frame around the spinner line of a running turn (the output style's yellow by default)
   command: string // the frame around a slash command's output row
   history: string // the frame of the prompt history pane
-  hover: string // the frame of the history pane's message under the pointer
+  hover: string // the frame of the history pane's message under the pointer, on its own (the ctx bar's fuchsia by default)
   paneBackground: string // what is painted under the history pane's body, darker than the terminal's
   effort: string // the effort level on the modes line
   ostyle: string // the output style on the modes line
@@ -61,7 +61,7 @@ export const THEMES: Record<string, Theme> = {
     spinner: '38;2;230;200;110',
     command: '38;2;128;128;128',
     history: '38;2;215;119;87',
-    hover: '38;2;255;255;255',
+    hover: '38;2;255;0;255',
     paneBackground: '38;2;16;16;22',
     effort: '38;2;215;119;87',
     ostyle: '38;2;230;200;110',

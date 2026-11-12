@@ -168,7 +168,7 @@ Option `theme` (Color theme), default `default`.
 
 | Value | Colors |
 | --- | --- |
-| `default` (default) | white, gray, fuchsia (ctx), sky blue (lmt), light green (rst), Clawd orange, gray-green (pch), khaki (sha), violet (branch), coral (flags), light green (+added), coral (-removed), Clawd orange (the matrix rain, the frame around your prompts and the frame around the status line too), neon blue (the frame around Claude's replies), dark violet (the frame around the tool calls), yellow (the frame around the spinner, as the output style), gray (the frame around a command's output), Clawd orange (the prompt history pane's frame too), white (the history message's frame under the pointer), near black (the history pane's background) |
+| `default` (default) | white, gray, fuchsia (ctx), sky blue (lmt), light green (rst), Clawd orange, gray-green (pch), khaki (sha), violet (branch), coral (flags), light green (+added), coral (-removed), Clawd orange (the matrix rain, the frame around your prompts, in the chat and in the history pane, and the frame around the status line too), neon blue (the frame around Claude's replies, in the chat and in the history pane), dark violet (the frame around the tool calls, in the chat and in the history pane), yellow (the frame around the spinner, as the output style), gray (the frame around a command's output), Clawd orange (the prompt history pane's frame too), fuchsia (the history message's frame under the pointer, as the ctx bar), near black (the history pane's background) |
 
 | Usage | Result |
 | --- | --- |
@@ -240,7 +240,7 @@ read on the session start from the session's transcript file and joining as
 the session stores them. A click on a message (or Enter on it while the pane
 has the keyboard) scrolls the transcript to it: a prompt's or a text's row, a
 tool call's own row; under the pointer a message's frame turns the theme's `hover` color
-(white in `default`); the pane's body sits on the theme's
+(the ctx bar's fuchsia in `default`); the pane's body sits on the theme's
 `paneBackground`, darker than the terminal's own (near black in `default`) (the row's id comes with the row as the session stores it, or from the
 session's transcript file for prompts sent before the mod loaded); a prompt
 or answer whose row cannot be found is noted in the debug log, nothing on screen. Slash commands are left out. On
