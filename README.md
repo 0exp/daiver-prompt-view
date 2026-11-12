@@ -480,7 +480,8 @@ and `automemory/<session_id>`.
 ## Develop
 
 Development rules (docs for every option and command, typeahead for every
-command's values) are in `.claude/CLAUDE.md`.
+command's values, a `CHANGELOG.md` entry for every change) are in
+`.claude/CLAUDE.md`. What changed in each version is in `CHANGELOG.md`.
 
 ```
 hooks/register.ts          the hooks module: options, the one session.start, typeahead
@@ -490,6 +491,7 @@ commands/<feature>/*.md    the slash commands
 statusline/                the status line script (POSIX sh + jq + git)
 tests/                     claude plugin test .
 skills/daiver-prompt-view/ how Claude checks, changes, reloads and releases the mod
+CHANGELOG.md               what changed in each version (Keep a Changelog)
 ```
 
 ```

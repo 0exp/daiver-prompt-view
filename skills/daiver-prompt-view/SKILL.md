@@ -46,6 +46,7 @@ ctx ███░░░░░░░ 37% | lmt ████░░░░░░ 43% 
 - A new or changed option: update `README.md` (the **Options** table, the `pluginConfigs` example) with a usage example, in the same change.
 - A new or changed command: a row in README's **Commands** table and its own section (option and default, every value described, a usage table with each form and its exact answer).
 - Every command's values have typeahead: a `choiceRows` entry in `hooks/register.ts` + `argument-hint` in its `.md`, from the constant the command validates against, covered in `tests/autocomplete.test.ts`.
+- Every change, a minor one too, is a new version: bump `version` and add its entry to `CHANGELOG.md` ([Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.1.0/)) under that version, dated: a short summary by meaning (what the mod does now), no implementation details.
 
 ## Tasks
 
@@ -56,7 +57,7 @@ ctx ███░░░░░░░ 37% | lmt ████░░░░░░ 43% 
 2. Script changes: render before and after with a full sample input (`session_id`, `session_name`, `model.display_name`, `workspace.current_dir`, `transcript_path`, `cost.total_duration_ms`, `effort.level`, `thinking.enabled`, `output_style.name`, `fast_mode`, `context_window.*`, `rate_limits.five_hour.*`, `version`) and show plain text (`sed $'s/\e\\[[0-9;]*m//g'`).
 3. `claude plugin test ~/Projects/daiver-prompt-view` and `claude plugin validate ~/Projects/daiver-prompt-view` (expected warning: no icon).
 4. Type-check: load `plugin-authoring` for this build's `claude-code.d.ts`; tsconfig in the scratchpad (`strict`, `target: es2023`, `module: esnext`, `moduleResolution: bundler`, `lib: [es2023]`, `noEmit`, `types: []`, `include` = the d.ts + the repo's `hooks/`), `npx -y -p typescript@5.6.3 tsc -p <scratchpad>`.
-5. Bump `version` in `.claude-plugin/plugin.json` (patch fixes, minor features) and update `README.md`.
+5. Bump `version` in `.claude-plugin/plugin.json` (patch fixes, minor features), update `README.md`, and add the change to `CHANGELOG.md` under the new version.
 6. Apply: ask the user to type `/reload-plugins` (Claude cannot run slash commands); the installed script copy refreshes on that start.
 
 **Wire the status line**: set `statusLine` to `{ "type": "command", "command": "sh \"$HOME/.claude/daiver-prompt-view/statusline.sh\"", "refreshInterval": 1 }` with python `json`/`jq`, backing up `settings.json` first (`settings.json.bak-daiver-prompt-view`).
@@ -71,7 +72,7 @@ The installed copy stays, so the status line keeps working without the agents li
 
 **Clean stale state**: `agents/` and `automemory/` hold a file per session, never removed: list `find ~/.claude/daiver-prompt-view/agents ~/.claude/daiver-prompt-view/automemory -type f -mtime +7` and ask before deleting.
 
-**Release / publish**: `origin` = `https://github.com/0exp/daiver-prompt-view`, branch `main`. Commit and push only when the user asks; bump `version` first. Others install with `/plugin install daiver-prompt-view --marketplace 0exp/daiver-prompt-view`, update with `claude plugin marketplace update daiver-prompt-view`. Never commit `.claude-plugin/types/` or a local `tsconfig.json`.
+**Release / publish**: `origin` = `https://github.com/0exp/daiver-prompt-view`, branch `main`. Commit and push only when the user asks; bump `version` and write the `CHANGELOG.md` entry first. Others install with `/plugin install daiver-prompt-view --marketplace 0exp/daiver-prompt-view`, update with `claude plugin marketplace update daiver-prompt-view`. Never commit `.claude-plugin/types/` or a local `tsconfig.json`.
 
 ## Debugging
 

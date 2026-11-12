@@ -22,6 +22,13 @@ The mod's layout, invariants and checks are in `skills/daiver-prompt-view/SKILL.
 - Values come from the same constant the command validates against (`ANIMATIONS`, `THEME_NAMES`, ...), never a copy.
 - Cover it in `tests/autocomplete.test.ts`.
 
+## Every change goes into `CHANGELOG.md`
+
+- `CHANGELOG.md` follows [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.1.0/): the newest version on top, `## [x.y.z] - YYYY-MM-DD` headings, entries grouped under `### Added`, `### Changed`, `### Deprecated`, `### Removed`, `### Fixed`, `### Security`, and an `## [Unreleased]` section kept at the top.
+- Every change is a new version, a minor one too (a color, a text, a doc fix): it bumps `version` in `.claude-plugin/plugin.json` (patch for fixes and small tweaks, minor for features) and adds its entry in the same change, under that version's heading, dated the day of the change. Nothing is left without an entry; `[Unreleased]` stays empty between releases.
+- An entry is a short summary of what changed for the person using the mod, by meaning: what it does now, not how. No file names, functions, hooks, props or other implementation details; one line per change, as many lines as there are distinct changes.
+- A reverted change leaves no entry; a change undone within the same version is not listed.
+
 ## Before calling a change done
 
-`claude plugin test .`, `claude plugin validate .`, and the type-check from the skill all pass; bump `version` in `.claude-plugin/plugin.json`.
+`claude plugin test .`, `claude plugin validate .`, and the type-check from the skill all pass; bump `version` in `.claude-plugin/plugin.json` and add the change to `CHANGELOG.md` under that version.
