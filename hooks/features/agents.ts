@@ -5,6 +5,7 @@ import type { AgentStatus, EngineInterface, On, PromptSubmitInput } from 'claude
 import { config } from '../shared/config'
 import { home, sync } from '../shared/files'
 import { sgr, THEMES } from '../shared/themes'
+import { noteSubagentCalls } from './tool'
 
 type State = 'pending' | 'running' | 'waiting' | 'idle'
 type Kind = 'agent' | 'shell' | 'monitor'
@@ -206,7 +207,11 @@ export function registerAgents(on: On) {
   }).catch(($, e, next) => next(e))
 
   on('tool.call', async ($, e, next) => {
-    if (e.agentId !== undefined) return next(e)
+    if (e.agentId !== undefined) {
+      // a subagent's call: its row is drawn unframed (tool.tsx)
+      await noteSubagentCalls($, [e.tool_use_id])
+      return next(e)
+    }
 
     mainTools.push(e.tool)
     await refresh($)

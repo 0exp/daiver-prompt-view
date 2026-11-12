@@ -13,6 +13,7 @@ export type Ran = { name: string; args: string; output: string; at: number; uuid
 declare module 'claude-code' {
   interface PluginState {
     // skip: how many of the newest messages the history pane scrolled past (its header stays)
-    'daiver-prompt-view': { prompts: Shaped<Prompt[]>; answers: Shaped<Answer[]>; commands: Shaped<Ran[]>; skip: number }
+    // subagentCalls: the tool_use ids of the calls subagents made, their rows drawn unframed
+    'daiver-prompt-view': { prompts: Shaped<Prompt[]>; answers: Shaped<Answer[]>; commands: Shaped<Ran[]>; skip: number; subagentCalls: string[] }
   }
 }

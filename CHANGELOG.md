@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.37.3] - 2026-11-12
+
+### Fixed
+
+- A running subagent's tool calls under its row show as text again, not as two empty frame lines.
+
 ## [1.37.2] - 2026-11-12
 
 ### Added

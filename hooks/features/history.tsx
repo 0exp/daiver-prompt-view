@@ -12,6 +12,7 @@ import { command, failed } from '../shared/commands'
 import { config, frameStyle, HISTORY_MODES, hoverStyle, writeConfig } from '../shared/config'
 import { setOption } from '../shared/options'
 import { hexOf, THEMES } from '../shared/themes'
+import { noteSubagentCalls } from './tool'
 import type { Answer, Prompt, Ran } from '../../types'
 
 export const HISTORY = command('history', 'show')
@@ -325,11 +326,15 @@ export function registerHistory(on: On) {
     return { text: MODE_SET[arg]! }
   }).catch(($, e, next) => failed(next.error.message ?? next.error.kind))
 
-  // Claude's rows on main, as the session stores them: each text and tool call joins the answers
+  // Claude's rows on main, as the session stores them: each text and tool call
+  // joins the answers; a subagent's tool calls are drawn unframed (tool.tsx)
   on('session.append', { door: 'response' }, async ($, e, next) => {
     if (e.agentId === undefined && e.message.type === 'assistant') {
       const found = answersOf(e.message.content, e.uuid, await $.clock.now())
       if (found.length > 0) await update($, answers, list => [...list, ...found].slice(-KEEP))
+    } else if (e.agentId !== undefined && e.message.type === 'assistant' && Array.isArray(e.message.content)) {
+      const blocks = e.message.content as readonly { type: string; id?: unknown }[]
+      await noteSubagentCalls($, blocks.flatMap(one => (one.type === 'tool_use' && typeof one.id === 'string' ? [one.id] : [])))
     }
 
     return next(e)
