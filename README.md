@@ -94,7 +94,8 @@ markdown table in a reply is fitted inside that frame on the terminal: each
 column as wide as its widest cell while the room allows, its cells wrapping when
 the frame is narrower, so its right edge and corners stay in place. So do
 the tool calls' rows (`Bash(ls)` and the result), in the theme's `tool` color
-(dark violet in `default`), and the spinner line of a running turn
+(dark violet in `default`; a call the transcript shows nothing for gets no
+frame, in the fullscreen layout, where the terminal says how tall a row is), and the spinner line of a running turn
 (`Sauteing… (12s)`), in the theme's `spinner` color (the output style's yellow in `default`), and the output row
 of a slash command (`/reload-plugins`, `/cost`, this mod's own commands), in the
 theme's `command` color (gray in `default`).

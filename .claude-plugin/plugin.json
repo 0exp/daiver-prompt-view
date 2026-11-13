@@ -1,6 +1,6 @@
 {
   "name": "daiver-prompt-view",
-  "version": "1.37.4",
+  "version": "1.37.5",
   "description": "A multi-line status line under the prompt: model, session, modes, agents, usage bars, git state and Clawd",
   "author": {
     "name": "Rustam Ibragimov",

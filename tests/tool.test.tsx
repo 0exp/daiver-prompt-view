@@ -65,3 +65,36 @@ test("a subagent's tool call is drawn as the engine draws it, no frame: under a 
   expect((await ui.find({ type: 'Box' }))?.props.borderColor).toBe('#6a34a3')
   await ui.unmount()
 })
+
+test('a row the engine draws empty is left unframed, and framed again once it grows', async ($, on) => {
+  world(on)
+  on('ui.render', ($, e) => {
+    const { Text } = $.ui.resolve(e)
+    return <Text>row</Text>
+  })
+
+  await $.session.start(start)
+
+  const props = { ...ROW.props, tool_use_id: 'e1' }
+  const at = (of: number) => ({ ...props, onScreen: { first: 0, last: of - 1, of } })
+  const isFramed = async (ui: { find: (q: { type: 'Box' }) => Promise<{ props: Record<string, unknown> } | undefined> }) =>
+    (await ui.find({ type: 'Box' }))?.props.borderStyle === 'dashed'
+  const ui = await $.ui.mount({ ...ROW, requestId: 'e1', props, surface: 'terminal' })
+
+  // not measured yet: framed
+  expect(await isFramed(ui)).toBe(true)
+  // framed, the gap and two borders alone: the engine drew nothing, the frame goes
+  await ui.redraw(at(3))
+  expect(await isFramed(ui)).toBe(false)
+  // bare, the engine's gap row alone or off screen: still bare
+  await ui.redraw(at(1))
+  expect(await isFramed(ui)).toBe(false)
+  await ui.redraw({ ...props, onScreen: null })
+  expect(await isFramed(ui)).toBe(false)
+  // bare, a row of its own now: framed again, and a real row stays framed
+  await ui.redraw(at(2))
+  expect(await isFramed(ui)).toBe(true)
+  await ui.redraw(at(4))
+  expect(await isFramed(ui)).toBe(true)
+  await ui.unmount()
+})

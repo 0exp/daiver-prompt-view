@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.37.5] - 2026-11-13
+
+### Fixed
+
+- A tool call the transcript shows nothing for no longer leaves an empty frame of two lines; its frame comes back once the call shows something.
+
 ## [1.37.4] - 2026-11-13
 
 ### Fixed
