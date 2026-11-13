@@ -1,5 +1,5 @@
 import { expect, mock, test } from 'claude-code/testing'
-import { COPIED_GLYPH, COPIED_MS, COPY_GLYPH, toolText } from '../hooks/features/copy'
+import { COPIED_GLYPH, COPIED_MS, COPY_GLYPH, COPY_RIGHT, toolText } from '../hooks/features/copy'
 import { start, world } from './world'
 
 const FULLSCREEN = { columns: 100, rows: 40, isFullscreen: true }
@@ -62,7 +62,7 @@ test("a tool call's and a command's box copy too: the call with its result, the 
   ] as const) {
     const ui = await $.ui.mount({ ...row, surface: 'terminal', viewport: FULLSCREEN })
     expect((await ui.find({ type: 'Button', key: 'copy' }))?.props.label).toBe(COPY_GLYPH)
-    expect((await ui.find({ type: 'Box' }))?.children.at(-1)).toMatchObject({ props: { position: 'absolute', top: 0, right: 0 } })
+    expect((await ui.find({ type: 'Box' }))?.children.at(-1)).toMatchObject({ props: { position: 'absolute', top: 0, right: COPY_RIGHT } })
     await ui.press({ key: 'copy' })
     expect(copied.at(-1)).toBe(text)
     await clock.advance(COPIED_MS)
@@ -96,8 +96,8 @@ test("a framed message's corner copies its text, with a ✓ for a moment", async
     const ui = await $.ui.mount({ ...row, surface: 'terminal', viewport: FULLSCREEN })
     const button = await ui.find({ type: 'Button', key: 'copy' })
     expect(button?.props).toMatchObject({ label: COPY_GLYPH, plain: true, dimColor: true })
-    // at the frame's top right, in the padding by the border
-    expect((await ui.find({ type: 'Box' }))?.children.at(-1)).toMatchObject({ props: { position: 'absolute', top: 0, right: 0 } })
+    // at the frame's top right, a column in from the border
+    expect((await ui.find({ type: 'Box' }))?.children.at(-1)).toMatchObject({ props: { position: 'absolute', top: 0, right: COPY_RIGHT } })
 
     await ui.press({ key: 'copy' })
     expect(copied.at(-1)).toBe(row.props.text)

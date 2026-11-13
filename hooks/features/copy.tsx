@@ -1,8 +1,9 @@
 // copy: a `⧉` at the top right of every framed box in the transcript (the
 // person's prompt, Claude's reply, a tool call, a slash command's output) that
 // copies the box's own text, its markdown as written, with nothing of the frame.
-// A tool call copies as the call and its result (`toolText`). It stands in the column of padding by the border:
-// offsets of -1 put it outside the frame, where nothing showed on screen.
+// A tool call copies as the call and its result (`toolText`). It stands one
+// column in from the border (`COPY_RIGHT`), not pressed against it: offsets
+// of -1 put it outside the frame, where nothing showed on screen.
 // A press shows `✓` there for a moment. Drawn in the
 // fullscreen terminal alone, the one that takes clicks; on a desktop surface and
 // on the main screen the frame stays as it is
@@ -14,6 +15,8 @@ import { toolLine } from './history'
 export const COPIED_MS = 1500
 export const COPY_GLYPH = '⧉'
 export const COPIED_GLYPH = '✓'
+// the columns between the button and the frame's right border
+export const COPY_RIGHT = 1
 
 // whether a message's text was just copied, one per drawn row
 const copied = atom({ plugin: 'daiver-prompt-view', key: 'copied' } as const, false)
@@ -56,7 +59,7 @@ export async function copyCorner($: EngineInterface, e: RenderInput<'UserMessage
   const { Box, Button } = $.ui.resolve(e)
 
   return (
-    <Box position="absolute" top={0} right={0}>
+    <Box position="absolute" top={0} right={COPY_RIGHT}>
       <Button
         key="copy"
         label={isDone ? COPIED_GLYPH : COPY_GLYPH}

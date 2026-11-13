@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.39.1] - 2026-11-14
+
+### Changed
+
+- The copy button `⧉` stands a column in from the frame's right border instead of pressed against it.
+
 ## [1.39.0] - 2026-11-14
 
 ### Added
