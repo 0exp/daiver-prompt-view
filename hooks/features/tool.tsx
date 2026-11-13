@@ -12,11 +12,13 @@
 // too, told by its height (`onScreen.of`, where the surface reports it): framed,
 // an empty row is the gap and the two borders, three rows at most, a real one
 // four at least; once bare it stays so while the engine's row is the gap alone
-// or less, and is framed again when the row grows (two rows or more)
+// or less, and is framed again when the row grows (two rows or more).
+// The frame's top right corner holds the copy button (`copy.tsx`): the call and its result
 import type { EngineInterface, On } from 'claude-code'
 import { atom, read, update } from 'claude-code'
 import { config, frameStyle } from '../shared/config'
 import { hexOf, THEMES } from '../shared/themes'
+import { copyCorner, toolText } from './copy'
 
 // the newest subagent calls kept
 const KEEP = 500
@@ -73,6 +75,7 @@ export function registerTool(on: On) {
     remember(id, 'framed')
 
     const row = await next(e)
+    const corner = await copyCorner($, e, toolText(e.props.tool, e.props.input, e.props.output))
     const { Box } = $.ui.resolve(e)
 
     return (
@@ -80,6 +83,7 @@ export function registerTool(on: On) {
         <Box flexDirection="column" marginTop={-1}>
           {row}
         </Box>
+        {corner}
       </Box>
     )
   }).catch(($, e, next) => next(e))

@@ -100,14 +100,18 @@ frame, in the fullscreen layout, where the terminal says how tall a row is), and
 of a slash command (`/reload-plugins`, `/cost`, this mod's own commands), in the
 theme's `command` color (gray in `default`).
 
-In the fullscreen terminal the frames of your prompts and of Claude's replies
-carry a copy button, `⧉`, in their top right corner. A click puts the message's
-own text on the clipboard, its markdown as written, with nothing of the frame:
+In the fullscreen terminal every framed box of the transcript (your prompts,
+Claude's replies, tool calls, slash commands' output) carries a copy button,
+`⧉`, in its top right corner. A click puts the box's own text on the clipboard,
+its markdown as written, with nothing of the frame:
 
 | Frame | A click on `⧉` copies |
 | --- | --- |
 | Your prompt | the prompt as you typed it |
 | A block of Claude's reply | that block's text, its markdown (`**bold**`, tables, fences) as written |
+| A Bash call | `$ <command>`, the whole command, then a blank line and its output (stdout, then stderr) once it ended |
+| Any other tool call | the call as the history pane names it (`Read(/a/b.ts)`), then a blank line and its result (text as it is, else JSON) |
+| A slash command's output | the text the command printed |
 
 For a moment after the click the corner shows `✓`. On the main screen, which
 takes no clicks, and with the frames hidden there is no button.

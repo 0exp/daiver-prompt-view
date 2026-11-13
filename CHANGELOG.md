@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.39.0] - 2026-11-14
+
+### Added
+
+- The copy button `⧉` on every framed box in the transcript: a tool call's frame copies the call and its result (a Bash call as `$ command` with its output), a slash command's frame copies its output.
+
 ## [1.38.0] - 2026-11-13
 
 ### Added
