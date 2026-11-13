@@ -89,7 +89,10 @@ bare row paints under it. The frame is drawing only, the stored message is
 untouched, and a theme switch redraws it at once.
 
 Claude's replies get a frame of their own, in the theme's `reply` color (neon
-blue in `default`), around each text block as the transcript draws it. So do
+blue in `default`), around each text block as the transcript draws it. A
+markdown table in a reply is fitted inside that frame on the terminal: each
+column as wide as its widest cell while the room allows, its cells wrapping when
+the frame is narrower, so its right edge and corners stay in place. So do
 the tool calls' rows (`Bash(ls)` and the result), in the theme's `tool` color
 (dark violet in `default`), and the spinner line of a running turn
 (`Sauteing… (12s)`), in the theme's `spinner` color (the output style's yellow in `default`), and the output row

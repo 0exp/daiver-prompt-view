@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.37.4] - 2026-11-13
+
+### Fixed
+
+- Tables in Claude's framed replies fit inside the frame: their right edge is no longer cut and their corners no longer wrap to the next line.
+
 ## [1.37.3] - 2026-11-12
 
 ### Fixed
