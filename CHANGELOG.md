@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.38.0] - 2026-11-13
+
+### Added
+
+- A copy button `⧉` in the top right corner of your prompts' and Claude's replies' frames: a click copies the message's text, without the frame, and shows `✓` for a moment (in the fullscreen terminal).
+
 ## [1.37.5] - 2026-11-13
 
 ### Fixed

@@ -6,7 +6,8 @@ export const DIR = '/home/me/.claude/daiver-prompt-view'
 // the world beneath the plugin: a filesystem in memory (the shipped script and
 // what the plugin writes), no agents, the plugin's /config rows and their changes
 // `configRows: false`: the plugin's /config rows filtered out, as a plugin above may
-export function world(on: On, { configRows = true } = {}) {
+// `clock: false`: no clock here, for a test that brings `mock.clock`
+export function world(on: On, { configRows = true, clock: hasClock = true } = {}) {
   const files = new Map<string, string>()
   const sets: string[] = []
   const state = new Map<string, { value: unknown; version: number }>()
@@ -28,7 +29,7 @@ export function world(on: On, { configRows = true } = {}) {
   on('agent.list', () => ({ value: [] }))
   on('session.id', () => ({ value: 's1' }))
   on('session.cwd', () => ({ value: '/home/me/proj' }))
-  on('clock.now', () => ({ value: clock.now }))
+  if (hasClock) on('clock.now', () => ({ value: clock.now }))
   on('settings.read', () => ({ value: settings.value }))
   on('command.register', ($, e) => ({ value: { command: e.name } }))
   on('state.get', ($, e) => ({ value: state.get(`${e.plugin}.${e.key}`) ?? { value: undefined, version: 0 } }))

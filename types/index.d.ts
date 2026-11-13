@@ -14,6 +14,7 @@ declare module 'claude-code' {
   interface PluginState {
     // skip: how many of the newest messages the history pane scrolled past (its header stays)
     // subagentCalls: the tool_use ids of the calls subagents made, their rows drawn unframed
-    'daiver-prompt-view': { prompts: Shaped<Prompt[]>; answers: Shaped<Answer[]>; commands: Shaped<Ran[]>; skip: number; subagentCalls: string[] }
+    // copied: a framed message whose text its corner button just copied, by the row's requestId
+    'daiver-prompt-view': { prompts: Shaped<Prompt[]>; answers: Shaped<Answer[]>; commands: Shaped<Ran[]>; skip: number; subagentCalls: string[]; copied: StateFamily<boolean> }
   }
 }

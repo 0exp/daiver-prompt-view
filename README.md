@@ -100,6 +100,18 @@ frame, in the fullscreen layout, where the terminal says how tall a row is), and
 of a slash command (`/reload-plugins`, `/cost`, this mod's own commands), in the
 theme's `command` color (gray in `default`).
 
+In the fullscreen terminal the frames of your prompts and of Claude's replies
+carry a copy button, `⧉`, in their top right corner. A click puts the message's
+own text on the clipboard, its markdown as written, with nothing of the frame:
+
+| Frame | A click on `⧉` copies |
+| --- | --- |
+| Your prompt | the prompt as you typed it |
+| A block of Claude's reply | that block's text, its markdown (`**bold**`, tables, fences) as written |
+
+For a moment after the click the corner shows `✓`. On the main screen, which
+takes no clicks, and with the frames hidden there is no button.
+
 ## Toasts
 
 Claude Code's own toast (on its notification bar, for 4 seconds) when your work
