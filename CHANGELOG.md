@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.45.0] - 2026-11-14
+
+### Added
+
+- The doctor names the plugin that skips the mod's hooks, as Claude Code's notices in the session say, and tells who can let those hooks through.
+
 ## [1.44.0] - 2026-11-14
 
 ### Added

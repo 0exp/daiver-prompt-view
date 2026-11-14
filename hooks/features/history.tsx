@@ -11,6 +11,7 @@ import type { CommandRunInput, CommandRunResult, EngineInterface, On, PromptSubm
 import { command, failed } from '../shared/commands'
 import { config, frameStyle, HISTORY_MODES, hoverStyle, writeConfig } from '../shared/config'
 import { setOption } from '../shared/options'
+import { transcriptPath } from '../shared/files'
 import { hexOf, THEMES } from '../shared/themes'
 import { noteSubagentCalls } from './tool'
 import type { Answer, Prompt, Ran } from '../../types'
@@ -65,13 +66,11 @@ export function answersOf(content: readonly { type: string; [field: string]: unk
   return found
 }
 
-// the session's transcript file (~/.claude/projects/<cwd, every other
-// character a dash>/<session id>.jsonl): a JSON row per message, user rows
-// with the prompt as `message.content` and the row's `uuid`, Claude's rows
-// with their blocks; a subagent's rows (`isSidechain`) are left out
+// the session's transcript rows: user rows with the prompt as
+// `message.content` and the row's `uuid`, Claude's rows with their blocks; a
+// subagent's rows (`isSidechain`) are left out
 async function transcriptRows($: EngineInterface) {
-  const slug = (await $.session.cwd()).replace(/[^A-Za-z0-9]/g, '-')
-  const path = `${await $.env.get('HOME')}/.claude/projects/${slug}/${await $.session.id()}.jsonl`
+  const path = await transcriptPath($)
   const found = { prompts: new Map<string, string>(), answers: [] as Answer[], commands: [] as Ran[] }
 
   if (!(await $.fs.exists(path))) return found

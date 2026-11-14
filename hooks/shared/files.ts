@@ -14,3 +14,11 @@ export async function sync($: EngineInterface, path: string, text: string) {
 
   if (current !== text) await $.fs.write(path, text)
 }
+
+// the session's transcript file: ~/.claude/projects/<cwd, every other
+// character a dash>/<session id>.jsonl, a JSON row per line
+export async function transcriptPath($: EngineInterface) {
+  const slug = (await $.session.cwd()).replace(/[^A-Za-z0-9]/g, '-')
+
+  return `${await $.env.get('HOME')}/.claude/projects/${slug}/${await $.session.id()}.jsonl`
+}
