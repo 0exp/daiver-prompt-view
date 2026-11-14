@@ -337,9 +337,11 @@ anim() {
     matrix) echo 'rest crack scatter dust m1 m2 m3 m4 m5 m6 m7 m8 m1 m2 m3 m4 dust scatter crack' ;; # to pixels, then the rain
   esac
 }
-# the clodikAnimation option (/daiver-prompt-view:clodik:animation): one of them, or random
+# the clodikAnimation option (/daiver-prompt-view:clodik:animation): one of
+# them, or random (empty here); none, or one unknown: matrix, the default
 animation=$(sed -n 's/^animation=//p' "$mod/config" 2>/dev/null)
-case " $anims " in *" $animation "*) ;; *) animation='' ;; esac
+case " $anims random " in *" $animation "*) ;; *) animation=matrix ;; esac
+[ "$animation" = random ] && animation=''
 
 busy=''
 # the clodikAnimate option (/daiver-prompt-view:clodik:animate): animate whether busy or not

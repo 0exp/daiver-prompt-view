@@ -1,6 +1,6 @@
 {
   "name": "daiver-prompt-view",
-  "version": "1.42.0",
+  "version": "1.43.0",
   "description": "A multi-line status line under the prompt: model, session, modes, agents, usage bars, git state and Clawd",
   "author": {
     "name": "Rustam Ibragimov",
@@ -90,7 +90,7 @@
       "type": "string",
       "title": "Clawd's animation",
       "description": "The animation Clawd plays, or a random one every few seconds (also /daiver-prompt-view:clodik:animation <name>)",
-      "default": "random",
+      "default": "matrix",
       "options": [
         "random",
         "jump",

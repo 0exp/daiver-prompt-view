@@ -14,7 +14,7 @@ test('the session start installs the script, its config and the default theme', 
   await $.session.start(start)
 
   expect(files.get(`${DIR}/statusline.sh`)).toBe('#!/bin/sh\n')
-  expect(config()).toBe(conf(true, false, 'random'))
+  expect(config()).toBe(conf(true, false, 'matrix'))
   // the palette the status line had before themes, byte for byte
   expect(files.get(`${DIR}/theme.sh`)).toBe(THEME_SH)
 })
@@ -75,7 +75,7 @@ test("show-usage toggles the session's tokens and cost, on and off set them", as
 
   expect(config()).toContain('\nusage=true\n')
   expect((await $.command.run(run('statusline:show-usage'))).text).toBe("The session's tokens and cost are now hidden.")
-  expect(config()).toBe(conf(true, false, 'random', 'default', false, true, true, true, 'dashed', -1, false))
+  expect(config()).toBe(conf(true, false, 'matrix', 'default', false, true, true, true, 'dashed', -1, false))
   expect((await $.command.run(run('statusline:show-usage'))).text).toBe("The session's tokens and cost are now shown.")
   expect((await $.command.run(run('statusline:show-usage', 'off'))).text).toBe("The session's tokens and cost are now hidden.")
   expect((await $.command.run(run('statusline:show-usage', 'on'))).text).toBe("The session's tokens and cost are now shown.")

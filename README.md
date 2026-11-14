@@ -78,8 +78,9 @@ narrow, it sits right next to the lines.
 While Claude Code is busy (the agents line shows the main loop anything but
 `idle`), Clawd moves: jump, spin around, sway, blink, cheer, wave, squash and
 stretch, hop side to side, tap dance, shiver, fall to pixels and back, dissolve
-into the Matrix's rain of glyphs and back. A new
-random animation starts every 8 seconds, a frame per refresh.
+into the Matrix's rain of glyphs and back. By default it plays the Matrix
+(the `clodikAnimation` option); with `random`, a new random animation starts
+every 8 seconds. A frame per refresh.
 
 ## Your prompts, Claude's replies, tool calls, the spinner and command output
 
@@ -150,7 +151,7 @@ after the command.
 | Command | Arguments | Default | What it does |
 | --- | --- | --- | --- |
 | `/daiver-prompt-view:clodik:animate` | `on`, `off`, or nothing | `off` | Animate Clawd all the time (`on`) or only while Claude Code is busy (`off`); with no argument, toggles |
-| `/daiver-prompt-view:clodik:animation` | an animation name, or nothing | `random` | Pick the animation Clawd plays; with no argument, shows the current one and the list |
+| `/daiver-prompt-view:clodik:animation` | an animation name, or nothing | `matrix` | Pick the animation Clawd plays; with no argument, shows the current one and the list |
 | `/daiver-prompt-view:view:theme` | a theme name, or nothing | `default` | Pick the colors of every line (the agents line's included); with no argument, shows the current one and the list |
 | `/daiver-prompt-view:history:show` | `on`, `off`, or nothing | `off` | Show (`on`) or hide (`off`) the pane with this session's prompts; with no argument, toggles |
 | `/daiver-prompt-view:toasts:show` | `on`, `off`, or nothing | `off` | Show (`on`) or hide (`off`) the toasts (`Task complete`, `/-Command complete`); with no argument, toggles |
@@ -175,11 +176,11 @@ while Claude Code is busy (the agents line's main loop is anything but `idle`).
 
 ### `/daiver-prompt-view:clodik:animation [name]`
 
-Option `clodikAnimation` (Clawd's animation), default `random`.
+Option `clodikAnimation` (Clawd's animation), default `matrix`.
 
 | Value | Animation |
 | --- | --- |
-| `random` (default) | a random one of the others, a new one every 8 seconds, never the same twice in a row |
+| `random` | a random one of the others, a new one every 8 seconds, never the same twice in a row |
 | `jump` | squash and jump |
 | `spin` | turn around |
 | `sway` | sway left and right |
@@ -191,7 +192,7 @@ Option `clodikAnimation` (Clawd's animation), default `random`.
 | `tap` | tap dance |
 | `shiver` | shiver |
 | `pixels` | fall to pixels and back |
-| `matrix` | fall to pixels, then the Matrix's rain of glyphs runs down the canvas, then back |
+| `matrix` (default) | fall to pixels, then the Matrix's rain of glyphs runs down the canvas, then back |
 
 | Usage | Result |
 | --- | --- |
@@ -235,7 +236,7 @@ Every option is in `/config`, or in `~/.claude/settings.json` under
 | `borderStyle` | Frame style | choice | `dashed` | `dashed`, `line` | `chat:border-style` |
 | `clodik` | Show Clawd | boolean | `true` | `true`, `false` | (none) |
 | `clodikAnimate` | Animate Clawd always | boolean | `false` | `true`, `false` | `clodik:animate` |
-| `clodikAnimation` | Clawd's animation | choice | `random` | `random`, `jump`, `spin`, `sway`, `blink`, `cheer`, `wave`, `stretch`, `hop`, `tap`, `shiver`, `pixels`, `matrix` | `clodik:animation` |
+| `clodikAnimation` | Clawd's animation | choice | `matrix` | `random`, `jump`, `spin`, `sway`, `blink`, `cheer`, `wave`, `stretch`, `hop`, `tap`, `shiver`, `pixels`, `matrix` | `clodik:animation` |
 | `theme` | Color theme | choice | `default` | `default` | `view:theme` |
 | `statuslinePadding` | Status line padding | number | `-1` | whole numbers from `-2` to `20` | (none) |
 

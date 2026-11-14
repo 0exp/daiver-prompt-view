@@ -30,7 +30,7 @@ test('show toggles the history option, opens and closes the pane', async ($, on)
   expect(panes.open).toEqual([])
 
   expect((await $.command.run(run('history:show'))).text).toBe('The prompt history pane is now shown.')
-  expect(config()).toBe(conf(true, false, 'random', 'default', true))
+  expect(config()).toBe(conf(true, false, 'matrix', 'default', true))
   expect(panes.open).toEqual(['history'])
   expect(panes.background).toBe('#101016')
   expect((await $.command.run(run('history:show', 'off'))).text).toBe('The prompt history pane is now hidden.')
@@ -129,7 +129,7 @@ test('with no /config row the change holds for the session, noted in the debug l
   await $.session.start(start)
 
   expect((await $.command.run(run('history:show', 'on'))).text).toBe('The prompt history pane is now shown.')
-  expect(config()).toBe(conf(true, false, 'random', 'default', true))
+  expect(config()).toBe(conf(true, false, 'matrix', 'default', true))
   expect(sets).toEqual([])
   expect(toasts).toEqual([])
   expect(logs).toEqual(['the history option has no /config row to save to; the change holds for this session'])

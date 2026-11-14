@@ -61,7 +61,7 @@ export function world(on: On, { configRows = true, clock: hasClock = true } = {}
   on('config.list', $ => ({
     value: !configRows ? [] : [
       { key: `${$.plugin.name}.clodikAnimate`, label: 'Animate Clawd always', kind: 'boolean', value: false, provider, isLocked: false },
-      { key: `${$.plugin.name}.clodikAnimation`, label: "Clawd's animation", kind: 'choice', value: 'random', provider, isLocked: false },
+      { key: `${$.plugin.name}.clodikAnimation`, label: "Clawd's animation", kind: 'choice', value: 'matrix', provider, isLocked: false },
       { key: `${$.plugin.name}.theme`, label: 'Color theme', kind: 'choice', value: 'default', provider, isLocked: false },
       { key: `${$.plugin.name}.history`, label: 'Show the prompt history pane', kind: 'boolean', value: false, provider, isLocked: false },
       { key: `${$.plugin.name}.toasts`, label: 'Show the toasts', kind: 'boolean', value: false, provider, isLocked: false },

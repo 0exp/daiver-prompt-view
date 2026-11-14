@@ -24,7 +24,7 @@ test('show-borders toggles the option, on and off set it', async ($, on) => {
   await $.session.start(start)
 
   expect((await $.command.run(run('chat:show-borders'))).text).toBe('The frames are now hidden.')
-  expect(config()).toBe(conf(true, false, 'random', 'default', false, false))
+  expect(config()).toBe(conf(true, false, 'matrix', 'default', false, false))
   expect((await $.command.run(run('chat:show-borders'))).text).toBe('The frames are now shown.')
   expect((await $.command.run(run('chat:show-borders', 'off'))).text).toBe('The frames are now hidden.')
   expect((await $.command.run(run('chat:show-borders', 'on'))).text).toBe('The frames are now shown.')
@@ -38,7 +38,7 @@ test("show-chat-borders toggles the chat's own option, on and off set it", async
   await $.session.start(start)
 
   expect((await $.command.run(run('chat:show-chat-borders'))).text).toBe("The chat's frames are now hidden.")
-  expect(config()).toBe(conf(true, false, 'random', 'default', false, true, true, false))
+  expect(config()).toBe(conf(true, false, 'matrix', 'default', false, true, true, false))
   expect((await $.command.run(run('chat:show-chat-borders'))).text).toBe("The chat's frames are now shown.")
   expect((await $.command.run(run('chat:show-chat-borders', 'off'))).text).toBe("The chat's frames are now hidden.")
   expect((await $.command.run(run('chat:show-chat-borders', 'on'))).text).toBe("The chat's frames are now shown.")
@@ -52,7 +52,7 @@ test("show-statusline-borders toggles the status line's own option, on and off s
   await $.session.start(start)
 
   expect((await $.command.run(run('chat:show-statusline-borders'))).text).toBe("The status line's frame is now hidden.")
-  expect(config()).toBe(conf(true, false, 'random', 'default', false, true, false))
+  expect(config()).toBe(conf(true, false, 'matrix', 'default', false, true, false))
   expect((await $.command.run(run('chat:show-statusline-borders'))).text).toBe("The status line's frame is now shown.")
   expect((await $.command.run(run('chat:show-statusline-borders', 'off'))).text).toBe("The status line's frame is now hidden.")
   expect((await $.command.run(run('chat:show-statusline-borders', 'on'))).text).toBe("The status line's frame is now shown.")
@@ -103,7 +103,7 @@ test('border-style sets the frames style, shows it with no argument', async ($, 
 
   expect((await $.command.run(run('chat:border-style'))).text).toBe('Frame style: dashed (one of dashed, line)')
   expect((await $.command.run(run('chat:border-style', 'line'))).text).toBe('The frames are now line.')
-  expect(config()).toBe(conf(true, false, 'random', 'default', false, true, true, true, 'line'))
+  expect(config()).toBe(conf(true, false, 'matrix', 'default', false, true, true, true, 'line'))
   expect((await $.command.run(run('chat:border-style', 'dashed'))).text).toBe('The frames are now dashed.')
   expect(sets).toEqual(['borderStyle=line', 'borderStyle=dashed'])
   expect((await $.command.run(run('chat:border-style', 'wavy'))).text).toBe('Usage: /daiver-prompt-view:chat:border-style [dashed|line]')

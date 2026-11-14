@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.43.0] - 2026-11-14
+
+### Changed
+
+- Clawd plays the Matrix animation by default instead of a random one; `random` stays a choice.
+
 ## [1.42.0] - 2026-11-14
 
 ### Added
