@@ -299,7 +299,12 @@ loaded are there too; from then on each prompt joins as it is sent. The list
 lives in the session's state, so it survives a reload of the mod. The wheel
 or the scroll keys move the list by messages while the header with the `×`
 stays put (`↑3` after the count says how many newer messages are above); a
-scrollbar at the list's right edge shows where it stands. While the list is empty the pane's body
+scrollbar at the list's right edge shows where it stands. A click on the
+scrollbar moves the list there, the thumb centered on the row clicked: the top
+for the newest messages, the bottom for the oldest, the middle for the middle
+of the story; the row under the pointer is highlighted. `▲` over the
+scrollbar and `▼` under it move the list a message at a time, newer and older;
+each is dim once the list is at that end. While the list is empty the pane's body
 is framed in the theme's `history` color (Clawd orange in `default`); with
 messages inside, each has its own frame and the body none. The `×` in the top
 right corner

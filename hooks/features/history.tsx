@@ -400,12 +400,20 @@ export function registerHistory(on: On) {
     const theme = THEMES[config.theme]!
     const frame = list.length === 0 ? { borderStyle: frameStyle(), borderColor: hexOf(theme.history) } : {}
     // the scrollbar at the list's right edge: a track as tall as the body under
-    // the header, its thumb where the list stands (messages a rough 4 rows each)
-    const track = Math.max(3, e.props.scroll.bodyRows - 2)
+    // the header, its thumb where the list stands (messages a rough 4 rows each);
+    // each row a Button (a press carries no position), inverted under the pointer;
+    // ▲ over it and ▼ under it move the list a message at a time, dim at its end
+    // (the track two rows shorter for them)
+    const track = Math.max(3, e.props.scroll.bodyRows - 4)
     const visible = Math.max(1, Math.floor(track / 4))
     const thumb = Math.max(1, Math.round((track * Math.min(visible, list.length)) / Math.max(1, list.length)))
     const thumbAt = list.length > 1 ? Math.round(((track - thumb) * past) / (list.length - 1)) : 0
     const bar = Array.from({ length: track }, (_, row) => row >= thumbAt && row < thumbAt + thumb)
+    // a press on the track's row: the list scrolls so the thumb's middle stands
+    // on it, as a click on a browser's scrollbar track
+    const pastAt = (row: number) =>
+      track <= thumb ? 0 : Math.min(Math.max(0, Math.round(((row - Math.floor(thumb / 2)) * (list.length - 1)) / (track - thumb))), list.length - 1)
+    const by = (step: number) => update($, skip, n => Math.min(Math.max(0, (n ?? 0) + step), Math.max(0, list.length - 1)))
     const message = (item: Item, i: number) => {
       const isMine = item.who === 'me'
       const color = 'ran' in item ? theme.command : 'prompt' in item ? theme.prompt : item.answer.kind === 'tool' ? theme.tool : theme.reply
@@ -453,7 +461,17 @@ export function registerHistory(on: On) {
             </Box>
             {list.length > 1 && (
               <Box flexDirection="column" width={1} marginLeft={1}>
-                {bar.map(isThumb => (isThumb ? <Text color={hexOf(theme.history)}>┃</Text> : <Text dimColor>│</Text>))}
+                <Button key="up" plain onPress={() => void by(-1)}>
+                  <Text dimColor={past === 0}>▲</Text>
+                </Button>
+                {bar.map((isThumb, row) => (
+                  <Button key={`s${row}`} plain onPress={() => void update($, skip, () => pastAt(row))}>
+                    {isThumb ? <Text color={hexOf(theme.history)}>┃</Text> : <Text dimColor>│</Text>}
+                  </Button>
+                ))}
+                <Button key="down" plain onPress={() => void by(1)}>
+                  <Text dimColor={past >= list.length - 1}>▼</Text>
+                </Button>
               </Box>
             )}
           </Box>

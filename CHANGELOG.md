@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.42.0] - 2026-11-14
+
+### Added
+
+- A click on the history pane's scrollbar scrolls the list there, the row under the pointer highlighted.
+- Arrows at the ends of the history pane's scrollbar move the list a message at a time.
+
 ## [1.41.1] - 2026-11-14
 
 ### Changed

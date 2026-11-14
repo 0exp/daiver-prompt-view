@@ -92,7 +92,7 @@ test('every message is a press; one whose row is nowhere to be found is noted in
   await $.prompt.submit(submit('gone'))
 
   const ui = await $.ui.mount({ ...PANE, surface: 'terminal' })
-  const buttons = (await ui.findAll({ type: 'Button' })).filter(one => one.key !== 'close')
+  const buttons = (await ui.findAll({ type: 'Button' })).filter(one => one.key?.startsWith('p'))
 
   // newest first
   expect(buttons.map(one => one.text)).toEqual(['gone', 'find me'])
@@ -115,7 +115,7 @@ test('the pane scrolls by messages under its header: the ones scrolled past are 
   state.set('daiver-prompt-view.skip', { value: 1, version: 1 })
 
   const ui = await $.ui.mount({ ...PANE, surface: 'terminal' })
-  const buttons = (await ui.findAll({ type: 'Button' })).filter(one => one.key !== 'close')
+  const buttons = (await ui.findAll({ type: 'Button' })).filter(one => one.key?.startsWith('p'))
 
   expect(buttons.map(one => one.text)).toEqual(['older'])
   expect((await ui.find({ type: 'Text', text: /History/ }))?.text).toBe('History (2) ↑1')
@@ -145,9 +145,10 @@ test('the scrollbar stands at the list\'s right edge, its thumb where the list i
   const ui = await $.ui.mount({ ...PANE, surface: 'terminal' })
   const cells = (await ui.findAll({ type: 'Text' })).filter(one => one.text === '┃' || one.text === '│')
 
-  // bodyRows 20: an 18-row track; 4 of 5 messages fit, so the thumb is 14 rows, at the end for the oldest
-  expect(cells.length).toBe(18)
-  expect(cells.map(one => one.text).join('')).toBe('│'.repeat(4) + '┃'.repeat(14))
+  // bodyRows 20: ▲, a 16-row track, ▼; 4 of 5 messages fit, so the thumb is 13 rows, at the end for the oldest
+  expect(cells.length).toBe(16)
+  expect(cells.map(one => one.text).join('')).toBe('│'.repeat(3) + '┃'.repeat(13))
+  expect((await ui.findAll({ type: 'Text' })).filter(one => one.text === '▲' || one.text === '▼').map(one => one.text)).toEqual(['▲', '▼'])
   await ui.unmount()
 })
 
@@ -193,7 +194,7 @@ test("the whole story: prompts pushed to the right in the prompt color, answers 
   for (const surface of ['terminal', 'desktop', 'vscode', 'mobile'] as const) {
     const ui = await $.ui.mount({ ...PANE, surface })
     const boxes = await messages(ui)
-    const buttons = (await ui.findAll({ type: 'Button' })).filter(one => one.key !== 'close')
+    const buttons = (await ui.findAll({ type: 'Button' })).filter(one => one.key?.startsWith('p'))
 
     expect((await ui.find({ type: 'Text', text: /History/ }))?.text).toBe('History (5)')
     // newest first
@@ -249,7 +250,7 @@ test('a long answer shows its first lines; an empty answers pane says so', { opt
   const long = Array.from({ length: 12 }, (_, n) => `line ${n + 1}`).join('\n')
   await $.session.append(response('r1', [{ type: 'text', text: long }, { type: 'tool_use', id: 't1', name: 'TaskList', input: {} }]))
   ui = await $.ui.mount({ ...PANE, surface: 'terminal' })
-  const buttons = (await ui.findAll({ type: 'Button' })).filter(one => one.key !== 'close')
+  const buttons = (await ui.findAll({ type: 'Button' })).filter(one => one.key?.startsWith('p'))
 
   expect(buttons.map(one => one.text)).toEqual(['TaskList', `${long.split('\n').slice(0, 8).join('\n')}\n…`])
   await ui.unmount()
@@ -300,7 +301,7 @@ test("slash commands join the person's side in the command color: the transcript
 
   const ui = await $.ui.mount({ ...PANE, surface: 'terminal' })
   const boxes = await messages(ui)
-  const buttons = (await ui.findAll({ type: 'Button' })).filter(one => one.key !== 'close')
+  const buttons = (await ui.findAll({ type: 'Button' })).filter(one => one.key?.startsWith('p'))
 
   expect((await ui.find({ type: 'Text', text: /History/ }))?.text).toBe('History (4)')
   expect(buttons.map(one => one.text)).toEqual(['/cost', '/daiver-prompt-view:history:show', '/model opus', '/reload-plugins'])
@@ -324,3 +325,49 @@ test('answers leaves the commands out', { options: { historyMode: 'answers' } },
   await ui.unmount()
 })
 
+
+test("a press on the scrollbar's track scrolls the list there, the thumb's middle on the row", async ($, on) => {
+  const { state } = world(on)
+
+  await $.session.start(start)
+  for (const n of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]) await $.prompt.submit(submit(`prompt ${n}`))
+
+  const ui = await $.ui.mount({ ...PANE, surface: 'terminal' })
+  const rows = (await ui.findAll({ type: 'Button' })).filter(one => one.key?.startsWith('s'))
+  const skipped = () => (state.get('daiver-prompt-view.skip') as { value: number } | undefined)?.value
+
+  // bodyRows 20: a 16-row track, a 4-of-10 thumb of 6 rows: each row a plain Button
+  expect(rows.length).toBe(16)
+  expect(rows.every(one => one.props.plain === true)).toBe(true)
+  // the last row: the oldest messages
+  await ui.press({ key: 's15' })
+  expect(skipped()).toBe(9)
+  // the middle: the middle of the story
+  await ui.press({ key: 's8' })
+  expect(skipped()).toBe(5)
+  // the first row: the newest, back at the top
+  await ui.press({ key: 's0' })
+  expect(skipped()).toBe(0)
+  await ui.unmount()
+})
+
+test('▲ and ▼ at the scrollbar\'s ends move the list a message at a time, never past its ends', async ($, on) => {
+  const { state } = world(on)
+
+  await $.session.start(start)
+  for (const n of [1, 2, 3]) await $.prompt.submit(submit(`prompt ${n}`))
+
+  const ui = await $.ui.mount({ ...PANE, surface: 'terminal' })
+  const skipped = () => (state.get('daiver-prompt-view.skip') as { value: number } | undefined)?.value ?? 0
+
+  await ui.press({ key: 'up' })
+  expect(skipped()).toBe(0)
+  await ui.press({ key: 'down' })
+  expect(skipped()).toBe(1)
+  await ui.press({ key: 'down' })
+  await ui.press({ key: 'down' })
+  expect(skipped()).toBe(2)
+  await ui.press({ key: 'up' })
+  expect(skipped()).toBe(1)
+  await ui.unmount()
+})
