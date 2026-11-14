@@ -1,6 +1,6 @@
 import { expect, test } from 'claude-code/testing'
 import { loadConfig } from '../hooks/shared/config'
-import { withPadding } from '../hooks/features/statusline'
+import { drawnPadding, withPadding } from '../hooks/features/statusline'
 import { conf, DIR, run, start, world } from './world'
 
 const THEME_SH =
@@ -89,4 +89,22 @@ test('a statuslineUsage value reaches the config file', { options: { statuslineU
   await $.session.start(start)
 
   expect(config()).toContain('\nusage=false\n')
+})
+
+test('the padding Claude Code draws with: statusLine.padding while it runs the mod\'s script, 0 with none', () => {
+  expect(drawnPadding({ ...WIRED, padding: 3 })).toBe(3)
+  expect(drawnPadding(WIRED)).toBe(0)
+  expect(drawnPadding({ ...WIRED, padding: 1.5 })).toBe(0)
+  expect(drawnPadding({ type: 'command', command: 'ccstatus', padding: 2 })).toBe(undefined)
+  expect(drawnPadding(undefined)).toBe(undefined)
+})
+
+test("the config's padding is the one drawn: the option's while the mod's settings.read hook answers", { options: { statuslinePadding: 2 } }, async ($, on) => {
+  const { config, settings } = world(on)
+  settings.value = { statusLine: { ...WIRED, padding: 4 } }
+
+  await $.session.start(start)
+
+  // the hook put the option in the merged settings, and the frame is built for it
+  expect(config()).toContain('\npadding=2\n')
 })

@@ -27,7 +27,7 @@ export function paddingOf(value: unknown) {
 
 // the options the status line script reads, from the plugin's userConfig;
 // a change in /config reloads the module, and session.start fires again
-export const config = { clodik: true, animate: false, animation: 'matrix', theme: 'default', history: false, historyMode: 'fullstory', toasts: false, borders: true, chatBorders: true, statuslineBorders: true, usage: true, borderStyle: 'dashed', padding: PADDING.default }
+export const config = { clodik: true, animate: false, animation: 'matrix', theme: 'default', history: false, historyMode: 'fullstory', toasts: false, borders: true, chatBorders: true, statuslineBorders: true, usage: true, borderStyle: 'dashed', padding: PADDING.default, drawnPadding: undefined as number | undefined }
 
 export function loadConfig(options: Record<string, unknown>) {
   config.clodik = options.clodik !== false
@@ -49,6 +49,6 @@ export function loadConfig(options: Record<string, unknown>) {
 export async function writeConfig($: EngineInterface) {
   const dir = await home($)
 
-  await sync($, `${dir}/config`, `clodik=${config.clodik}\nanimate=${config.animate}\nanimation=${config.animation}\ntheme=${config.theme}\nhistory=${config.history}\nborders=${config.borders}\nchatBorders=${config.chatBorders}\nstatuslineBorders=${config.statuslineBorders}\nborderStyle=${config.borderStyle}\npadding=${config.padding}\nusage=${config.usage}\n`)
+  await sync($, `${dir}/config`, `clodik=${config.clodik}\nanimate=${config.animate}\nanimation=${config.animation}\ntheme=${config.theme}\nhistory=${config.history}\nborders=${config.borders}\nchatBorders=${config.chatBorders}\nstatuslineBorders=${config.statuslineBorders}\nborderStyle=${config.borderStyle}\npadding=${config.drawnPadding ?? config.padding}\nusage=${config.usage}\n`)
   await sync($, `${dir}/theme.sh`, themeShell(config.theme))
 }

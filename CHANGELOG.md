@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.43.2] - 2026-11-14
+
+### Fixed
+
+- The status line's frame fits the padding Claude Code really draws with, also when an organization's plugin keeps the padding option from applying; the debug log then says so.
+
 ## [1.43.1] - 2026-11-14
 
 ### Changed

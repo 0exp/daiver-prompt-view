@@ -516,8 +516,13 @@ from each edge of the terminal and adds `statusLine.padding` to that, and while
 `statusLine` runs this script the mod sets that padding to its
 `statuslinePadding` option (`-1` by default), in the settings as Claude Code
 merges them: nothing is written to `settings.json`, and a `padding` there is
-overridden. The frame reads the same value and widens to match. Another status
-line's `padding` is left as it is.
+overridden. The frame is built for the padding Claude Code really draws with,
+read back from the merged settings every few seconds. Where a plugin seated
+above this one (an organization's security plugin) passes the settings on past
+the mod, the option cannot reach Claude Code: the status line keeps the
+`statusLine.padding` of `settings.json` (`0` with none), the frame still fits
+it, and the debug log says the option is not applied; set the same value in
+`settings.json` to have it there. Another status line's `padding` is left as it is.
 
 | `statuslinePadding` | Free columns on each side of the frame |
 | --- | --- |

@@ -41,10 +41,16 @@ async function writeAutoMemory($: EngineInterface) {
 // on every session start (and so every reload): the script copy, its config and theme, auto memory
 export async function startStatusline($: EngineInterface) {
   await sync($, `${await home($)}/statusline.sh`, await $.fs.read(`${$.plugin.root}/${SCRIPT}`))
+  await readPadding($)
   await writeConfig($)
   await writeAutoMemory($)
   // a second's refresh, as the status line's: /memory changes the setting any time
   $.clock.every(1000, () => writeAutoMemory($))
+  // the padding drawn, again every few seconds: a settings file or a plugin above may change it
+  $.clock.every(5000, async () => {
+    await readPadding($)
+    await writeConfig($)
+  })
 }
 
 // the settings as the engine merges them, with statusLine.padding set to the
@@ -52,6 +58,39 @@ export async function startStatusline($: EngineInterface) {
 // is written to settings.json: every reader of the merged settings, the status
 // line's own Box included, reads the padding from here). A read of one source
 // is left as that file holds it
+// the padding Claude Code draws the status line with, from statusLine as the
+// merged settings hold it: its padding (none: 0, as the engine's Box takes it)
+// while it runs this mod's script; undefined for another status line or none
+export function drawnPadding(line: unknown) {
+  const own = line as { command?: unknown; padding?: unknown } | undefined
+
+  if (typeof own !== 'object' || own === null || typeof own.command !== 'string' || !own.command.includes(SCRIPT_COPY)) return undefined
+
+  return Number.isInteger(own.padding) ? (own.padding as number) : 0
+}
+
+// this mod's settings.read hook ran since the last readPadding; the skip noted once a load
+let hookRan = false
+let skipNoted = false
+
+// the frame is built for the padding the engine draws with, not the option's
+// alone: a plugin seated above (an organization's) may send settings.read on
+// past this mod's hook, and the settings.json padding is then the one drawn. A
+// read the hooks refuse leaves the option's
+async function readPadding($: EngineInterface) {
+  hookRan = false
+  const drawn = drawnPadding(await $.settings.read({ key: 'statusLine' }).catch(() => undefined))
+
+  config.drawnPadding = drawn
+  if (drawn !== undefined && drawn !== config.padding && !hookRan && !skipNoted) {
+    skipNoted = true
+    $.ui.log(
+      `daiver-prompt-view: statuslinePadding ${config.padding} is not applied: a plugin above passes settings.read on past this mod; the status line keeps statusLine.padding ${drawn} from the settings files, and its frame follows it`,
+      { to: 'debug' },
+    )
+  }
+}
+
 export function withPadding(settings: Readonly<Record<string, unknown>>) {
   const line = settings.statusLine as { command?: unknown } | undefined
 
@@ -80,6 +119,7 @@ export function registerStatusline(on: On) {
   }).catch(($, e, next) => failed(next.error.message ?? next.error.kind))
 
   on('settings.read', async ($, e, next) => {
+    hookRan = true
     const result = await next(e)
 
     return e.source === undefined && result.deny === undefined ? { value: withPadding(result.value) } : result
