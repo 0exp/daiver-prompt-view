@@ -27,7 +27,7 @@ mod="$HOME/.claude/daiver-prompt-view"
 c_gray='' c_white='' c_orange='' c_session='' c_ctx='' c_ctxSize='' c_lmt='' c_rst='' c_pch='' c_sha='' c_branch='' c_flags='' c_added='' c_removed='' c_matrix='' c_frame='' c_effort='' c_ostyle=''
 [ -f "$mod/theme.sh" ] && . "$mod/theme.sh"
 # a theme.sh written before the context's size had a color of its own: the
-# reset time's
+# reset time's, until the mod writes the theme again
 [ -z "$c_ctxSize" ] && c_ctxSize=$c_orange
 gray=$(esc "$c_gray")
 white=$(esc "$c_white")

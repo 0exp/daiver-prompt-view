@@ -11,7 +11,7 @@ export type Theme = {
   orange: string // Clawd, the rst reset time
   session: string // [session]
   ctx: string // ctx bar
-  ctxSize: string // the context's size in tokens beside the ctx bar's percentage (the rst reset time's Clawd orange by default)
+  ctxSize: string // the context's size in tokens beside the ctx bar's percentage (lavender by default)
   lmt: string // lmt bar
   rst: string // rst bar
   pch: string // pch bar
@@ -46,7 +46,7 @@ export const THEMES: Record<string, Theme> = {
     orange: '38;2;215;119;87',
     session: '38;2;255;250;250',
     ctx: '38;2;255;0;255',
-    ctxSize: '38;2;215;119;87',
+    ctxSize: '38;2;156;121;206',
     lmt: '38;2;135;206;235',
     rst: '38;2;144;238;144',
     pch: '38;2;132;136;132',

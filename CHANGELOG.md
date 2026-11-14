@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.41.1] - 2026-11-14
+
+### Changed
+
+- The context's size beside the context bar is lavender instead of Clawd orange in the default theme.
+
 ## [1.41.0] - 2026-11-14
 
 ### Added
