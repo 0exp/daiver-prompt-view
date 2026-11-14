@@ -1,6 +1,6 @@
 {
   "name": "daiver-prompt-view",
-  "version": "1.40.1",
+  "version": "1.41.0",
   "description": "A multi-line status line under the prompt: model, session, modes, agents, usage bars, git state and Clawd",
   "author": {
     "name": "Rustam Ibragimov",
@@ -25,6 +25,12 @@
       "type": "boolean",
       "title": "Show the status line's frame",
       "description": "The frame around the status line, on its own: drawn while this and the frames option are both on (also /daiver-prompt-view:chat:show-statusline-borders [on|off])",
+      "default": true
+    },
+    "statuslineUsage": {
+      "type": "boolean",
+      "title": "Show the session's tokens and cost",
+      "description": "The session's input and output tokens and its cost at the end of the status line's first line, as <in:1.2M·out:85k·cash:$4.31> (also /daiver-prompt-view:statusline:show-usage [on|off])",
       "default": true
     },
     "borderStyle": {

@@ -30,6 +30,8 @@ else as wide as the widest line, Clawd inside it at the right border.
    session's transcripts (`k` thousands, `M` millions), `cash`
    the cost in dollars at API prices, subagents included (on a subscription an
    estimate, not a bill); `<in:0·out:0·cash:$0.00>` before the first request.
+   Hidden with the `statuslineUsage` option off
+   (`/daiver-prompt-view:statusline:show-usage`).
 2. Modes: reasoning effort, output style, thinking, fast mode (each only when known).
 3. Agents (the `agents` feature):
    - `main`: the main loop: `thinking` while its turn runs, `tool:<name>` while
@@ -157,6 +159,7 @@ after the command.
 | `/daiver-prompt-view:chat:show-chat-borders` | `on`, `off`, or nothing | `on` | Show (`on`) or hide (`off`) the frames around prompts, replies, tool calls, the spinner and command output, the status line's left as it is; with no argument, toggles |
 | `/daiver-prompt-view:chat:show-statusline-borders` | `on`, `off`, or nothing | `on` | Show (`on`) or hide (`off`) the frame around the status line alone; with no argument, toggles |
 | `/daiver-prompt-view:chat:border-style` | `dashed`, `line`, or nothing | `dashed` | Draw every frame dashed (`dashed`) or as a solid line (`line`); with no argument, shows the current one and the list |
+| `/daiver-prompt-view:statusline:show-usage` | `on`, `off`, or nothing | `on` | Show (`on`) or hide (`off`) the session's tokens and cost at the end of the status line's first line; with no argument, toggles |
 
 ### `/daiver-prompt-view:clodik:animate [on|off]`
 
@@ -228,6 +231,7 @@ Every option is in `/config`, or in `~/.claude/settings.json` under
 | `borders` | Show the frames | boolean | `true` | `true`, `false` | `chat:show-borders` |
 | `chatBorders` | Show the chat's frames | boolean | `true` | `true`, `false` | `chat:show-chat-borders` |
 | `statuslineBorders` | Show the status line's frame | boolean | `true` | `true`, `false` | `chat:show-statusline-borders` |
+| `statuslineUsage` | Show the session's tokens and cost | boolean | `true` | `true`, `false` | `statusline:show-usage` |
 | `borderStyle` | Frame style | choice | `dashed` | `dashed`, `line` | `chat:border-style` |
 | `clodik` | Show Clawd | boolean | `true` | `true`, `false` | (none) |
 | `clodikAnimate` | Animate Clawd always | boolean | `false` | `true`, `false` | `clodik:animate` |
@@ -247,6 +251,7 @@ For example, in `~/.claude/settings.json`:
       "borders":           true,
       "chatBorders":       true,
       "statuslineBorders": true,
+      "statuslineUsage":   true,
       "borderStyle":       "dashed",
       "clodik":            true,
       "clodikAnimate":     false,
@@ -418,6 +423,25 @@ one says, and this one off hides it while the transcript's frames stay.
 | `/daiver-prompt-view:chat:show-statusline-borders off` | `The status line's frame is now hidden.` |
 | `/daiver-prompt-view:chat:show-statusline-borders` | toggles: `The status line's frame is now hidden.` when it was on, `The status line's frame is now shown.` when it was off |
 | `/daiver-prompt-view:chat:show-statusline-borders maybe` | nothing changes: `Usage: /daiver-prompt-view:chat:show-statusline-borders [on|off]` |
+
+### `/daiver-prompt-view:statusline:show-usage [on|off]`
+
+Option `statuslineUsage` (Show the session's tokens and cost), default `true`
+(`on`). It covers the segment at the end of the status line's first line: the
+input and output tokens of every request in the session, subagents included,
+and the session's cost in dollars at API prices.
+
+| Value | Effect |
+| --- | --- |
+| `on` | the first line ends with the segment: `Opus 5.5 -> [demo] (sid:419e75ee) <stime:1h23m> <automemory:on> <in:1.2M·out:85k·cash:$4.31>` |
+| `off` | the first line ends where it did before: `Opus 5.5 -> [demo] (sid:419e75ee) <stime:1h23m> <automemory:on>`, and the session's transcripts are not read |
+
+| Usage | Result |
+| --- | --- |
+| `/daiver-prompt-view:statusline:show-usage on` | `The session's tokens and cost are now shown.` |
+| `/daiver-prompt-view:statusline:show-usage off` | `The session's tokens and cost are now hidden.` |
+| `/daiver-prompt-view:statusline:show-usage` | toggles: `The session's tokens and cost are now hidden.` when they were shown, `The session's tokens and cost are now shown.` when they were hidden |
+| `/daiver-prompt-view:statusline:show-usage maybe` | nothing changes: `Usage: /daiver-prompt-view:statusline:show-usage [on\|off]` |
 
 ### `/daiver-prompt-view:chat:border-style [dashed|line]`
 

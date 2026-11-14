@@ -14,7 +14,7 @@ import { registerReply } from './features/reply'
 import { registerSpinner } from './features/spinner'
 import { registerTool } from './features/tool'
 import { commandToast, registerToasts, TOASTS } from './features/toasts'
-import { registerStatusline, startStatusline } from './features/statusline'
+import { registerStatusline, startStatusline, USAGE } from './features/statusline'
 import { registerView, THEME } from './features/view'
 
 export const register: Register = (on, options) => {
@@ -75,6 +75,7 @@ export const register: Register = (on, options) => {
       [CHAT_BORDERS]: { values: ['on', 'off'], current: config.chatBorders ? 'on' : 'off' },
       [STATUSLINE_BORDERS]: { values: ['on', 'off'], current: config.statuslineBorders ? 'on' : 'off' },
       [BORDER_STYLE]: { values: BORDER_STYLES, current: config.borderStyle },
+      [USAGE]: { values: ['on', 'off'], current: config.usage ? 'on' : 'off' },
     })
 
     if (rows.length === 0) return next(e)

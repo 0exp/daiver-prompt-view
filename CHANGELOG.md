@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.41.0] - 2026-11-14
+
+### Added
+
+- An option and a command to show or hide the session's tokens and cost on the first line, shown by default; with no argument the command toggles them.
+
 ## [1.40.1] - 2026-11-14
 
 ### Fixed

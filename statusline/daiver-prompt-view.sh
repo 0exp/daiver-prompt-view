@@ -86,27 +86,30 @@ case "$am" in on | off) model="${model}${gray}<${bold}automemory:${unbold}$am>${
 # once (it has a row per content block, all with its usage), kept in
 # tokens/<session_id> with the files' sizes and summed again only when one
 # grows. Names braced: bash 3.2 as sh takes the dot's first byte for part of a
-# bare $name
-tsum='0 0'
-if [ -n "$tp" ] && [ -f "$tp" ]; then
-  tfiles=$(ls "$tp" "${tp%.jsonl}"/subagents/*.jsonl 2>/dev/null)
-  tsig=$(echo "$tfiles" | while IFS= read -r f; do printf '%s,' "$(wc -c < "$f" | tr -d ' ')"; done)
-  tc="$mod/tokens/$(echo "$input" | jq -r '.session_id // "none"')"
-  csig='' cin='' cout=''
-  [ -f "$tc" ] && read -r csig cin cout < "$tc"
-  if [ "$csig" = "$tsig" ] && [ -n "$cout" ]; then
-    tsum="$cin $cout"
-  else
-    tsum=$(echo "$tfiles" | while IFS= read -r f; do grep '"usage"' "$f"; done |
-      jq -rs '[.[] | select(.type == "assistant" and .message.usage) | {key: .message.id, value: .message.usage}] | from_entries | [.[]]
-        | "\(map((.input_tokens // 0) + (.cache_creation_input_tokens // 0) + (.cache_read_input_tokens // 0)) | add // 0) \(map(.output_tokens // 0) | add // 0)"' 2>/dev/null)
-    case "$tsum" in *[0-9]' '[0-9]*) mkdir -p "$mod/tokens" && printf '%s %s\n' "$tsig" "$tsum" > "$tc.$$" && mv "$tc.$$" "$tc" ;; *) tsum='0 0' ;; esac
+# bare $name. The statuslineUsage option off (statusline:show-usage, `usage=`
+# in config): no segment, nothing summed
+if ! grep -qx 'usage=false' "$mod/config" 2>/dev/null; then
+  tsum='0 0'
+  if [ -n "$tp" ] && [ -f "$tp" ]; then
+    tfiles=$(ls "$tp" "${tp%.jsonl}"/subagents/*.jsonl 2>/dev/null)
+    tsig=$(echo "$tfiles" | while IFS= read -r f; do printf '%s,' "$(wc -c < "$f" | tr -d ' ')"; done)
+    tc="$mod/tokens/$(echo "$input" | jq -r '.session_id // "none"')"
+    csig='' cin='' cout=''
+    [ -f "$tc" ] && read -r csig cin cout < "$tc"
+    if [ "$csig" = "$tsig" ] && [ -n "$cout" ]; then
+      tsum="$cin $cout"
+    else
+      tsum=$(echo "$tfiles" | while IFS= read -r f; do grep '"usage"' "$f"; done |
+        jq -rs '[.[] | select(.type == "assistant" and .message.usage) | {key: .message.id, value: .message.usage}] | from_entries | [.[]]
+          | "\(map((.input_tokens // 0) + (.cache_creation_input_tokens // 0) + (.cache_read_input_tokens // 0)) | add // 0) \(map(.output_tokens // 0) | add // 0)"' 2>/dev/null)
+      case "$tsum" in *[0-9]' '[0-9]*) mkdir -p "$mod/tokens" && printf '%s %s\n' "$tsig" "$tsum" > "$tc.$$" && mv "$tc.$$" "$tc" ;; *) tsum='0 0' ;; esac
+    fi
   fi
+  tin=$(echo "${tsum% *}" | jq -r "$human"' h')
+  tout=$(echo "${tsum#* }" | jq -r "$human"' h')
+  cash=$(printf '%.2f' "$(echo "$input" | jq -r '.cost.total_cost_usd // 0')")
+  model="${model}${gray}<${bold}in:${unbold}${tin}·${bold}out:${unbold}${tout}·${bold}cash:${unbold}\$${cash}>${reset} "
 fi
-tin=$(echo "${tsum% *}" | jq -r "$human"' h')
-tout=$(echo "${tsum#* }" | jq -r "$human"' h')
-cash=$(printf '%.2f' "$(echo "$input" | jq -r '.cost.total_cost_usd // 0')")
-model="${model}${gray}<${bold}in:${unbold}${tin}·${bold}out:${unbold}${tout}·${bold}cash:${unbold}\$${cash}>${reset} "
 
 # line 2: modes; the effort level and the output style in their theme colors
 effort=$(echo "$input" | jq -r '.effort.level // empty')

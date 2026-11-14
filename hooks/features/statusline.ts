@@ -2,10 +2,14 @@
 // plugin's folder moves with each GitHub update: the status line runs a copy at
 // a stable path (<mod dir>/statusline.sh), refreshed on every session start
 import type { EngineInterface, On } from 'claude-code'
+import { command, failed } from '../shared/commands'
 import { config, writeConfig } from '../shared/config'
+import { setOption } from '../shared/options'
 import { home, sync } from '../shared/files'
 
 const SCRIPT = 'statusline/daiver-prompt-view.sh'
+
+export const USAGE = command('statusline', 'show-usage')
 // how statusLine.command names the script: the installed copy's path
 const SCRIPT_COPY = 'daiver-prompt-view/statusline.sh'
 // the status line's input has no auto memory state: <mod dir>/automemory holds
@@ -57,6 +61,24 @@ export function withPadding(settings: Readonly<Record<string, unknown>>) {
 }
 
 export function registerStatusline(on: On) {
+  // statusline:show-usage [on|off]: the statuslineUsage option, the session's
+  // tokens and cost on the first line; toggled when no argument
+  on('command.run', { command: USAGE }, async ($, e) => {
+    const arg = e.args.trim().toLowerCase()
+
+    if (arg !== '' && arg !== 'on' && arg !== 'off') return { text: `Usage: /${USAGE} [on|off]` }
+
+    const value = arg === '' ? !config.usage : arg === 'on'
+    const deny = await setOption($, 'statuslineUsage', value)
+
+    if (deny !== undefined) return { text: `The session's tokens and cost were not changed: ${deny}` }
+
+    config.usage = value
+    await writeConfig($)
+
+    return { text: `The session's tokens and cost are now ${value ? 'shown' : 'hidden'}.` }
+  }).catch(($, e, next) => failed(next.error.message ?? next.error.kind))
+
   on('settings.read', async ($, e, next) => {
     const result = await next(e)
 

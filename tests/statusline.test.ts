@@ -1,7 +1,7 @@
 import { expect, test } from 'claude-code/testing'
 import { loadConfig } from '../hooks/shared/config'
 import { withPadding } from '../hooks/features/statusline'
-import { conf, DIR, start, world } from './world'
+import { conf, DIR, run, start, world } from './world'
 
 const THEME_SH =
   "# daiver-prompt-view theme: default\nc_gray='38;2;128;128;128'\nc_white='38;2;255;255;255'\nc_orange='38;2;215;119;87'\n" +
@@ -66,4 +66,27 @@ test('another status line, or none, is left as it is', async () => {
   expect(withPadding(other)).toBe(other)
   expect(withPadding({ model: 'opus' })).toEqual({ model: 'opus' })
   loadConfig({})
+})
+
+test("show-usage toggles the session's tokens and cost, on and off set them", async ($, on) => {
+  const { sets, config } = world(on)
+
+  await $.session.start(start)
+
+  expect(config()).toContain('\nusage=true\n')
+  expect((await $.command.run(run('statusline:show-usage'))).text).toBe("The session's tokens and cost are now hidden.")
+  expect(config()).toBe(conf(true, false, 'random', 'default', false, true, true, true, 'dashed', -1, false))
+  expect((await $.command.run(run('statusline:show-usage'))).text).toBe("The session's tokens and cost are now shown.")
+  expect((await $.command.run(run('statusline:show-usage', 'off'))).text).toBe("The session's tokens and cost are now hidden.")
+  expect((await $.command.run(run('statusline:show-usage', 'on'))).text).toBe("The session's tokens and cost are now shown.")
+  expect(sets).toEqual(['statuslineUsage=false', 'statuslineUsage=true', 'statuslineUsage=false', 'statuslineUsage=true'])
+  expect((await $.command.run(run('statusline:show-usage', 'maybe'))).text).toBe('Usage: /daiver-prompt-view:statusline:show-usage [on|off]')
+})
+
+test('a statuslineUsage value reaches the config file', { options: { statuslineUsage: false } }, async ($, on) => {
+  const { config } = world(on)
+
+  await $.session.start(start)
+
+  expect(config()).toContain('\nusage=false\n')
 })
