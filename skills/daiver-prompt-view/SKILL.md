@@ -25,7 +25,7 @@ ctx ███░░░░░░░ 37% (74k/200k) | lmt ████░░░░
 | Commands | `commands/<feature>/<name>.md` -> `/daiver-prompt-view:<feature>:<name>`, answered by a `command.run` hook (the .md body is only a fallback if the mod is not loaded) |
 | Status line script (source of truth) | `statusline/daiver-prompt-view.sh` |
 | Installed copy (what the status line runs) | `~/.claude/daiver-prompt-view/statusline.sh` |
-| State, per session | `~/.claude/daiver-prompt-view/agents/<session_id>`, `.../automemory/<session_id>`, `.../tokens/<session_id>` (the transcripts' sizes and the session's input/output token sums, summed again when a transcript grows); `.../agents.idle`, the agents line of a session with no state yet; options in `.../config`, colors in `.../theme.sh` |
+| State, per session | `~/.claude/daiver-prompt-view/agents/<session_id>`, `.../automemory/<session_id>` (`on`, `off`, or `unknown`, drawn `?`: `autoMemoryState` reads the merged settings, and when that read is refused the user, project and local settings files, the last holding `autoMemoryEnabled` winning), `.../tokens/<session_id>` (the transcripts' sizes and the session's input/output token sums, summed again when a transcript grows); `.../agents.idle`, the agents line of a session with no state yet; options in `.../config`, colors in `.../theme.sh` |
 | Wiring | `statusLine.command` in `~/.claude/settings.json` = `sh "$HOME/.claude/daiver-prompt-view/statusline.sh"`, `refreshInterval: 1` |
 | Installed as | `daiver-prompt-view@daiver-prompt-view`, user scope; for development a `directory` marketplace pointing at the repo (read from the folder itself: never move it without reinstalling) |
 

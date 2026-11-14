@@ -108,3 +108,37 @@ test("the config's padding is the one drawn: the option's while the mod's settin
   // the hook put the option in the merged settings, and the frame is built for it
   expect(config()).toContain('\npadding=2\n')
 })
+
+const MEMORY = `${DIR}/automemory/s1`
+const USER_SETTINGS = '/home/me/.claude/settings.json'
+const LOCAL_SETTINGS = '/home/me/proj/.claude/settings.local.json'
+
+test('auto memory: on by default, off when the merged settings turn it off', async ($, on) => {
+  const { files, settings } = world(on)
+
+  await $.session.start(start)
+  expect(files.get(MEMORY)).toBe('on\n')
+
+  settings.value = { autoMemoryEnabled: false }
+  await $.session.start(start)
+  expect(files.get(MEMORY)).toBe('off\n')
+})
+
+test('auto memory with the settings read refused: from the settings files, the local one winning', async ($, on) => {
+  const { files } = world(on, { settingsDenied: true })
+  files.set(USER_SETTINGS, '{"autoMemoryEnabled":true}')
+  files.set(LOCAL_SETTINGS, '{"autoMemoryEnabled":false}')
+
+  await $.session.start(start)
+
+  expect(files.get(MEMORY)).toBe('off\n')
+})
+
+test('auto memory with the settings read refused and no file to read: unknown, not on', async ($, on) => {
+  const { files } = world(on, { settingsDenied: true })
+  for (const path of [USER_SETTINGS, '/home/me/proj/.claude/settings.json', LOCAL_SETTINGS]) files.set(path, 'not json')
+
+  await $.session.start(start)
+
+  expect(files.get(MEMORY)).toBe('unknown\n')
+})

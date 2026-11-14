@@ -1,7 +1,7 @@
 #!/bin/sh
 # daiver-prompt-view: the status line under the prompt.
 # Reads the status line JSON on stdin and prints:
-#   1. model -> [session] (sid:…) <stime:…> <automemory:on|off> <in:…·out:…·cash:…>
+#   1. model -> [session] (sid:…) <stime:…> <automemory:on|off|?> <in:…·out:…·cash:…>
 #   2. modes: effort, outputstyle, thinkmode, fastmode
 #   3. the agents lines, which the mod writes for this session
 #   4. ctx / lmt / rst / pch bars
@@ -53,7 +53,7 @@ human='def h: if . >= 1000000 then ((. / 100000 | floor) / 10 | tostring) + "M" 
 dir=$(echo "$input" | jq -r '.workspace.current_dir // .cwd // empty')
 case "$dir" in "$HOME"*) dir="~${dir#"$HOME"}" ;; esac
 
-# line 1: model -> [session] (sid:…) <stime:…> <automemory:on|off> <in:…·out:…·cash:…>
+# line 1: model -> [session] (sid:…) <stime:…> <automemory:on|off|?> <in:…·out:…·cash:…>
 mname="${white}$(echo "$input" | jq -r '.model.display_name')${reset}"
 model=''
 sid=$(echo "$input" | jq -r '.session_id // empty' | cut -c1-8)
@@ -73,9 +73,13 @@ stm="$((el / 3600))h$(printf '%02d' $((el % 3600 / 60)))m"
 model="${model}${gray}<${bold}stime:${unbold}$stm>${reset} "
 
 # auto memory: the status line's input has no such field, the hooks module
-# writes it for this session; no file, no segment
+# writes it for this session (on, off, unknown); no file, no segment
 am=$(cat "$mod/automemory/$(echo "$input" | jq -r '.session_id // empty')" 2>/dev/null)
-case "$am" in on | off) model="${model}${gray}<${bold}automemory:${unbold}$am>${reset} " ;; esac
+case "$am" in
+  on | off) model="${model}${gray}<${bold}automemory:${unbold}$am>${reset} " ;;
+  # nothing could be read (a plugin above refused it): unknown, never a guess
+  unknown) model="${model}${gray}<${bold}automemory:${unbold}?>${reset} " ;;
+esac
 
 # the session's tokens and cost, last on the line: input (new, written to and
 # read from the cache) and output tokens of every request so far (k thousands,

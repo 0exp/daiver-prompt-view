@@ -13,7 +13,8 @@ export const USAGE = command('statusline', 'show-usage')
 // how statusLine.command names the script: the installed copy's path
 const SCRIPT_COPY = 'daiver-prompt-view/statusline.sh'
 // the status line's input has no auto memory state: <mod dir>/automemory holds
-// it, a file per session (`on` or `off`), for the script's <automemory:…> segment
+// it, a file per session (`on`, `off`, or `unknown` when nothing could be
+// read), for the script's <automemory:…> segment
 const AUTO_MEMORY_KEY = 'autoMemoryEnabled'
 
 // /pause-memory, as the prompt footer's mode label says it
@@ -22,20 +23,56 @@ let memoryPaused = false
 // of session without auto memory (remote, restricted, ...)
 let memoryBlocked = false
 
-// as the engine decides, for what a plugin can see: the switch variable beats the setting
-async function autoMemoryOn($: EngineInterface) {
+// the setting from the settings files themselves, for when a plugin above
+// refuses the mod's settings read: user, then project, then local, the last
+// that holds it winning (managed settings are not files a plugin can name);
+// undefined when none holds it, null when none could be read
+async function autoMemoryFromFiles($: EngineInterface) {
+  const cwd = await $.session.cwd()
+  const paths = [`${await $.env.get('HOME')}/.claude/settings.json`, `${cwd}/.claude/settings.json`, `${cwd}/.claude/settings.local.json`]
+  let value: unknown
+  let isRead = false
+
+  for (const path of paths) {
+    try {
+      if (!(await $.fs.exists(path))) {
+        isRead = true
+        continue
+      }
+      const settings = JSON.parse(await $.fs.read(path)) as Record<string, unknown>
+      isRead = true
+      if (AUTO_MEMORY_KEY in settings) value = settings[AUTO_MEMORY_KEY]
+    } catch {
+      // unreadable or not JSON: the others may still say
+    }
+  }
+
+  return isRead ? value : null
+}
+
+// as the engine decides, for what a plugin can see: the switch variable beats
+// the setting; the setting from the merged settings, else from the files, else
+// unknown (never a guess of on)
+async function autoMemoryState($: EngineInterface): Promise<'on' | 'off' | 'unknown'> {
   const env = (await $.env.get('CLAUDE_CODE_DISABLE_AUTO_MEMORY'))?.toLowerCase() ?? ''
 
-  if (memoryPaused || ['1', 'true', 'yes', 'on'].includes(env)) return false
-  if (['0', 'false', 'no', 'off'].includes(env)) return true
+  if (memoryPaused || ['1', 'true', 'yes', 'on'].includes(env)) return 'off'
+  if (['0', 'false', 'no', 'off'].includes(env)) return 'on'
+  if (memoryBlocked) return 'off'
 
-  return !memoryBlocked && (await $.settings.read({ key: AUTO_MEMORY_KEY })) !== false
+  const merged = await $.settings.read({ key: AUTO_MEMORY_KEY }).then(
+    value => ({ value }),
+    () => undefined,
+  )
+  const value = merged !== undefined ? merged.value : await autoMemoryFromFiles($)
+
+  return value === null ? 'unknown' : value === false ? 'off' : 'on'
 }
 
 async function writeAutoMemory($: EngineInterface) {
   const path = `${await home($)}/automemory/${await $.session.id()}`
 
-  await sync($, path, (await autoMemoryOn($)) ? 'on\n' : 'off\n')
+  await sync($, path, `${await autoMemoryState($)}\n`)
 }
 
 // on every session start (and so every reload): the script copy, its config and theme, auto memory
@@ -129,7 +166,7 @@ export function registerStatusline(on: On) {
   on('prompt.section', { name: 'memory' }, async ($, e, next) => {
     const result = await next(e)
 
-    memoryBlocked = result.text === null && !memoryPaused && (await $.settings.read({ key: AUTO_MEMORY_KEY })) !== false
+    memoryBlocked = result.text === null && !memoryPaused && (await $.settings.read({ key: AUTO_MEMORY_KEY }).catch(() => undefined)) !== false
     await writeAutoMemory($)
 
     return result

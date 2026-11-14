@@ -25,7 +25,9 @@ else as wide as the widest line, Clawd inside it at the right border.
 1. Model, session name, short session id, session time (`stime`, from the
    transcript's creation time), whether auto memory is on in this session
    (`automemory`, written by the hooks module: the status line's input has no
-   such field), and last the session's tokens and cost: `in` input and `out`
+   such field; read from the settings files themselves when a plugin above
+   refuses the mod's settings read, and `?` when nothing could be read, never a
+   guessed `on`), and last the session's tokens and cost: `in` input and `out`
    output tokens of every request so far, subagents included, summed from the
    session's transcripts (`k` thousands, `M` millions), `cash`
    the cost in dollars at API prices, subagents included (on a subscription an
