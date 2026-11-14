@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.43.1] - 2026-11-14
+
+### Changed
+
+- The development rules: a change is committed and pushed only with the maintainer's yes, a commit per finished feature and one push for a set of them.
+
 ## [1.43.0] - 2026-11-14
 
 ### Changed

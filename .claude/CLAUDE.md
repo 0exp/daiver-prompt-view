@@ -32,3 +32,9 @@ The mod's layout, invariants and checks are in `skills/daiver-prompt-view/SKILL.
 ## Before calling a change done
 
 `claude plugin test .`, `claude plugin validate .`, and the type-check from the skill all pass; bump `version` in `.claude-plugin/plugin.json` and add the change to `CHANGELOG.md` under that version.
+
+## Commits and pushes are offered, never made on their own
+
+- Never commit or push without the maintainer's yes, whatever the output style. Keep track of every feature built in the session.
+- A finished feature: offer to commit it and push it, and wait for the answer.
+- A feature made of several: each one is implemented and committed on its own (its own version and `CHANGELOG.md` entry), offered as it is finished; the push is offered once, after all of them are committed.
