@@ -6,6 +6,7 @@ import { command, failed } from '../shared/commands'
 import { config, writeConfig } from '../shared/config'
 import { setOption } from '../shared/options'
 import { home, sync } from '../shared/files'
+import { markSeen } from '../shared/seen'
 
 const SCRIPT = 'statusline/daiver-prompt-view.sh'
 
@@ -50,29 +51,35 @@ async function autoMemoryFromFiles($: EngineInterface) {
   return isRead ? value : null
 }
 
+// where the auto memory state was told from
+export type MemorySource = 'paused' | 'env' | 'blocked' | 'settings' | 'files' | 'none'
+
 // as the engine decides, for what a plugin can see: the switch variable beats
 // the setting; the setting from the merged settings, else from the files, else
 // unknown (never a guess of on)
-async function autoMemoryState($: EngineInterface): Promise<'on' | 'off' | 'unknown'> {
+export async function autoMemory($: EngineInterface): Promise<{ state: 'on' | 'off' | 'unknown'; source: MemorySource }> {
   const env = (await $.env.get('CLAUDE_CODE_DISABLE_AUTO_MEMORY'))?.toLowerCase() ?? ''
 
-  if (memoryPaused || ['1', 'true', 'yes', 'on'].includes(env)) return 'off'
-  if (['0', 'false', 'no', 'off'].includes(env)) return 'on'
-  if (memoryBlocked) return 'off'
+  if (memoryPaused) return { state: 'off', source: 'paused' }
+  if (['1', 'true', 'yes', 'on'].includes(env)) return { state: 'off', source: 'env' }
+  if (['0', 'false', 'no', 'off'].includes(env)) return { state: 'on', source: 'env' }
+  if (memoryBlocked) return { state: 'off', source: 'blocked' }
 
   const merged = await $.settings.read({ key: AUTO_MEMORY_KEY }).then(
     value => ({ value }),
     () => undefined,
   )
-  const value = merged !== undefined ? merged.value : await autoMemoryFromFiles($)
+  if (merged !== undefined) return { state: merged.value === false ? 'off' : 'on', source: 'settings' }
 
-  return value === null ? 'unknown' : value === false ? 'off' : 'on'
+  const value = await autoMemoryFromFiles($)
+
+  return value === null ? { state: 'unknown', source: 'none' } : { state: value === false ? 'off' : 'on', source: 'files' }
 }
 
 async function writeAutoMemory($: EngineInterface) {
   const path = `${await home($)}/automemory/${await $.session.id()}`
 
-  await sync($, path, `${await autoMemoryState($)}\n`)
+  await sync($, path, `${(await autoMemory($)).state}\n`)
 }
 
 // on every session start (and so every reload): the script copy, its config and theme, auto memory
@@ -128,6 +135,18 @@ async function readPadding($: EngineInterface) {
   }
 }
 
+// whether a settings read reaches this mod's hook now: `answered` (it ran),
+// `passed` (a plugin above sent the read on past it) or `refused` (denied)
+export async function settingsHook($: EngineInterface): Promise<'answered' | 'passed' | 'refused'> {
+  hookRan = false
+  const isRead = await $.settings.read({ key: 'statusLine' }).then(
+    () => true,
+    () => false,
+  )
+
+  return !isRead ? 'refused' : hookRan ? 'answered' : 'passed'
+}
+
 export function withPadding(settings: Readonly<Record<string, unknown>>) {
   const line = settings.statusLine as { command?: unknown } | undefined
 
@@ -157,6 +176,7 @@ export function registerStatusline(on: On) {
 
   on('settings.read', async ($, e, next) => {
     hookRan = true
+    markSeen('settings.read')
     const result = await next(e)
 
     return e.source === undefined && result.deny === undefined ? { value: withPadding(result.value) } : result
@@ -164,6 +184,7 @@ export function registerStatusline(on: On) {
 
   // the prompt's memory section is the engine's own answer for this session
   on('prompt.section', { name: 'memory' }, async ($, e, next) => {
+    markSeen('prompt.section')
     const result = await next(e)
 
     memoryBlocked = result.text === null && !memoryPaused && (await $.settings.read({ key: AUTO_MEMORY_KEY }).catch(() => undefined)) !== false

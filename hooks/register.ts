@@ -8,6 +8,7 @@ import { BORDER_STYLE, BORDERS, CHAT_BORDERS, registerChat, STATUSLINE_BORDERS }
 import { forgetNotifiedTasks, registerAgents, startAgents } from './features/agents'
 import { ANIMATE, ANIMATION, registerClodik } from './features/clodik'
 import { registerCommand } from './features/command'
+import { registerDoctor } from './features/doctor'
 import { collectCommand, collectPrompt, HISTORY, HISTORY_MODE, registerHistory, startHistory } from './features/history'
 import { registerPrompt } from './features/prompt'
 import { registerReply } from './features/reply'
@@ -51,6 +52,7 @@ export const register: Register = (on, options) => {
 
   registerToasts(on)
   registerStatusline(on)
+  registerDoctor(on)
   registerAgents(on)
   registerClodik(on)
   registerPrompt(on)

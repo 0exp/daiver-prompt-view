@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.44.0] - 2026-11-14
+
+### Added
+
+- A command that checks what of the mod works in the session: which of its hooks an organization's plugin passes by, the status line padding drawn, and where auto memory is read from.
+
 ## [1.43.3] - 2026-11-14
 
 ### Fixed

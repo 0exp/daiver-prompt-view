@@ -4,6 +4,7 @@
 import type { AgentStatus, EngineInterface, On, PromptSubmitInput } from 'claude-code'
 import { config } from '../shared/config'
 import { home, sync } from '../shared/files'
+import { markSeen } from '../shared/seen'
 import { sgr, THEMES } from '../shared/themes'
 import { noteSubagentCalls } from './tool'
 
@@ -252,6 +253,7 @@ export function registerAgents(on: On) {
   }).catch(($, e, next) => next(e))
 
   on('classic.Stop', ($, e, next) => {
+    markSeen('classic.Stop')
     const live = new Map((e.background_tasks ?? []).map(task => [task.id, task]))
 
     for (const id of tasks.keys()) if (!live.has(id)) tasks.delete(id)

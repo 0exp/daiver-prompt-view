@@ -162,6 +162,7 @@ after the command.
 | `/daiver-prompt-view:chat:show-chat-borders` | `on`, `off`, or nothing | `on` | Show (`on`) or hide (`off`) the frames around prompts, replies, tool calls, the spinner and command output, the status line's left as it is; with no argument, toggles |
 | `/daiver-prompt-view:chat:show-statusline-borders` | `on`, `off`, or nothing | `on` | Show (`on`) or hide (`off`) the frame around the status line alone; with no argument, toggles |
 | `/daiver-prompt-view:chat:border-style` | `dashed`, `line`, or nothing | `dashed` | Draw every frame dashed (`dashed`) or as a solid line (`line`); with no argument, shows the current one and the list |
+| `/daiver-prompt-view:mod:doctor` | nothing | (none) | Check what of the mod works in this session: the hooks a plugin above may pass by, the status line padding, where auto memory is read from |
 | `/daiver-prompt-view:statusline:show-usage` | `on`, `off`, or nothing | `on` | Show (`on`) or hide (`off`) the session's tokens and cost at the end of the status line's first line; with no argument, toggles |
 
 ### `/daiver-prompt-view:clodik:animate [on|off]`
@@ -431,6 +432,26 @@ one says, and this one off hides it while the transcript's frames stay.
 | `/daiver-prompt-view:chat:show-statusline-borders off` | `The status line's frame is now hidden.` |
 | `/daiver-prompt-view:chat:show-statusline-borders` | toggles: `The status line's frame is now hidden.` when it was on, `The status line's frame is now shown.` when it was off |
 | `/daiver-prompt-view:chat:show-statusline-borders maybe` | nothing changes: `Usage: /daiver-prompt-view:chat:show-statusline-borders [on|off]` |
+
+### `/daiver-prompt-view:mod:doctor`
+
+No option and no value: it reports. An organization may seat a security plugin
+above the user's plugins (`cc-plugin-sec-default`) that sends some events on
+past this mod; the command says which parts of the mod that touches, one line
+each:
+
+| Line | What it says |
+| --- | --- |
+| `settings.read` | checked now: `answered by the mod` (the padding option applies), `passed on past the mod by a plugin above` (the padding option cannot apply, the frame follows `settings.json`), or `refused` (auto memory is read from the settings files) |
+| `prompt.section` | how many times it ran since the mod loaded; it runs with each turn, so `not seen yet` after a turn means a plugin above passes it by: a session whose auto memory is blocked is not told apart then |
+| `classic.Stop` | the same; it runs as a turn ends and drops finished shells and monitors from the agents line |
+| `padding` | the `statuslinePadding` option and the padding the status line is drawn with |
+| `auto memory` | `on`, `off` or `?`, and where it was read from: the merged settings, the settings files, `CLAUDE_CODE_DISABLE_AUTO_MEMORY`, `/pause-memory`, or nothing |
+
+| Usage | Result |
+| --- | --- |
+| `/daiver-prompt-view:mod:doctor` | the report, for example:<br>`daiver-prompt-view doctor`<br>`settings.read: answered by the mod (checked now): the padding option applies`<br>`prompt.section: ran 3 times; it tells a session whose auto memory is blocked`<br>`classic.Stop: ran 3 times; it drops finished shells and monitors from the agents line`<br>`padding: statuslinePadding -1, drawn -1`<br>`auto memory: on, from the merged settings` |
+| `/daiver-prompt-view:mod:doctor now` | nothing is checked: `Usage: /daiver-prompt-view:mod:doctor` |
 
 ### `/daiver-prompt-view:statusline:show-usage [on|off]`
 
