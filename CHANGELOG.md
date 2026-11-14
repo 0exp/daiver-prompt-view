@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.40.1] - 2026-11-14
+
+### Fixed
+
+- `in` and `out` on the first line count the whole session's tokens, subagents included, instead of the last request's alone.
+
 ## [1.40.0] - 2026-11-14
 
 ### Added

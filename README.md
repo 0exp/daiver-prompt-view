@@ -26,7 +26,8 @@ else as wide as the widest line, Clawd inside it at the right border.
    transcript's creation time), whether auto memory is on in this session
    (`automemory`, written by the hooks module: the status line's input has no
    such field), and last the session's tokens and cost: `in` input and `out`
-   output tokens of every request so far (`k` thousands, `M` millions), `cash`
+   output tokens of every request so far, subagents included, summed from the
+   session's transcripts (`k` thousands, `M` millions), `cash`
    the cost in dollars at API prices, subagents included (on a subscription an
    estimate, not a bill); `<in:0·out:0·cash:$0.00>` before the first request.
 2. Modes: reasoning effort, output style, thinking, fast mode (each only when known).

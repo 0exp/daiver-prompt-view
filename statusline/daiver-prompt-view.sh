@@ -77,12 +77,34 @@ model="${model}${gray}<${bold}stime:${unbold}$stm>${reset} "
 am=$(cat "$mod/automemory/$(echo "$input" | jq -r '.session_id // empty')" 2>/dev/null)
 case "$am" in on | off) model="${model}${gray}<${bold}automemory:${unbold}$am>${reset} " ;; esac
 
-# the session's tokens and cost, last on the line: input and output tokens of
-# every request so far (k thousands, M millions) and the cost in dollars at API
-# prices, subagents included; zeros before the first request. Names braced:
-# bash 3.2 as sh takes the dot's first byte for part of a bare $name
-tin=$(echo "$input" | jq -r "$human"' (.context_window.total_input_tokens // 0) | h')
-tout=$(echo "$input" | jq -r "$human"' (.context_window.total_output_tokens // 0) | h')
+# the session's tokens and cost, last on the line: input (new, written to and
+# read from the cache) and output tokens of every request so far (k thousands,
+# M millions) and the cost in dollars at API prices, subagents included; zeros
+# before the first request. The input's context_window.total_*_tokens are the
+# last request's alone, so the sums come from the transcript and the
+# subagents' ones beside it (<session>/subagents/agent-*.jsonl): each response
+# once (it has a row per content block, all with its usage), kept in
+# tokens/<session_id> with the files' sizes and summed again only when one
+# grows. Names braced: bash 3.2 as sh takes the dot's first byte for part of a
+# bare $name
+tsum='0 0'
+if [ -n "$tp" ] && [ -f "$tp" ]; then
+  tfiles=$(ls "$tp" "${tp%.jsonl}"/subagents/*.jsonl 2>/dev/null)
+  tsig=$(echo "$tfiles" | while IFS= read -r f; do printf '%s,' "$(wc -c < "$f" | tr -d ' ')"; done)
+  tc="$mod/tokens/$(echo "$input" | jq -r '.session_id // "none"')"
+  csig='' cin='' cout=''
+  [ -f "$tc" ] && read -r csig cin cout < "$tc"
+  if [ "$csig" = "$tsig" ] && [ -n "$cout" ]; then
+    tsum="$cin $cout"
+  else
+    tsum=$(echo "$tfiles" | while IFS= read -r f; do grep '"usage"' "$f"; done |
+      jq -rs '[.[] | select(.type == "assistant" and .message.usage) | {key: .message.id, value: .message.usage}] | from_entries | [.[]]
+        | "\(map((.input_tokens // 0) + (.cache_creation_input_tokens // 0) + (.cache_read_input_tokens // 0)) | add // 0) \(map(.output_tokens // 0) | add // 0)"' 2>/dev/null)
+    case "$tsum" in *[0-9]' '[0-9]*) mkdir -p "$mod/tokens" && printf '%s %s\n' "$tsig" "$tsum" > "$tc.$$" && mv "$tc.$$" "$tc" ;; *) tsum='0 0' ;; esac
+  fi
+fi
+tin=$(echo "${tsum% *}" | jq -r "$human"' h')
+tout=$(echo "${tsum#* }" | jq -r "$human"' h')
 cash=$(printf '%.2f' "$(echo "$input" | jq -r '.cost.total_cost_usd // 0')")
 model="${model}${gray}<${bold}in:${unbold}${tin}·${bold}out:${unbold}${tout}·${bold}cash:${unbold}\$${cash}>${reset} "
 

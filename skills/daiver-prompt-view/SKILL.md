@@ -25,7 +25,7 @@ ctx ███░░░░░░░ 37% (74k/200k) | lmt ████░░░░
 | Commands | `commands/<feature>/<name>.md` -> `/daiver-prompt-view:<feature>:<name>`, answered by a `command.run` hook (the .md body is only a fallback if the mod is not loaded) |
 | Status line script (source of truth) | `statusline/daiver-prompt-view.sh` |
 | Installed copy (what the status line runs) | `~/.claude/daiver-prompt-view/statusline.sh` |
-| State, per session | `~/.claude/daiver-prompt-view/agents/<session_id>`, `.../automemory/<session_id>`; `.../agents.idle`, the agents line of a session with no state yet; options in `.../config`, colors in `.../theme.sh` |
+| State, per session | `~/.claude/daiver-prompt-view/agents/<session_id>`, `.../automemory/<session_id>`, `.../tokens/<session_id>` (the transcripts' sizes and the session's input/output token sums, summed again when a transcript grows); `.../agents.idle`, the agents line of a session with no state yet; options in `.../config`, colors in `.../theme.sh` |
 | Wiring | `statusLine.command` in `~/.claude/settings.json` = `sh "$HOME/.claude/daiver-prompt-view/statusline.sh"`, `refreshInterval: 1` |
 | Installed as | `daiver-prompt-view@daiver-prompt-view`, user scope; for development a `directory` marketplace pointing at the repo (read from the folder itself: never move it without reinstalling) |
 
@@ -70,7 +70,7 @@ claude plugin uninstall daiver-prompt-view@daiver-prompt-view && claude plugin m
 ```
 The installed copy stays, so the status line keeps working without the agents line and live options. Offer to restore `statusLine` from the backup and to delete `~/.claude/daiver-prompt-view/`; ask before deleting.
 
-**Clean stale state**: `agents/` and `automemory/` hold a file per session, never removed: list `find ~/.claude/daiver-prompt-view/agents ~/.claude/daiver-prompt-view/automemory -type f -mtime +7` and ask before deleting.
+**Clean stale state**: `agents/`, `automemory/` and `tokens/` hold a file per session, never removed: list `find ~/.claude/daiver-prompt-view/agents ~/.claude/daiver-prompt-view/automemory ~/.claude/daiver-prompt-view/tokens -type f -mtime +7` and ask before deleting.
 
 **Release / publish**: `origin` = `https://github.com/0exp/daiver-prompt-view`, branch `main`. Commit and push only when the user asks; bump `version` and write the `CHANGELOG.md` entry first. Others install with `/plugin install daiver-prompt-view --marketplace 0exp/daiver-prompt-view`, update with `claude plugin marketplace update daiver-prompt-view`. Never commit `.claude-plugin/types/` or a local `tsconfig.json`.
 
