@@ -11,6 +11,7 @@ export type Theme = {
   orange: string // Clawd, the rst reset time
   session: string // [session]
   ctx: string // ctx bar
+  ctxSize: string // the context's size in tokens beside the ctx bar's percentage (the rst reset time's Clawd orange by default)
   lmt: string // lmt bar
   rst: string // rst bar
   pch: string // pch bar
@@ -45,6 +46,7 @@ export const THEMES: Record<string, Theme> = {
     orange: '38;2;215;119;87',
     session: '38;2;255;250;250',
     ctx: '38;2;255;0;255',
+    ctxSize: '38;2;215;119;87',
     lmt: '38;2;135;206;235',
     rst: '38;2;144;238;144',
     pch: '38;2;132;136;132',
@@ -87,7 +89,7 @@ export const hexOf = (params: string) => {
 export const sgr = (params: string) => `\x1b[${params}m`
 
 // the status line's colors as the script sources them: c_<name>='<params>'
-const SHELL_KEYS = ['gray', 'white', 'orange', 'session', 'ctx', 'lmt', 'rst', 'pch', 'sha', 'branch', 'flags', 'added', 'removed', 'matrix', 'frame', 'effort', 'ostyle'] as const
+const SHELL_KEYS = ['gray', 'white', 'orange', 'session', 'ctx', 'ctxSize', 'lmt', 'rst', 'pch', 'sha', 'branch', 'flags', 'added', 'removed', 'matrix', 'frame', 'effort', 'ostyle'] as const
 
 export const themeShell = (name: string) =>
   `# daiver-prompt-view theme: ${name}\n` + SHELL_KEYS.map(key => `c_${key}='${THEMES[name][key]}'\n`).join('')

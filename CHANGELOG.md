@@ -5,13 +5,21 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+## [1.40.0] - 2026-11-14
+
+### Added
+
+- The context bar shows the context's size in tokens beside its percentage, as `37% (74k/200k)`.
+- The context's size beside the context bar has its own theme color, Clawd orange by default, as the 5-hour window's reset time.
+- The first line ends with the session's tokens and cost, as `<in:1.2M·out:85k·cash:$4.31>`.
+
 ## [1.39.2] - 2026-11-14
 
 ### Changed
 
 - Bumped version to 1.39.2.
-
-## [Unreleased]
 
 ## [1.39.1] - 2026-11-14
 

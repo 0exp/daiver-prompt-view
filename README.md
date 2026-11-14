@@ -5,11 +5,11 @@ model, session, modes, the session's agents, usage bars, git state,
 and Clawd, Claude's mascot, at the right edge.
 
 ```
-Opus 5.5 -> [demo] (sid:419e75ee) <stime:1h23m> <automemory:on>
+Opus 5.5 -> [demo] (sid:419e75ee) <stime:1h23m> <automemory:on> <in:1.2M·out:85k·cash:$4.31>
 (effort:high) (outputstyle:Proactive) (thinkmode:thinking) (fastmode:false)                      ▐▛███▜▌
 ⚙ main:thinking (1m13s) │ agents:2 (sub:1 sh:1 mon:0) -> pending:0 running:2 waiting:0 idle:0  ▝▜█████▛▘
 -> Explore (time:1m01s) [Find lock index usages]                                                 ▘▘ ▝▝
-ctx ███░░░░░░░ 37% | lmt ████░░░░░░ 43% | rst ██████░░░░ 1h56m (at 17h48m) | pch ████████░░ 85%  2.1.303
+ctx ███░░░░░░░ 37% (74k/200k) | lmt ████░░░░░░ 43% | rst ██████░░░░ 1h56m (at 17h48m) | pch ████████░░ 85%  2.1.303
  (08d3788a) main [+#?] | ~/Projects/demo
 ```
 
@@ -25,7 +25,10 @@ else as wide as the widest line, Clawd inside it at the right border.
 1. Model, session name, short session id, session time (`stime`, from the
    transcript's creation time), whether auto memory is on in this session
    (`automemory`, written by the hooks module: the status line's input has no
-   such field).
+   such field), and last the session's tokens and cost: `in` input and `out`
+   output tokens of every request so far (`k` thousands, `M` millions), `cash`
+   the cost in dollars at API prices, subagents included (on a subscription an
+   estimate, not a bill); `<in:0·out:0·cash:$0.00>` before the first request.
 2. Modes: reasoning effort, output style, thinking, fast mode (each only when known).
 3. Agents (the `agents` feature):
    - `main`: the main loop: `thinking` while its turn runs, `tool:<name>` while
@@ -51,7 +54,9 @@ else as wide as the widest line, Clawd inside it at the right border.
    Agents come from `$.agent.list()`, polled every second. Shells and monitors
    are tracked from their `Bash` / `Monitor` calls and dropped on their task
    notification, `TaskStop`, or the `Stop` hook's `background_tasks` snapshot.
-4. Bars: `ctx` context window used, `lmt` 5-hour rate limit used, `rst` time to
+4. Bars: `ctx` context window used, with its size in tokens in brackets
+   (`37% (74k/200k)`: the last request's input over the window, `k` thousands,
+   `M` millions; `(0/200k)` before the first request), `lmt` 5-hour rate limit used, `rst` time to
    its reset and, in orange, its local time (24-hour `HHhMMm`), `pch` prompt
    cache hits of the last request. All four show from the start: before the
    first response (or once the 5-hour window has reset) `lmt` is 0%, `rst` a
@@ -200,7 +205,7 @@ Option `theme` (Color theme), default `default`.
 
 | Value | Colors |
 | --- | --- |
-| `default` (default) | white, gray, fuchsia (ctx), sky blue (lmt), light green (rst), Clawd orange, gray-green (pch), khaki (sha), violet (branch), coral (flags), light green (+added), coral (-removed), Clawd orange (the matrix rain, the frame around your prompts, in the chat and in the history pane, and the frame around the status line too), neon blue (the frame around Claude's replies, in the chat and in the history pane), dark violet (the frame around the tool calls, in the chat and in the history pane), yellow (the frame around the spinner, as the output style), gray (the frame around a command's output), Clawd orange (the prompt history pane's frame too), fuchsia (the history message's frame under the pointer, as the ctx bar), near black (the history pane's background) |
+| `default` (default) | white, gray, fuchsia (ctx), Clawd orange (the context's size beside it, as the reset time), sky blue (lmt), light green (rst), Clawd orange, gray-green (pch), khaki (sha), violet (branch), coral (flags), light green (+added), coral (-removed), Clawd orange (the matrix rain, the frame around your prompts, in the chat and in the history pane, and the frame around the status line too), neon blue (the frame around Claude's replies, in the chat and in the history pane), dark violet (the frame around the tool calls, in the chat and in the history pane), yellow (the frame around the spinner, as the output style), gray (the frame around a command's output), Clawd orange (the prompt history pane's frame too), fuchsia (the history message's frame under the pointer, as the ctx bar), near black (the history pane's background) |
 
 | Usage | Result |
 | --- | --- |

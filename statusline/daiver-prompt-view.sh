@@ -1,7 +1,7 @@
 #!/bin/sh
 # daiver-prompt-view: the status line under the prompt.
 # Reads the status line JSON on stdin and prints:
-#   1. model -> [session] (sid:…) <stime:…> <automemory:on|off>
+#   1. model -> [session] (sid:…) <stime:…> <automemory:on|off> <in:…·out:…·cash:…>
 #   2. modes: effort, outputstyle, thinkmode, fastmode
 #   3. the agents lines, which the mod writes for this session
 #   4. ctx / lmt / rst / pch bars
@@ -24,8 +24,11 @@ mod="$HOME/.claude/daiver-prompt-view"
 # the colors of the active theme (the `theme` option, /daiver-prompt-view:view:theme):
 # c_<name>='<SGR params>' lines the hooks module writes from its themes; with
 # none yet, no colors
-c_gray='' c_white='' c_orange='' c_session='' c_ctx='' c_lmt='' c_rst='' c_pch='' c_sha='' c_branch='' c_flags='' c_added='' c_removed='' c_matrix='' c_frame='' c_effort='' c_ostyle=''
+c_gray='' c_white='' c_orange='' c_session='' c_ctx='' c_ctxSize='' c_lmt='' c_rst='' c_pch='' c_sha='' c_branch='' c_flags='' c_added='' c_removed='' c_matrix='' c_frame='' c_effort='' c_ostyle=''
 [ -f "$mod/theme.sh" ] && . "$mod/theme.sh"
+# a theme.sh written before the context's size had a color of its own: the
+# reset time's
+[ -z "$c_ctxSize" ] && c_ctxSize=$c_orange
 gray=$(esc "$c_gray")
 white=$(esc "$c_white")
 orange=$(esc "$c_orange")
@@ -44,10 +47,13 @@ bar() {
   printf '%s' "$o"
 }
 
+# a jq definition: a token count in short, 950, 74k, 1.2M
+human='def h: if . >= 1000000 then ((. / 100000 | floor) / 10 | tostring) + "M" elif . >= 1000 then (. / 1000 | floor | tostring) + "k" else (floor | tostring) end;'
+
 dir=$(echo "$input" | jq -r '.workspace.current_dir // .cwd // empty')
 case "$dir" in "$HOME"*) dir="~${dir#"$HOME"}" ;; esac
 
-# line 1: model -> [session] (sid:…) <stime:…> <automemory:on|off>
+# line 1: model -> [session] (sid:…) <stime:…> <automemory:on|off> <in:…·out:…·cash:…>
 mname="${white}$(echo "$input" | jq -r '.model.display_name')${reset}"
 model=''
 sid=$(echo "$input" | jq -r '.session_id // empty' | cut -c1-8)
@@ -70,6 +76,15 @@ model="${model}${gray}<${bold}stime:${unbold}$stm>${reset} "
 # writes it for this session; no file, no segment
 am=$(cat "$mod/automemory/$(echo "$input" | jq -r '.session_id // empty')" 2>/dev/null)
 case "$am" in on | off) model="${model}${gray}<${bold}automemory:${unbold}$am>${reset} " ;; esac
+
+# the session's tokens and cost, last on the line: input and output tokens of
+# every request so far (k thousands, M millions) and the cost in dollars at API
+# prices, subagents included; zeros before the first request. Names braced:
+# bash 3.2 as sh takes the dot's first byte for part of a bare $name
+tin=$(echo "$input" | jq -r "$human"' (.context_window.total_input_tokens // 0) | h')
+tout=$(echo "$input" | jq -r "$human"' (.context_window.total_output_tokens // 0) | h')
+cash=$(printf '%.2f' "$(echo "$input" | jq -r '.cost.total_cost_usd // 0')")
+model="${model}${gray}<${bold}in:${unbold}${tin}·${bold}out:${unbold}${tout}·${bold}cash:${unbold}\$${cash}>${reset} "
 
 # line 2: modes; the effort level and the output style in their theme colors
 effort=$(echo "$input" | jq -r '.effort.level // empty')
@@ -102,7 +117,14 @@ if [ -n "$rst" ]; then
   [ $left -le 0 ] && five=0 left=18000
   [ $left -gt 18000 ] && left=18000
 fi
-out="ctx $(esc "$c_ctx")$(bar $ctx)${reset} ${ctx}%"
+# the context's size in tokens beside its percentage: the last request's input
+# (new, written to and read from the cache) over the window's size, as 74k/200k
+# (1.2M over a million); 0 before the first request, the size alone left out
+# when the input does not carry it; in the theme's ctxSize color
+csz=$(echo "$input" | jq -r "$human"'
+  ((.context_window.current_usage // {}) | (.input_tokens // 0) + (.cache_creation_input_tokens // 0) + (.cache_read_input_tokens // 0) | h)
+  + ((.context_window.context_window_size // 0) | if . > 0 then "/" + h else "" end)')
+out="ctx $(esc "$c_ctx")$(bar $ctx)${reset} ${ctx}% $(esc "$c_ctxSize")(${csz})${reset}"
 out="$out | lmt $(esc "$c_lmt")$(bar $five)${reset} ${five}%"
 out="$out | rst $(esc "$c_rst")$(bar $(((18000 - left) * 100 / 18000)))${reset} $((left / 3600))h$(printf '%02d' $((left % 3600 / 60)))m"
 # the reset's local time, 24-hour HHhMMm, in Clawd's orange (BSD date -r, else

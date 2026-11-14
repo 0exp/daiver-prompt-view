@@ -6,11 +6,11 @@ description: Manage the daiver-prompt-view Claude Code mod (the multi-line statu
 # daiver-prompt-view mod
 
 ```
-Opus 5.5 -> [demo] (sid:419e75ee) <stime:1h23m> <automemory:on>
+Opus 5.5 -> [demo] (sid:419e75ee) <stime:1h23m> <automemory:on> <in:1.2M·out:85k·cash:$4.31>
 (effort:high) (outputstyle:Proactive) (thinkmode:thinking) (fastmode:false)          ▐▛███▜▌
 ⚙ main:thinking (1m13s) │ agents:1 (sub:1 sh:0 mon:0) -> pending:0 running:1 …    ▝▜█████▛▘
 -> Explore (time:1m01s) [Find lock index usages]                                     ▘▘ ▝▝
-ctx ███░░░░░░░ 37% | lmt ████░░░░░░ 43% | rst ██████░░░░ 1h56m (at 17h48m) | pch …  2.1.303
+ctx ███░░░░░░░ 37% (74k/200k) | lmt ████░░░░░░ 43% | rst ██████░░░░ 1h56m (at 17h48m) | pch …  2.1.303
  (08d3788a) main [+#?] +12/-3 | ~/Projects/demo
 ```
 
@@ -34,7 +34,7 @@ ctx ███░░░░░░░ 37% | lmt ████░░░░░░ 43% 
 - The agents lines are printed by the script from `agents/<session_id>`, right after the modes line; the hooks module writes it only when its text changed. The line is never missing: with no file for the session (or an empty one) the script prints `agents.idle` (an idle main loop, zeros everywhere; written by `startAgents` and `redrawAgents` in the theme's colors), and with not even that, the same line built in the script from `c_gray`/`c_white`.
 - The whole output goes through `frame()` (the theme's `c_frame`): `inner` = `$COLUMNS - 2*pad - 2` when known (`pad` = 2 + the `statuslinePadding` option, read from `padding=` in `config`, else `statusLine.padding` from `~/.claude/settings.json`; never under 0: the engine draws the status line in a Box with `paddingX: padding ?? 0` inside its own 2-column indent, so the padding is added to the 2, and only a negative one narrows the indent). The option reaches the engine through `statusline.ts`'s `settings.read` hook (`withPadding`): the merged settings get `statusLine.padding` = the option while `statusLine.command` runs `daiver-prompt-view/statusline.sh`; nothing is written to settings.json, a one-source read is left alone, never narrower than the widest line; Clawd's canvas ends at the right border (`col = inner - 11`).
 - The script is POSIX `sh` + `jq` + `git` and prints something even with `{"model":{"display_name":"X"},"cwd":"/tmp"}`. Private-use glyphs (U+E0A0) are `printf` octal escapes.
-- Colors live only in `hooks/shared/themes.ts` as SGR params. The script sources `theme.sh` (`c_gray`, `c_white`, `c_orange`, `c_session`, `c_ctx`, `c_lmt`, `c_rst`, `c_pch`, `c_sha`, `c_branch`, `c_flags`, `c_added`, `c_removed`, `c_matrix`, `c_frame`, `c_effort`, `c_ostyle`); the agents line and the prompt, reply, tool, spinner, command and history-pane frames (`prompt`, `reply`, `tool`, `spinner`, `command`, `history`, `hover`, `paneBackground`, as #rrggbb via `hexOf`) use the same theme in TS. A new theme = an entry in `THEMES` + its name in `userConfig.theme.options` (`plugin.json`) + `argument-hint` of `commands/view/theme.md`. `tests/statusline.test.ts` and `tests/agents.test.ts` pin `default` byte for byte.
+- Colors live only in `hooks/shared/themes.ts` as SGR params. The script sources `theme.sh` (`c_gray`, `c_white`, `c_orange`, `c_session`, `c_ctx`, `c_ctxSize`, `c_lmt`, `c_rst`, `c_pch`, `c_sha`, `c_branch`, `c_flags`, `c_added`, `c_removed`, `c_matrix`, `c_frame`, `c_effort`, `c_ostyle`); the agents line and the prompt, reply, tool, spinner, command and history-pane frames (`prompt`, `reply`, `tool`, `spinner`, `command`, `history`, `hover`, `paneBackground`, as #rrggbb via `hexOf`) use the same theme in TS. A new theme = an entry in `THEMES` + its name in `userConfig.theme.options` (`plugin.json`) + `argument-hint` of `commands/view/theme.md`. `tests/statusline.test.ts` and `tests/agents.test.ts` pin `default` byte for byte.
 - A new command = `commands/<feature>/<name>.md` (`description`, `argument-hint`, `disable-model-invocation: true`) + a `command.run` hook on `command('<feature>', '<name>')` whose `.catch` answers `failed(...)` (never `next`: that would send the .md body to the model) + its values in `register.ts`'s typeahead table.
 - Agents: `AgentInfo` has no start time (`agentSince` stamped on first sight, cleared on every start); main time from `turn.start` while idle; shells/monitors from `tool.call` results, dropped on task notifications, `TaskStop`, `classic.Stop` snapshot.
 - `$` reaches a helper only as a `function` declaration's parameter (never an arrow function's) when the helper is called across files.
