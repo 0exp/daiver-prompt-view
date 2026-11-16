@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.47.3] - 2026-11-16
+
+### Changed
+
+- The history pane shows a tool call's command whole: a multi-line one with every line and a long one in full, instead of its first line cut with `…`.
+
 ## [1.47.2] - 2026-11-16
 
 ### Changed

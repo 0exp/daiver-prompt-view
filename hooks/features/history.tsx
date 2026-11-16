@@ -39,16 +39,17 @@ const textOf = (content: readonly { type: string; text?: string }[]) =>
     .map(block => block.text)
     .join('\n')
 
-// a tool call as the pane names it: the tool and its main argument, one line
-// (`Bash(ls -la)`, `Read(/src/a.ts)`), the tool alone when it has none
-const ARGUMENTS = ['command', 'file_path', 'notebook_path', 'path', 'pattern', 'url', 'query', 'skill', 'description', 'subject', 'prompt']
+// a tool call as the pane names it: the tool and its main argument, whole, a
+// multi-line one (a heredoc, a script) with every line (`Bash(ls -la)`,
+// `Read(/src/a.ts)`), the tool alone when it has none
 const cut = (text: string, max: number) => (text.length > max ? `${text.slice(0, max - 1)}…` : text)
+const ARGUMENTS = ['command', 'file_path', 'notebook_path', 'path', 'pattern', 'url', 'query', 'skill', 'description', 'subject', 'prompt']
 
 export function toolLine(name: string, input: unknown) {
   const fields = typeof input === 'object' && input !== null ? (input as Record<string, unknown>) : {}
   const key = ARGUMENTS.find(one => typeof fields[one] === 'string' && (fields[one] as string).trim() !== '')
 
-  return key === undefined ? name : `${name}(${cut((fields[key] as string).trim().split('\n')[0]!, 80)})`
+  return key === undefined ? name : `${name}(${(fields[key] as string).trim()})`
 }
 
 // the blocks of one of Claude's rows as the pane lists them: each text and

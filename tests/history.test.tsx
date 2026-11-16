@@ -1,5 +1,6 @@
 import { expect, mock, test } from 'claude-code/testing'
 import { COPIED_GLYPH, COPIED_MS, COPY_GLYPH } from '../hooks/features/copy'
+import { toolLine } from '../hooks/features/history'
 import { frameStyle, hoverStyle, loadConfig } from '../hooks/shared/config'
 import { conf, run, start, world } from './world'
 
@@ -216,7 +217,7 @@ test("the whole story: prompts pushed to the right in the prompt color, answers 
 
     expect((await ui.find({ type: 'Text', text: /History/ }))?.text).toBe('History (5)')
     // newest first
-    expect(buttons.map(one => one.text)).toEqual(['Read(/src/a.ts)', 'All done.', 'Bash(ls -la)', 'Looking.', 'look around'])
+    expect(buttons.map(one => one.text)).toEqual(['Read(/src/a.ts)', 'All done.', 'Bash(ls -la\necho done)', 'Looking.', 'look around'])
     expect(boxes.map(one => one.props.borderColor)).toEqual(['#6a34a3', '#00c8ff', '#6a34a3', '#00c8ff', '#d77757'])
     expect(boxes.map(one => [one.props.marginLeft, one.props.marginRight])).toEqual([
       [undefined, 8],
@@ -436,4 +437,14 @@ test("every message's copy button copies the whole message, not the pane's short
   await ui.redraw()
   expect((await ui.find({ type: 'Button', key: 'c0' }))?.props.label).toBe(COPY_GLYPH)
   await ui.unmount()
+})
+
+test("a tool call's line holds its whole argument, every line of a multi-line one, no cut", () => {
+  const script = 'cat > a.sh <<EOF\necho one\necho two\nEOF'
+  const long = `grep -rn ${'x'.repeat(120)} .`
+
+  expect(toolLine('Bash', { command: script })).toBe(`Bash(${script})`)
+  expect(toolLine('Bash', { command: long })).toBe(`Bash(${long})`)
+  expect(toolLine('Read', { file_path: ' /src/a.ts ' })).toBe('Read(/src/a.ts)')
+  expect(toolLine('TaskList', {})).toBe('TaskList')
 })
