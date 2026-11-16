@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.46.1] - 2026-11-16
+
+### Changed
+
+- The buttons above the prompt are always gray, on and off alike, in a color of their own in the theme.
+
 ## [1.46.0] - 2026-11-16
 
 ### Added

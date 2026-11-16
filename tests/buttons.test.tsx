@@ -19,6 +19,10 @@ test('the row shows the borders and the history switches where they stand', asyn
   expect((await ui.find({ key: 'history' }))?.props.label).toBe('≡ history: off')
   expect((await ui.find({ key: 'borders' }))?.props.hotkey).toBe('b')
   expect((await ui.find({ key: 'history' }))?.props.hotkey).toBe('h')
+  expect((await ui.find({ type: 'Text', text: '▣ borders: on' }))?.props.color).toBe('#808080')
+  expect((await ui.find({ key: 'borders' }))?.props.dimColor).toBe(true)
+  expect((await ui.find({ key: 'history' }))?.props.dimColor).toBe(true)
+  expect((await ui.find({ type: 'Text', text: '≡ history: off' }))?.props.color).toBe('#808080')
   await ui.unmount()
 })
 

@@ -140,6 +140,9 @@ A row above the prompt with two switches, each showing where it stands:
 | `▣ borders` | `b` | shows or hides the frames, as `/daiver-prompt-view:chat:show-borders` does |
 | `≡ history` | `h` | opens or closes the prompt history pane, as `/daiver-prompt-view:history:show` does |
 
+Both buttons are drawn in the theme's `buttons` color (gray in `default`), on
+and off alike: the label says which.
+
 A click presses a button; so does its key while the row holds the focus
 (ctrl+x tab, or a click on it). On the main screen, which takes no clicks, the
 keys do. The row makes way for a survey, Claude Code's `[-]` (ctrl+x ctrl+a)

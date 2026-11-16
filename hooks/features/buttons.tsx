@@ -8,6 +8,7 @@ import type { EngineInterface, On } from 'claude-code'
 import { command, failed } from '../shared/commands'
 import { config } from '../shared/config'
 import { setOption } from '../shared/options'
+import { hexOf, THEMES } from '../shared/themes'
 import { setFrames } from './chat'
 import { show } from './history'
 
@@ -57,12 +58,21 @@ export function registerButtons(on: On) {
 
     const { Box, Button, Text } = $.ui.resolve(e)
     band.drawn += 1
+    // every button in the theme's buttons color, on and off alike: the label says which;
+    // dimColor dims the brackets Claude Code draws around it, which take no color of their own
+    const color = hexOf(THEMES[config.theme]!.buttons)
+    const borders = switchLabel('▣ borders', config.borders)
+    const history = switchLabel('≡ history', config.history)
 
     return (
       <Box flexDirection="row">
-        <Button key="borders" hotkey="b" label={switchLabel('▣ borders', config.borders)} dimColor={!config.borders} onPress={() => void pressBorders($).catch(() => undefined)} />
+        <Button key="borders" hotkey="b" label={borders} dimColor onPress={() => void pressBorders($).catch(() => undefined)}>
+          <Text color={color}>{borders}</Text>
+        </Button>
         <Text> </Text>
-        <Button key="history" hotkey="h" label={switchLabel('≡ history', config.history)} dimColor={!config.history} onPress={() => void pressHistory($).catch(() => undefined)} />
+        <Button key="history" hotkey="h" label={history} dimColor onPress={() => void pressHistory($).catch(() => undefined)}>
+          <Text color={color}>{history}</Text>
+        </Button>
       </Box>
     )
   }).catch(($, e, next) => next(e))
