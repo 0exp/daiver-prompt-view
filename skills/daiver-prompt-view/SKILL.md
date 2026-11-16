@@ -9,7 +9,7 @@ description: Manage the daiver-prompt-view Claude Code mod (the multi-line statu
 Opus 5.5 -> [demo] (sid:419e75ee) <stime:1h23m> <automemory:on> <in:1.2M·out:85k·cash:$4.31>
 (effort:high) (outputstyle:Proactive) (thinkmode:thinking) (fastmode:false)          ▐▛███▜▌
 ⚙ main:thinking (1m13s) │ agents:1 (sub:1 sh:0 mon:0) -> pending:0 running:1 …    ▝▜█████▛▘
--> Explore (time:1m01s) [Find lock index usages]                                     ▘▘ ▝▝
+-> Explore (time:1m01s) [Find lock index usages] (Grep(lock_index))                  ▘▘ ▝▝
 ctx ███░░░░░░░ 37% (74k/200k) | lmt ████░░░░░░ 43% | rst ██████░░░░ 1h56m (at 17h48m) | pch …  2.1.303
  (08d3788a) main [+#?] +12/-3 | ~/Projects/demo
 ```

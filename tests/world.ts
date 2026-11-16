@@ -1,4 +1,4 @@
-import type { On } from 'claude-code'
+import type { AgentInfo, On } from 'claude-code'
 import { mock } from 'claude-code/testing'
 
 export const DIR = '/home/me/.claude/daiver-prompt-view'
@@ -23,6 +23,8 @@ export function world(on: On, { configRows = true, clock: hasClock = true, setti
   const saved: Record<string, unknown> = {}
   // the id the session goes by; a test sets `session.id`, as a resume or a fork does
   const session = { id: 's1' }
+  // the session's live agents, as $.agent.list answers them; a test pushes one
+  const live: AgentInfo[] = []
 
   on('fs.exists', ($, e) => ({ value: files.has(e.path) || e.path.endsWith('/statusline/daiver-prompt-view.sh') }))
   on('fs.read', ($, e) => ({ value: files.get(e.path) ?? '#!/bin/sh\n' }))
@@ -31,7 +33,7 @@ export function world(on: On, { configRows = true, clock: hasClock = true, setti
     files.set(e.path, e.text)
     return { value: undefined }
   })
-  on('agent.list', () => ({ value: [] }))
+  on('agent.list', () => ({ value: live }))
   on('session.id', () => ({ value: session.id }))
   on('session.cwd', () => ({ value: '/home/me/proj' }))
   if (hasClock) on('clock.now', () => ({ value: clock.now }))
@@ -87,7 +89,7 @@ export function world(on: On, { configRows = true, clock: hasClock = true, setti
   on('session.start', ($, e) => ({ cwd: e.cwd }))
   on('prompt.autocomplete', () => ({ suggestions: [] }))
 
-  return { files, settings, clock, session, saved, sets, panes, toasts, logs, state, config: () => files.get(`${DIR}/config`), agents: () => files.get(`${DIR}/agents/s1`) }
+  return { files, settings, clock, session, live, saved, sets, panes, toasts, logs, state, config: () => files.get(`${DIR}/config`), agents: () => files.get(`${DIR}/agents/s1`) }
 }
 
 export const start = { cwd: '/tmp', surface: 'terminal', isInteractive: true } as const

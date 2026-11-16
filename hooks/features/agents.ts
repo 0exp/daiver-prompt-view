@@ -6,6 +6,7 @@ import { config } from '../shared/config'
 import { home, sync } from '../shared/files'
 import { markSeen } from '../shared/seen'
 import { sgr, THEMES } from '../shared/themes'
+import { toolLine } from './history'
 import { noteSubagentCalls } from './tool'
 
 type State = 'pending' | 'running' | 'waiting' | 'idle'
@@ -22,6 +23,8 @@ const RESET = '\x1b[0m'
 
 // a subagent's task on its `->` line is cut to this many characters
 const TASK_MAX = 60
+// and its current work after it (its last tool call) to this many
+const ACTIVITY_MAX = 40
 
 const toState = (status: string): State =>
   status === 'pending' ? 'pending' : status === 'waiting' ? 'waiting' : status === 'idle' ? 'idle' : 'running'
@@ -36,7 +39,7 @@ const elapsed = (ms: number) => {
   return `${Math.floor(s / 3600)}h${pad(Math.floor(s / 60) % 60)}m`
 }
 
-const clip = (text: string) => (text.length > TASK_MAX ? `${text.slice(0, TASK_MAX - 1)}…` : text)
+const clip = (text: string, max = TASK_MAX) => (text.length > max ? `${text.slice(0, max - 1)}…` : text)
 
 type Group = 'agents' | 'sub' | 'sh' | 'mon'
 
@@ -94,6 +97,8 @@ let mainSince: number | undefined
 let mainLast: number | undefined
 // when each live agent was first listed: `AgentInfo` has no start time
 const agentSince = new Map<string, number>()
+// what each live agent works on now: its last tool call, as `Bash(git status)`
+const agentActivity = new Map<string, string>()
 let shown = ''
 
 async function refresh($: EngineInterface) {
@@ -134,18 +139,22 @@ async function refresh($: EngineInterface) {
 
   const live = new Set(agents.map(agent => agent.id))
   for (const id of agentSince.keys()) if (!live.has(id)) agentSince.delete(id)
+  for (const id of agentActivity.keys()) if (!live.has(id)) agentActivity.delete(id)
   for (const agent of agents) if (!agentSince.has(agent.id)) agentSince.set(agent.id, now)
 
-  // one `-> <type> (time:<run time>) [<task>]` line per live agent, oldest first;
-  // a teammate goes by its name
+  // one `-> <type> (time:<run time>) [<task>] (<current work>)` line per live
+  // agent, oldest first; a teammate goes by its name
   const subs = agents
     .map(agent => ({ agent, since: agentSince.get(agent.id) ?? now }))
     .sort((a, b) => a.since - b.since)
     .map(({ agent, since }) => {
       const who = agent.type === 'teammate' && agent.name !== undefined ? agent.name : agent.type
+      const activity = agentActivity.get(agent.id)
       return (
         `${GRAY}-> ${KIND_COLOR('sub')}${who}${GRAY} (time:${ELAPSED_COLOR}${elapsed(now - since)}${GRAY}) ` +
-        `[${WHITE}${clip(agent.description)}${GRAY}]${RESET}`
+        `[${WHITE}${clip(agent.description)}${GRAY}]` +
+        (activity === undefined ? '' : ` (${WHITE}${clip(activity, ACTIVITY_MAX)}${GRAY})`) +
+        RESET
       )
     })
 
@@ -185,6 +194,7 @@ export async function startAgents($: EngineInterface) {
   mainSince = undefined
   mainLast = undefined
   agentSince.clear()
+  agentActivity.clear()
   await writeIdle($)
   await refresh($)
   $.clock.every(1000, () => refresh($))
@@ -222,8 +232,11 @@ export function registerAgents(on: On) {
 
   on('tool.call', async ($, e, next) => {
     if (e.agentId !== undefined) {
-      // a subagent's call: its row is drawn unframed (tool.tsx)
+      // a subagent's call: its row is drawn unframed (tool.tsx), and it is the
+      // agent's current work on its line until its next call
       await noteSubagentCalls($, [e.tool_use_id])
+      agentActivity.set(e.agentId, toolLine(e.tool, e))
+      await refresh($)
       return next(e)
     }
 

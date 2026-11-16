@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.49.0] - 2026-11-17
+
+### Added
+
+- Each subagent's line in the status line shows what it works on now, its last tool call (`Bash(git status)`, `Read(/path)`), in parentheses after its task.
+
 ## [1.48.2] - 2026-11-17
 
 ### Fixed

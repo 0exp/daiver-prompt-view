@@ -8,7 +8,7 @@ and Clawd, Claude's mascot, at the right edge.
 Opus 5.5 -> [demo] (sid:419e75ee) <stime:1h23m> <automemory:on> <in:1.2M·out:85k·cash:$4.31>
 (effort:high) (outputstyle:Proactive) (thinkmode:thinking) (fastmode:false)                      ▐▛███▜▌
 ⚙ main:thinking (1m13s) │ agents:2 (sub:1 sh:1 mon:0) -> pending:0 running:2 waiting:0 idle:0  ▝▜█████▛▘
--> Explore (time:1m01s) [Find lock index usages]                                                 ▘▘ ▝▝
+-> Explore (time:1m01s) [Find lock index usages] (Grep(lock_index))                              ▘▘ ▝▝
 ctx ███░░░░░░░ 37% (74k/200k) | lmt ████░░░░░░ 43% | rst ██████░░░░ 1h56m (at 17h48m) | pch ████████░░ 85%  2.1.303
  (08d3788a) main [+#?] | ~/Projects/demo
 ```
@@ -46,10 +46,13 @@ else as wide as the widest line, Clawd inside it at the right border.
      main loop works, `agents:main` replaces the zero.
    - `pending` / `running` / `waiting` / `idle`: the same work by state
      (finished, failed and killed ones are not counted).
-   - `-> <type> (time:<run time>) [<task>]`: one line per live subagent or
-     teammate, oldest first: its agent type (a teammate's name), how long it has
-     been listed (from the first poll that listed it; starts over on a reload),
-     and the Agent call's `description`, cut to 60 characters.
+   - `-> <type> (time:<run time>) [<task>] (<current work>)`: one line per live
+     subagent or teammate, oldest first: its agent type (a teammate's name), how
+     long it has been listed (from the first poll that listed it; starts over on
+     a reload), the Agent call's `description`, cut to 60 characters, and what it
+     works on now: its last tool call, as `Bash(git status)` or
+     `Read(/path/to/file)` (the command's first line, the file, the pattern...),
+     cut to 40 characters; left out until its first call.
 
    The line is always there: while a session has no state of its own yet (its
    start hook has not run, nothing was launched), the status line shows an idle

@@ -44,3 +44,15 @@ test('a session going on under a new id, with no new start, gets its agents line
 
   expect(files.get('/home/me/.claude/daiver-prompt-view/agents/s2')).toBe(IDLE)
 })
+
+test("a subagent's line shows its current work, its last tool call, after its task", async ($, on) => {
+  const { agents, live } = world(on)
+  on('tool.call', () => ({ deny: 'not run in a test' }))
+
+  await $.session.start(start)
+  live.push({ id: 'a1', type: 'Explore', description: 'Find the lock usages', status: 'running' })
+  await $.tool.call({ tool: 'Bash', command: 'git status\ngit log', agentId: 'a1' })
+
+  const plain = agents()!.replace(/\x1b\[[0-9;]*m/g, '')
+  expect(plain.split('\n')[1]).toBe('-> Explore (time:0s) [Find the lock usages] (Bash(git status))')
+})
