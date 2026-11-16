@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.46.0] - 2026-11-16
+
+### Added
+
+- A row of buttons above the prompt: `▣ borders` shows or hides the frames, `≡ history` opens or closes the prompt history pane, each showing where it stands; a click or its key (`b`, `h`) presses it.
+- An option and a command to hide or show that row of buttons.
+- The doctor tells whether the row of buttons is drawn, or which part of it a plugin above takes away.
+
 ## [1.45.0] - 2026-11-14
 
 ### Added

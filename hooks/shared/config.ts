@@ -27,7 +27,7 @@ export function paddingOf(value: unknown) {
 
 // the options the status line script reads, from the plugin's userConfig;
 // a change in /config reloads the module, and session.start fires again
-export const config = { clodik: true, animate: false, animation: 'matrix', theme: 'default', history: false, historyMode: 'fullstory', toasts: false, borders: true, chatBorders: true, statuslineBorders: true, usage: true, borderStyle: 'dashed', padding: PADDING.default, drawnPadding: undefined as number | undefined }
+export const config = { clodik: true, animate: false, animation: 'matrix', theme: 'default', history: false, historyMode: 'fullstory', toasts: false, buttons: true, borders: true, chatBorders: true, statuslineBorders: true, usage: true, borderStyle: 'dashed', padding: PADDING.default, drawnPadding: undefined as number | undefined }
 
 export function loadConfig(options: Record<string, unknown>) {
   config.clodik = options.clodik !== false
@@ -36,6 +36,7 @@ export function loadConfig(options: Record<string, unknown>) {
   config.theme = themeOf(options.theme)
   config.history = options.history === true
   config.toasts = options.toasts === true
+  config.buttons = options.buttons !== false
   config.historyMode = HISTORY_MODES.includes(String(options.historyMode)) ? String(options.historyMode) : 'fullstory'
   config.borders = options.borders !== false
   config.chatBorders = options.chatBorders !== false

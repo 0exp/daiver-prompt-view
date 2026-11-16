@@ -16,6 +16,7 @@ test('doctor: every hook answered, the padding applied, auto memory from the mer
       'prompt.section: not seen yet (it runs with each turn; still none after one: a plugin above passes it by); it tells a session whose auto memory is blocked',
       'classic.Stop: not seen yet (it runs as a turn ends; still none after one: a plugin above passes it by); it drops finished shells and monitors from the agents line',
       'padding: statuslinePadding -1, drawn -1',
+      'buttons row: never asked of the mod since it loaded: a plugin above answers the band over it',
       'auto memory: on, from the merged settings',
       "skipped by: no plugin, as Claude Code's notices in this session's transcript say",
     ].join('\n'),

@@ -127,6 +127,25 @@ its markdown as written, with nothing of the frame:
 For a moment after the click the corner shows `✓`. On the main screen, which
 takes no clicks, and with the frames hidden there is no button.
 
+## Buttons
+
+A row above the prompt with two switches, each showing where it stands:
+
+```
+[ ▣ borders: on ] [ ≡ history: off ]
+```
+
+| Button | Key | A press |
+| --- | --- | --- |
+| `▣ borders` | `b` | shows or hides the frames, as `/daiver-prompt-view:chat:show-borders` does |
+| `≡ history` | `h` | opens or closes the prompt history pane, as `/daiver-prompt-view:history:show` does |
+
+A click presses a button; so does its key while the row holds the focus
+(ctrl+x tab, or a click on it). On the main screen, which takes no clicks, the
+keys do. The row makes way for a survey, Claude Code's `[-]` (ctrl+x ctrl+a)
+collapses it, and the `buttons` option (`/daiver-prompt-view:chat:show-buttons off`)
+hides it.
+
 ## Toasts
 
 Claude Code's own toast (on its notification bar, for 4 seconds) when your work
@@ -161,6 +180,7 @@ after the command.
 | `/daiver-prompt-view:chat:show-borders` | `on`, `off`, or nothing | `on` | Show (`on`) or hide (`off`) the frames around prompts, replies, tool calls, the spinner, command output and the status line; with no argument, toggles |
 | `/daiver-prompt-view:chat:show-chat-borders` | `on`, `off`, or nothing | `on` | Show (`on`) or hide (`off`) the frames around prompts, replies, tool calls, the spinner and command output, the status line's left as it is; with no argument, toggles |
 | `/daiver-prompt-view:chat:show-statusline-borders` | `on`, `off`, or nothing | `on` | Show (`on`) or hide (`off`) the frame around the status line alone; with no argument, toggles |
+| `/daiver-prompt-view:chat:show-buttons` | `on`, `off`, or nothing | `on` | Show (`on`) or hide (`off`) the row of buttons above the prompt (borders, history); with no argument, toggles |
 | `/daiver-prompt-view:chat:border-style` | `dashed`, `line`, or nothing | `dashed` | Draw every frame dashed (`dashed`) or as a solid line (`line`); with no argument, shows the current one and the list |
 | `/daiver-prompt-view:mod:doctor` | nothing | (none) | Check what of the mod works in this session: the hooks a plugin above may pass by and which plugin does it, the status line padding, where auto memory is read from |
 | `/daiver-prompt-view:statusline:show-usage` | `on`, `off`, or nothing | `on` | Show (`on`) or hide (`off`) the session's tokens and cost at the end of the status line's first line; with no argument, toggles |
@@ -236,6 +256,7 @@ Every option is in `/config`, or in `~/.claude/settings.json` under
 | `chatBorders` | Show the chat's frames | boolean | `true` | `true`, `false` | `chat:show-chat-borders` |
 | `statuslineBorders` | Show the status line's frame | boolean | `true` | `true`, `false` | `chat:show-statusline-borders` |
 | `statuslineUsage` | Show the session's tokens and cost | boolean | `true` | `true`, `false` | `statusline:show-usage` |
+| `buttons` | Show the buttons row | boolean | `true` | `true`, `false` | `chat:show-buttons` |
 | `borderStyle` | Frame style | choice | `dashed` | `dashed`, `line` | `chat:border-style` |
 | `clodik` | Show Clawd | boolean | `true` | `true`, `false` | (none) |
 | `clodikAnimate` | Animate Clawd always | boolean | `false` | `true`, `false` | `clodik:animate` |
@@ -256,6 +277,7 @@ For example, in `~/.claude/settings.json`:
       "chatBorders":       true,
       "statuslineBorders": true,
       "statuslineUsage":   true,
+      "buttons":           true,
       "borderStyle":       "dashed",
       "clodik":            true,
       "clodikAnimate":     false,
@@ -433,6 +455,23 @@ one says, and this one off hides it while the transcript's frames stay.
 | `/daiver-prompt-view:chat:show-statusline-borders` | toggles: `The status line's frame is now hidden.` when it was on, `The status line's frame is now shown.` when it was off |
 | `/daiver-prompt-view:chat:show-statusline-borders maybe` | nothing changes: `Usage: /daiver-prompt-view:chat:show-statusline-borders [on|off]` |
 
+### `/daiver-prompt-view:chat:show-buttons [on|off]`
+
+Option `buttons` (Show the buttons row), default `true` (`on`): the row above
+the prompt with the `▣ borders` and `≡ history` switches (see **Buttons**).
+
+| Value | Effect |
+| --- | --- |
+| `on` | the row is drawn above the prompt |
+| `off` | no row; the frames and the history pane stay as they are |
+
+| Usage | Result |
+| --- | --- |
+| `/daiver-prompt-view:chat:show-buttons on` | `The buttons row is now shown.` |
+| `/daiver-prompt-view:chat:show-buttons off` | `The buttons row is now hidden.` |
+| `/daiver-prompt-view:chat:show-buttons` | toggles: `The buttons row is now hidden.` when it was on, `The buttons row is now shown.` when it was off |
+| `/daiver-prompt-view:chat:show-buttons maybe` | nothing changes: `Usage: /daiver-prompt-view:chat:show-buttons [on|off]` |
+
 ### `/daiver-prompt-view:mod:doctor`
 
 No option and no value: it reports. An organization may seat a security plugin
@@ -447,12 +486,13 @@ transcript name it (the mod cannot see the plugins above it otherwise):
 | `prompt.section` | how many times it ran since the mod loaded; it runs with each turn, so `not seen yet` after a turn means a plugin above passes it by; `skipped: "<plugin>" runs first and sends it on past the mod` when a notice names the plugin: a session whose auto memory is blocked is not told apart then |
 | `classic.Stop` | the same; it runs as a turn ends and drops finished shells and monitors from the agents line |
 | `padding` | the `statuslinePadding` option and the padding the status line is drawn with |
+| `buttons row` | how many times the mod drew the buttons row since it loaded and how often it was in the band Claude Code stacks: `never asked of the mod` (a plugin above answers the band over it), `the band's list never reached the mod` or `left out of the band's list` (a plugin above takes the row away), or `off` when the `buttons` option is; then whether the band is open (and how many rows it may take) or collapsed (ctrl+x ctrl+a opens it) |
 | `auto memory` | `on`, `off` or `?`, and where it was read from: the merged settings, the settings files, `CLAUDE_CODE_DISABLE_AUTO_MEMORY`, `/pause-memory`, or nothing |
 | `skipped by` | each plugin that sends the mod's hooks on past it, with those hooks, as Claude Code's notices say (it notices once a session for each hook); the mod cannot get past a plugin seated above it, whoever manages that plugin (an organization's admins for a managed one) can let the hooks through. `no plugin` when no notice came |
 
 | Usage | Result |
 | --- | --- |
-| `/daiver-prompt-view:mod:doctor` | the report, for example:<br>`daiver-prompt-view doctor`<br>`settings.read: answered by the mod (checked now): the padding option applies`<br>`prompt.section: ran 3 times; it tells a session whose auto memory is blocked`<br>`classic.Stop: ran 3 times; it drops finished shells and monitors from the agents line`<br>`padding: statuslinePadding -1, drawn -1`<br>`auto memory: on, from the merged settings`<br>`skipped by: no plugin, as Claude Code's notices in this session's transcript say` |
+| `/daiver-prompt-view:mod:doctor` | the report, for example:<br>`daiver-prompt-view doctor`<br>`settings.read: answered by the mod (checked now): the padding option applies`<br>`prompt.section: ran 3 times; it tells a session whose auto memory is blocked`<br>`classic.Stop: ran 3 times; it drops finished shells and monitors from the agents line`<br>`padding: statuslinePadding -1, drawn -1`<br>`buttons row: drawn 12 times, in the band's list 12 of 12 times; the band open, 20 rows`<br>`auto memory: on, from the merged settings`<br>`skipped by: no plugin, as Claude Code's notices in this session's transcript say` |
 | `/daiver-prompt-view:mod:doctor`, under a plugin that skips some hooks | for example:<br>`settings.read: passed on past the mod by "cc-plugin-sec-default" (checked now): the padding option cannot apply, the frame follows settings.json`<br>`prompt.section: skipped: "cc-plugin-sec-default" runs first and sends it on past the mod; it tells a session whose auto memory is blocked`<br>…<br>`skipped by: "cc-plugin-sec-default" (settings.read, prompt.section, classic.Stop), as Claude Code's notices in this session's transcript say; the mod cannot get past a plugin seated above it, whoever manages that plugin (your organization's admins for a managed one) can let these hooks through` |
 | `/daiver-prompt-view:mod:doctor now` | nothing is checked: `Usage: /daiver-prompt-view:mod:doctor` |
 

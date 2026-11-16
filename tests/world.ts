@@ -71,6 +71,7 @@ export function world(on: On, { configRows = true, clock: hasClock = true, setti
       { key: `${$.plugin.name}.chatBorders`, label: "Show the chat's frames", kind: 'boolean', value: true, provider, isLocked: false },
       { key: `${$.plugin.name}.statuslineBorders`, label: "Show the status line's frame", kind: 'boolean', value: true, provider, isLocked: false },
       { key: `${$.plugin.name}.statuslineUsage`, label: "Show the session's tokens and cost", kind: 'boolean', value: true, provider, isLocked: false },
+      { key: `${$.plugin.name}.buttons`, label: 'Show the buttons row', kind: 'boolean', value: true, provider, isLocked: false },
       { key: `${$.plugin.name}.borderStyle`, label: 'Frame style', kind: 'choice', value: 'dashed', provider, isLocked: false },
     ],
   }))

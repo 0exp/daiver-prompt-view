@@ -29,16 +29,26 @@ async function toggle($: EngineInterface, args: string, t: Toggle) {
   if (arg !== '' && arg !== 'on' && arg !== 'off') return { text: `Usage: /${t.name} [on|off]` }
 
   const value = arg === '' ? !config[t.field] : arg === 'on'
-  const deny = await setOption($, t.field, value)
+  const deny = await setFrames($, t.field, value)
   const verb = t.plural ? 'are' : 'is'
 
   if (deny !== undefined) return { text: `${t.what} ${t.plural ? 'were' : 'was'} not changed: ${deny}` }
 
-  config[t.field] = value
+  return { text: `${t.what} ${verb} now ${value ? 'shown' : 'hidden'}.` }
+}
+
+// sets one of the frames' options, writes the config file, draws the framed
+// sites again; the reason when the option was refused (the buttons row too)
+export async function setFrames($: EngineInterface, field: Toggle['field'], value: boolean) {
+  const deny = await setOption($, field, value)
+
+  if (deny !== undefined) return deny
+
+  config[field] = value
   await writeConfig($)
   $.ui.invalidate('ui.render')
 
-  return { text: `${t.what} ${verb} now ${value ? 'shown' : 'hidden'}.` }
+  return undefined
 }
 
 export function registerChat(on: On) {

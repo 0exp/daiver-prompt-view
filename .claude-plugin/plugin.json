@@ -1,6 +1,6 @@
 {
   "name": "daiver-prompt-view",
-  "version": "1.45.0",
+  "version": "1.46.0",
   "description": "A multi-line status line under the prompt: model, session, modes, agents, usage bars, git state and Clawd",
   "author": {
     "name": "Rustam Ibragimov",
@@ -67,6 +67,12 @@
         "questions",
         "answers"
       ]
+    },
+    "buttons": {
+      "type": "boolean",
+      "title": "Show the buttons row",
+      "description": "A row above the prompt with two switches: the borders (b) and the prompt history pane (h), each showing whether it is on; a click, or its key while the row holds the focus (ctrl+x tab), turns it (also /daiver-prompt-view:chat:show-buttons [on|off])",
+      "default": true
     },
     "toasts": {
       "type": "boolean",

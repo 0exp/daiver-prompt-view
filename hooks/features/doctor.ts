@@ -9,6 +9,7 @@ import { command, failed } from '../shared/commands'
 import { config } from '../shared/config'
 import { transcriptPath } from '../shared/files'
 import { seen } from '../shared/seen'
+import { bandReport } from './buttons'
 import { autoMemory, settingsHook, type MemorySource } from './statusline'
 
 export const DOCTOR = command('mod', 'doctor')
@@ -96,6 +97,7 @@ export async function doctorReport($: EngineInterface) {
     ran('prompt.section'),
     ran('classic.Stop'),
     `padding: ${padding}`,
+    bandReport(),
     `auto memory: ${memory.state === 'unknown' ? '?' : memory.state}, ${MEMORY[memory.source]}`,
     who.length === 0
       ? "skipped by: no plugin, as Claude Code's notices in this session's transcript say"

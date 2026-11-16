@@ -5,6 +5,7 @@ import { choiceRows } from './shared/commands'
 import { ANIMATIONS, BORDER_STYLES, config, HISTORY_MODES, loadConfig } from './shared/config'
 import { THEME_NAMES } from './shared/themes'
 import { BORDER_STYLE, BORDERS, CHAT_BORDERS, registerChat, STATUSLINE_BORDERS } from './features/chat'
+import { BUTTONS, registerButtons } from './features/buttons'
 import { forgetNotifiedTasks, registerAgents, startAgents } from './features/agents'
 import { ANIMATE, ANIMATION, registerClodik } from './features/clodik'
 import { registerCommand } from './features/command'
@@ -62,6 +63,7 @@ export const register: Register = (on, options) => {
   registerCommand(on)
   registerHistory(on)
   registerChat(on)
+  registerButtons(on)
   registerView(on)
 
   // the commands' values in the prompt box's typeahead
@@ -76,6 +78,7 @@ export const register: Register = (on, options) => {
       [BORDERS]: { values: ['on', 'off'], current: config.borders ? 'on' : 'off' },
       [CHAT_BORDERS]: { values: ['on', 'off'], current: config.chatBorders ? 'on' : 'off' },
       [STATUSLINE_BORDERS]: { values: ['on', 'off'], current: config.statuslineBorders ? 'on' : 'off' },
+      [BUTTONS]: { values: ['on', 'off'], current: config.buttons ? 'on' : 'off' },
       [BORDER_STYLE]: { values: BORDER_STYLES, current: config.borderStyle },
       [USAGE]: { values: ['on', 'off'], current: config.usage ? 'on' : 'off' },
     })

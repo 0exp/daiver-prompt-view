@@ -125,7 +125,8 @@ function open($: EngineInterface) {
 }
 
 // turns the option, writes it to the config file, opens or closes the pane
-async function show($: EngineInterface, value: boolean) {
+// (the buttons row too)
+export async function show($: EngineInterface, value: boolean) {
   const deny = await setOption($, 'history', value)
 
   if (deny !== undefined) return `The prompt history pane was not changed: ${deny}`
@@ -134,6 +135,7 @@ async function show($: EngineInterface, value: boolean) {
   await writeConfig($)
   if (value) await open($)
   else await $.ui.close({ id: PANE })
+  $.ui.invalidate('ui.render')
 
   return value ? 'The prompt history pane is now shown.' : 'The prompt history pane is now hidden.'
 }
@@ -361,6 +363,7 @@ export function registerHistory(on: On) {
       if (deny === undefined) {
         config.history = false
         await writeConfig($)
+        $.ui.invalidate('ui.render')
       }
     }
 
