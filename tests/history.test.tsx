@@ -1,4 +1,5 @@
-import { expect, test } from 'claude-code/testing'
+import { expect, mock, test } from 'claude-code/testing'
+import { COPIED_GLYPH, COPIED_MS, COPY_GLYPH } from '../hooks/features/copy'
 import { frameStyle, hoverStyle, loadConfig } from '../hooks/shared/config'
 import { conf, run, start, world } from './world'
 
@@ -369,5 +370,53 @@ test('▲ and ▼ at the scrollbar\'s ends move the list a message at a time, ne
   expect(skipped()).toBe(2)
   await ui.press({ key: 'up' })
   expect(skipped()).toBe(1)
+  await ui.unmount()
+})
+
+// a long answer, a Bash call with its result, a command with its output
+const COPIES =
+  '{"type":"assistant","uuid":"r1","timestamp":"1970-01-01T01:00:01.000Z","message":{"role":"assistant","content":[{"type":"text","text":"line 1\\nline 2\\nline 3\\nline 4\\nline 5\\nline 6\\nline 7\\nline 8\\nline 9\\nline 10\\nline 11\\nline 12"},{"type":"tool_use","id":"tu1","name":"Bash","input":{"command":"ls -la"}}]}}\n' +
+  '{"type":"user","uuid":"u1","timestamp":"1970-01-01T01:00:02.000Z","toolUseResult":{"stdout":"a.ts\\nb.ts\\n","stderr":""},"message":{"role":"user","content":[{"type":"tool_result","tool_use_id":"tu1","content":"a.ts\\nb.ts"}]}}\n' +
+  '{"type":"user","uuid":"c1","timestamp":"1970-01-01T01:00:03.000Z","message":{"role":"user","content":"<command-name>/cost</command-name>\\n<command-args></command-args>"}}\n' +
+  '{"type":"system","subtype":"local_command","uuid":"o1","timestamp":"1970-01-01T01:00:03.100Z","content":"<local-command-stdout>Total cost: $0.42\\nTotal duration: 1m</local-command-stdout>"}\n'
+
+test("every message's copy button copies the whole message, not the pane's short form; fullscreen only", async ($, on) => {
+  const { files } = world(on, { clock: false })
+  const clock = mock.clock(on)
+  const copied: string[] = []
+  on('ui.copy', ($, e) => {
+    copied.push(e.text)
+    return { value: { isCopied: true } }
+  })
+  files.set('/home/me/.claude/projects/-home-me-proj/s1.jsonl', COPIES)
+  files.set('/home/me/.claude/history.jsonl', '{"display":"a prompt","timestamp":3600000,"sessionId":"s1"}\n')
+
+  await $.session.start(start)
+
+  const plain = await $.ui.mount({ ...PANE, surface: 'terminal' })
+  expect(await plain.find({ type: 'Button', key: 'c0' })).toBeUndefined()
+  await plain.unmount()
+
+  const ui = await $.ui.mount({ ...PANE, surface: 'terminal', viewport: { columns: 120, rows: 40, isFullscreen: true } })
+  const texts = (await ui.findAll({ type: 'Button' })).filter(one => one.key?.startsWith('p')).map(one => one.text)
+  // newest first: the command, the tool call, the answer, the prompt
+  expect(texts.slice(0, 2)).toEqual(['/cost', 'Bash(ls -la)'])
+  expect((await ui.find({ type: 'Button', key: 'c0' }))?.props.label).toBe(COPY_GLYPH)
+
+  for (const [key, text] of [
+    ['c0', '/cost\n\nTotal cost: $0.42\nTotal duration: 1m'],
+    ['c1', '$ ls -la\n\na.ts\nb.ts'],
+    ['c2', 'line 1\nline 2\nline 3\nline 4\nline 5\nline 6\nline 7\nline 8\nline 9\nline 10\nline 11\nline 12'],
+    ['c3', 'a prompt'],
+  ] as const) {
+    await ui.press({ key })
+    expect(copied.at(-1)).toBe(text)
+  }
+  // the state the test world holds draws nothing again by itself: draw it as the write would
+  await ui.redraw()
+  expect((await ui.find({ type: 'Button', key: 'c0' }))?.props.label).toBe(COPIED_GLYPH)
+  await clock.advance(COPIED_MS)
+  await ui.redraw()
+  expect((await ui.find({ type: 'Button', key: 'c0' }))?.props.label).toBe(COPY_GLYPH)
   await ui.unmount()
 })

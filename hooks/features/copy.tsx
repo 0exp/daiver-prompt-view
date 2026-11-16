@@ -54,18 +54,28 @@ export function toolText(tool: string, input: unknown, output: unknown) {
 
 // the corner button, for the frame to hold as its last child; null where it is not drawn
 export async function copyCorner($: EngineInterface, e: RenderInput<'UserMessage' | 'AssistantMessage' | 'ToolUse' | 'CommandOutput'>, text: string) {
-  if (e.surface !== 'terminal' || e.viewport?.isFullscreen !== true || text.trim() === '') return null
-  const isDone = (await read($, memberOf(copied, e))) ?? false
-  const { Box, Button } = $.ui.resolve(e)
+  if (text.trim() === '') return null
+
+  return copyButton($, e, () => Promise.resolve(text), e.requestId, 'copy')
+}
+
+// the button itself, at a frame's top right: `id` names what was copied (a
+// transcript row's requestId, a history pane's message), `text` gives the text
+// at the press (a history pane's tool call reads its call and result then);
+// `key` the Button's own, one per button where a site holds several
+export async function copyButton($: EngineInterface, e: { surface: RenderSurface; viewport?: { isFullscreen?: boolean } }, text: () => Promise<string>, id: string, key: string) {
+  if (e.surface !== 'terminal' || e.viewport?.isFullscreen !== true) return null
+  const isDone = (await read($, memberOf(copied, { requestId: id }))) ?? false
+  const { Box, Button } = $.ui.resolve(e as RenderInput<'Pane'>)
 
   return (
     <Box position="absolute" top={0} right={COPY_RIGHT}>
       <Button
-        key="copy"
+        key={key}
         label={isDone ? COPIED_GLYPH : COPY_GLYPH}
         plain
         dimColor={!isDone}
-        onPress={press => void copyText($, press.surface, text, e.requestId).catch(() => undefined)}
+        onPress={press => void text().then(one => copyText($, press.surface, one, id)).catch(() => undefined)}
       />
     </Box>
   )

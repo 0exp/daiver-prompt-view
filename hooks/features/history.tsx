@@ -13,6 +13,7 @@ import { config, frameStyle, HISTORY_MODES, hoverStyle, writeConfig } from '../s
 import { setOption } from '../shared/options'
 import { transcriptPath } from '../shared/files'
 import { hexOf, THEMES } from '../shared/themes'
+import { copyButton, toolText } from './copy'
 import { noteSubagentCalls } from './tool'
 import type { Answer, Prompt, Ran } from '../../types'
 
@@ -240,6 +241,40 @@ async function jumpToCommand($: EngineInterface, ran: Ran) {
 
 // what the pane lists in the historyMode picked, oldest first: the person's
 // prompts and commands, Claude's answers, or both by time
+// a tool call's whole copy: the call and its result as the transcript file
+// holds them (the pane keeps the call's one line alone), as the transcript's
+// own copy button gives them; the line when the file has no such call
+export async function toolCopy($: EngineInterface, answer: Answer) {
+  const id = answer.toolUseId
+  const path = await transcriptPath($)
+
+  if (id === undefined || !(await $.fs.exists(path))) return answer.text
+  let call: { name: string; input: unknown } | undefined
+  let output: unknown
+
+  for (const line of (await $.fs.read(path)).split('\n')) {
+    if (!line.includes(id)) continue
+    try {
+      const row = JSON.parse(line) as { type?: unknown; toolUseResult?: unknown; message?: { content?: unknown } }
+      const content = Array.isArray(row.message?.content) ? (row.message.content as { type?: unknown; id?: unknown; name?: unknown; input?: unknown; tool_use_id?: unknown; content?: unknown }[]) : []
+      for (const block of content) {
+        if (block.type === 'tool_use' && block.id === id && typeof block.name === 'string') call = { name: block.name, input: block.input }
+        if (block.type === 'tool_result' && block.tool_use_id === id) {
+          const stdout = typeof row.toolUseResult === 'object' && row.toolUseResult !== null && typeof (row.toolUseResult as { stdout?: unknown }).stdout === 'string'
+          output = stdout ? row.toolUseResult
+            : typeof block.content === 'string' ? block.content
+            : Array.isArray(block.content) ? (block.content as { type?: unknown; text?: unknown }[]).filter(one => one.type === 'text' && typeof one.text === 'string').map(one => one.text).join('\n')
+            : undefined
+        }
+      }
+    } catch {
+      // a row cut short while it is written
+    }
+  }
+
+  return call === undefined ? answer.text : toolText(call.name, call.input, output)
+}
+
 type Item =
   | { who: 'me'; at: number; prompt: Prompt }
   | { who: 'me'; at: number; ran: Ran }
@@ -257,6 +292,21 @@ function itemsOf(mode: string, mine: readonly Prompt[], ran: readonly Ran[], the
 
 // an answer's text as its message shows it: the first lines, the rest a press away
 const LINES = 8
+// what a message's copy button copies: the whole message, never the pane's
+// short form: a prompt's text, a command with its output, an answer's text, a
+// tool call with its result
+function copyOf($: EngineInterface, item: Item) {
+  if ('prompt' in item) return Promise.resolve(item.prompt.text)
+  if ('ran' in item) return Promise.resolve([commandLine(item.ran.name, item.ran.args), item.ran.output].filter(part => part !== '').join('\n\n'))
+  if (item.answer.kind === 'tool') return toolCopy($, item.answer)
+
+  return Promise.resolve(item.answer.text)
+}
+
+// a message's own name for its ✓, the same however the list scrolls
+const copyId = (item: Item) =>
+  'prompt' in item ? `history:p:${item.at}` : 'ran' in item ? `history:c:${item.at}` : `history:a:${item.answer.uuid}:${item.answer.toolUseId ?? item.answer.text.slice(0, 40)}`
+
 const brief = (text: string, max = LINES) => {
   const lines = text.split('\n')
   const head = cut(lines.slice(0, max).join('\n'), 800)
@@ -416,6 +466,8 @@ export function registerHistory(on: On) {
     const pastAt = (row: number) =>
       track <= thumb ? 0 : Math.min(Math.max(0, Math.round(((row - Math.floor(thumb / 2)) * (list.length - 1)) / (track - thumb))), list.length - 1)
     const by = (step: number) => update($, skip, n => Math.min(Math.max(0, (n ?? 0) + step), Math.max(0, list.length - 1)))
+    // each message's copy button, at its frame's top right (fullscreen only, as the transcript's)
+    const corners = await Promise.all(shown.map((item, i) => copyButton($, e, () => copyOf($, item), copyId(item), `c${i}`)))
     const message = (item: Item, i: number) => {
       const isMine = item.who === 'me'
       const color = 'ran' in item ? theme.command : 'prompt' in item ? theme.prompt : item.answer.kind === 'tool' ? theme.tool : theme.reply
@@ -443,6 +495,7 @@ export function registerHistory(on: On) {
             {text}
           </Button>
           {'ran' in item && item.ran.output !== '' && <Text dimColor>{brief(item.ran.output, OUTPUT_LINES)}</Text>}
+          {corners[i]}
         </Box>
       )
     }

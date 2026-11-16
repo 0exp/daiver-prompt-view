@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.47.0] - 2026-11-16
+
+### Added
+
+- A copy button on every message of the history pane, as on the chat's boxes: it copies the whole message (a prompt, a command with its output, Claude's whole text, a tool call with its result), not the short form the pane shows.
+
 ## [1.46.2] - 2026-11-16
 
 ### Fixed

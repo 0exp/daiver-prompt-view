@@ -312,6 +312,18 @@ command, another plugin's or this mod's own, read on the session start from
 the transcript file and joining as each one runs), Claude's text in the `reply` color
 (its first 8 lines, `…` for the rest), a tool call in the `tool` color, one
 line with the tool and its main argument (`Bash(ls -la)`, `Read(/src/a.ts)`).
+In the fullscreen terminal each message carries a copy button, `⧉`, in its
+frame's top right corner, as the transcript's boxes do; it copies the whole
+message, never the pane's short form (`✓` for a moment after the click):
+
+| Message | A click on `⧉` copies |
+| --- | --- |
+| Your prompt | the prompt as you typed it |
+| A slash command | `/name args`, then a blank line and its whole output |
+| Claude's text | the whole text, its markdown as written, not the first 8 lines |
+| A Bash call | `$ <command>`, the whole command, then a blank line and its output, read from the session's transcript file |
+| Any other tool call | the call (`Read(/a/b.ts)`), then a blank line and its whole result, from the transcript file; the call's one line when the file has no such call |
+
 Answers are Claude's own on the main conversation (a subagent's are left out),
 read on the session start from the session's transcript file and joining as
 the session stores them. A click on a message (or Enter on it while the pane
