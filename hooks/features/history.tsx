@@ -405,7 +405,8 @@ export function registerHistory(on: On) {
     return next(e)
   }).catch(($, e, next) => next(e))
 
-  // the person's close (the × or ctrl+x x) turns the option off too
+  // the person's close (ctrl+x x, Claude Code's own) turns the option off too;
+  // the × turns it off itself, as history:show off (its close is the mod's own)
   on('ui.close', { id: PANE }, async ($, e, next) => {
     if (e.origin.kind === 'person' && config.history) {
       const deny = await setOption($, 'history', false)
@@ -506,7 +507,7 @@ export function registerHistory(on: On) {
           <Text bold>
             {HEADERS[mode]} ({list.length}){past > 0 && <Text dimColor> ↑{past}</Text>}
           </Text>
-          <Button key="close" label="×" role="dismiss" hotkey="x" plain onPress={() => void $.ui.close({ id: PANE })} />
+          <Button key="close" label="×" role="dismiss" hotkey="x" plain onPress={() => void show($, false).catch(() => undefined)} />
         </Box>
         {list.length === 0 && <Text dimColor>{EMPTY[mode]}</Text>}
         {list.length > 0 && (

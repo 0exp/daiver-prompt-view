@@ -80,6 +80,23 @@ test("the pane lists the session's prompts with their times in the theme's histo
   expect(panes.closed).toEqual(['history'])
 })
 
+test("the pane's × turns the history option off, so the buttons row says off", async ($, on) => {
+  const { sets, panes } = world(on)
+
+  await $.session.start(start)
+  await $.command.run(run('history:show', 'on'))
+
+  const pane = await $.ui.mount({ ...PANE, surface: 'terminal' })
+  await pane.press({ key: 'close' })
+  await pane.unmount()
+
+  expect(panes.open).toEqual([])
+  expect(sets).toEqual(['history=true', 'history=false'])
+  const band = await $.ui.mount({ plugin: 'daiver-prompt-view', component: 'AbovePrompt', requestId: 'band', surface: 'terminal', props: { hasSurvey: false, isCollapsed: false, isWorking: false, maxRows: 10, bodyColumns: 115, scroll: { offset: 0, bodyRows: 10 }, view: {} } })
+  expect((await band.find({ key: 'history' }))?.props.label).toBe('≡ history: off')
+  await band.unmount()
+})
+
 // every message is a press that scrolls the transcript to the prompt's row
 // ($.ui.scroll, which the test engine does not answer: the real one does); a
 // prompt whose row the transcript has not drawn says so in a toast

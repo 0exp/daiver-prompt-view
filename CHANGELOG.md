@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.47.1] - 2026-11-16
+
+### Fixed
+
+- Closing the history pane with its × turns the history option off, so the `≡ history` button shows `off` at once.
+
 ## [1.47.0] - 2026-11-16
 
 ### Added
