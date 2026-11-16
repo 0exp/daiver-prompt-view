@@ -1,4 +1,4 @@
-import { expect, test } from 'claude-code/testing'
+import { expect, mock, test } from 'claude-code/testing'
 import { start, world } from './world'
 
 // the line as agent-count's default colors drew it, byte for byte
@@ -32,4 +32,15 @@ test('a theme change draws the agents line again', async ($, on) => {
   await $.command.run({ command: 'daiver-prompt-view:view:theme', args: 'default', origin: { kind: 'composer' }, presentation: { isFullscreen: false, columns: 120 } })
 
   expect(agents()).toBe(IDLE)
+})
+
+test('a session going on under a new id, with no new start, gets its agents line there', async ($, on) => {
+  const { files, session } = world(on, { clock: false })
+  const clock = mock.clock(on)
+
+  await $.session.start(start)
+  session.id = 's2'
+  await clock.advance(1000)
+
+  expect(files.get('/home/me/.claude/daiver-prompt-view/agents/s2')).toBe(IDLE)
 })

@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.48.2] - 2026-11-17
+
+### Fixed
+
+- A resumed or forked session shows its subagents, shells and monitors in the agents line again: the line followed the session's old id and stayed idle.
+
 ## [1.48.1] - 2026-11-16
 
 ### Changed

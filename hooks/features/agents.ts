@@ -151,7 +151,15 @@ async function refresh($: EngineInterface) {
 
   const text = [line, ...subs].map(row => `${row}\n`).join('')
 
-  if (text === shown || file === undefined) return
+  if (file === undefined) return
+  // the session's id is read again on every write: a resumed or forked session
+  // goes on under a new id with no new start, and the status line asks for that id
+  const current = await agentsFile($)
+  if (current !== file) {
+    file = current
+    shown = ''
+  }
+  if (text === shown) return
   shown = text
   await $.fs.write(file, text)
 }
@@ -163,9 +171,14 @@ export async function redrawAgents($: EngineInterface) {
   await refresh($)
 }
 
+// this session's agents file, by the id the session goes by now
+async function agentsFile($: EngineInterface) {
+  return `${await home($)}/agents/${await $.session.id()}`
+}
+
 // on every session start (and so every reload): the state starts over
 export async function startAgents($: EngineInterface) {
-  file = `${await home($)}/agents/${await $.session.id()}`
+  file = await agentsFile($)
   shown = ''
   main = 'idle'
   mainTools.length = 0

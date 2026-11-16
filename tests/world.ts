@@ -21,6 +21,8 @@ export function world(on: On, { configRows = true, clock: hasClock = true, setti
   const clock = { now: 0 }
   // the /config values as saved, by field, over the rows' own: another session's save sets one
   const saved: Record<string, unknown> = {}
+  // the id the session goes by; a test sets `session.id`, as a resume or a fork does
+  const session = { id: 's1' }
 
   on('fs.exists', ($, e) => ({ value: files.has(e.path) || e.path.endsWith('/statusline/daiver-prompt-view.sh') }))
   on('fs.read', ($, e) => ({ value: files.get(e.path) ?? '#!/bin/sh\n' }))
@@ -30,7 +32,7 @@ export function world(on: On, { configRows = true, clock: hasClock = true, setti
     return { value: undefined }
   })
   on('agent.list', () => ({ value: [] }))
-  on('session.id', () => ({ value: 's1' }))
+  on('session.id', () => ({ value: session.id }))
   on('session.cwd', () => ({ value: '/home/me/proj' }))
   if (hasClock) on('clock.now', () => ({ value: clock.now }))
   on('settings.read', () => (settingsDenied ? { deny: 'refused by a plugin above' } : { value: settings.value }))
@@ -85,7 +87,7 @@ export function world(on: On, { configRows = true, clock: hasClock = true, setti
   on('session.start', ($, e) => ({ cwd: e.cwd }))
   on('prompt.autocomplete', () => ({ suggestions: [] }))
 
-  return { files, settings, clock, saved, sets, panes, toasts, logs, state, config: () => files.get(`${DIR}/config`), agents: () => files.get(`${DIR}/agents/s1`) }
+  return { files, settings, clock, session, saved, sets, panes, toasts, logs, state, config: () => files.get(`${DIR}/config`), agents: () => files.get(`${DIR}/agents/s1`) }
 }
 
 export const start = { cwd: '/tmp', surface: 'terminal', isInteractive: true } as const
