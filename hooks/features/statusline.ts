@@ -3,8 +3,8 @@
 // a stable path (<mod dir>/statusline.sh), refreshed on every session start
 import type { EngineInterface, On } from 'claude-code'
 import { command, failed } from '../shared/commands'
-import { config, writeConfig } from '../shared/config'
-import { setOption } from '../shared/options'
+import { adoptSaved, config, writeConfig } from '../shared/config'
+import { savedOptions, setOption } from '../shared/options'
 import { home, sync } from '../shared/files'
 import { markSeen } from '../shared/seen'
 
@@ -90,8 +90,11 @@ export async function startStatusline($: EngineInterface) {
   await writeAutoMemory($)
   // a second's refresh, as the status line's: /memory changes the setting any time
   $.clock.every(1000, () => writeAutoMemory($))
-  // the padding drawn, again every few seconds: a settings file or a plugin above may change it
+  // the padding drawn, again every few seconds: a settings file or a plugin above
+  // may change it; and the options another session changed, so the shared config
+  // file is not written back with this session's old ones (the frames redrawn)
   $.clock.every(5000, async () => {
+    if (adoptSaved(await savedOptions($).catch(() => ({})))) $.ui.invalidate('ui.render')
     await readPadding($)
     await writeConfig($)
   })

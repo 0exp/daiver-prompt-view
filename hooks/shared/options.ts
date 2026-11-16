@@ -1,5 +1,13 @@
 import type { ConfigValue, EngineInterface } from 'claude-code'
 
+// this plugin's options as /config holds them now, by userConfig key: what
+// any session saved last; none when another plugin filters the list
+export async function savedOptions($: EngineInterface) {
+  const rows = (await $.config.list()).filter(one => one.provider.plugin === $.plugin.name)
+
+  return Object.fromEntries(rows.map(one => [one.key.split('.').at(-1)!, one.value as unknown]))
+}
+
 // sets this plugin's /config row of the userConfig field; the reason when it
 // was refused. With no row to set (another plugin filters the list, the
 // option is not in this build's /config) the change holds for the session

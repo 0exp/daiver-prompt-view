@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.46.2] - 2026-11-16
+
+### Fixed
+
+- With several sessions open, an option changed in one (the frames, the theme, Clawd, ...) holds in the status line of every session, instead of flickering back to another session's old value.
+
 ## [1.46.1] - 2026-11-16
 
 ### Changed

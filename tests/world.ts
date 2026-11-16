@@ -19,6 +19,8 @@ export function world(on: On, { configRows = true, clock: hasClock = true, setti
   const settings = { value: {} as Record<string, unknown> }
   // the time $.clock.now answers; a test sets `clock.now`
   const clock = { now: 0 }
+  // the /config values as saved, by field, over the rows' own: another session's save sets one
+  const saved: Record<string, unknown> = {}
 
   on('fs.exists', ($, e) => ({ value: files.has(e.path) || e.path.endsWith('/statusline/daiver-prompt-view.sh') }))
   on('fs.read', ($, e) => ({ value: files.get(e.path) ?? '#!/bin/sh\n' }))
@@ -60,7 +62,7 @@ export function world(on: On, { configRows = true, clock: hasClock = true, setti
   })
   const provider = { plugin: 'daiver-prompt-view', tier: 'user' } as const
   on('config.list', $ => ({
-    value: !configRows ? [] : [
+    value: (!configRows ? [] : [
       { key: `${$.plugin.name}.clodikAnimate`, label: 'Animate Clawd always', kind: 'boolean', value: false, provider, isLocked: false },
       { key: `${$.plugin.name}.clodikAnimation`, label: "Clawd's animation", kind: 'choice', value: 'matrix', provider, isLocked: false },
       { key: `${$.plugin.name}.theme`, label: 'Color theme', kind: 'choice', value: 'default', provider, isLocked: false },
@@ -73,16 +75,17 @@ export function world(on: On, { configRows = true, clock: hasClock = true, setti
       { key: `${$.plugin.name}.statuslineUsage`, label: "Show the session's tokens and cost", kind: 'boolean', value: true, provider, isLocked: false },
       { key: `${$.plugin.name}.buttons`, label: 'Show the buttons row', kind: 'boolean', value: true, provider, isLocked: false },
       { key: `${$.plugin.name}.borderStyle`, label: 'Frame style', kind: 'choice', value: 'dashed', provider, isLocked: false },
-    ],
+    ] as const).map(row => ({ ...row, value: saved[row.key.split('.').at(-1)!] ?? row.value })),
   }))
   on('config.set', ($, e) => {
     sets.push(`${e.key.split('.').at(-1)}=${e.value}`)
+    saved[e.key.split('.').at(-1)!] = e.value
     return { value: e.value }
   })
   on('session.start', ($, e) => ({ cwd: e.cwd }))
   on('prompt.autocomplete', () => ({ suggestions: [] }))
 
-  return { files, settings, clock, sets, panes, toasts, logs, state, config: () => files.get(`${DIR}/config`), agents: () => files.get(`${DIR}/agents/s1`) }
+  return { files, settings, clock, saved, sets, panes, toasts, logs, state, config: () => files.get(`${DIR}/config`), agents: () => files.get(`${DIR}/agents/s1`) }
 }
 
 export const start = { cwd: '/tmp', surface: 'terminal', isInteractive: true } as const

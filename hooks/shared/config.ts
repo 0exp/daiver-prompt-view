@@ -46,6 +46,31 @@ export function loadConfig(options: Record<string, unknown>) {
   config.padding = paddingOf(options.statuslinePadding)
 }
 
+// the config as the userConfig options name it, loadConfig's input
+function optionsOf(): Record<string, unknown> {
+  return {
+    clodik: config.clodik, clodikAnimate: config.animate, clodikAnimation: config.animation, theme: config.theme,
+    history: config.history, toasts: config.toasts, buttons: config.buttons, historyMode: config.historyMode,
+    borders: config.borders, chatBorders: config.chatBorders, statuslineBorders: config.statuslineBorders,
+    statuslineUsage: config.usage, borderStyle: config.borderStyle, statuslinePadding: config.padding,
+  }
+}
+
+// the config file is one for every session, each writing it again every few
+// seconds: before that, a session takes the options as /config saved them (by
+// another session too), so no session writes back a value changed elsewhere.
+// The history pane stays the session's own (it opens and closes there alone);
+// an option with no saved row keeps the session's value. True when one changed
+export function adoptSaved(saved: Record<string, unknown>) {
+  const before = JSON.stringify(optionsOf())
+  const history = config.history
+
+  loadConfig({ ...optionsOf(), ...saved })
+  config.history = history
+
+  return JSON.stringify(optionsOf()) !== before
+}
+
 // the config file and the active theme's colors, next to the script
 export async function writeConfig($: EngineInterface) {
   const dir = await home($)

@@ -1,4 +1,4 @@
-import { expect, test } from 'claude-code/testing'
+import { expect, mock, test } from 'claude-code/testing'
 import { loadConfig } from '../hooks/shared/config'
 import { drawnPadding, withPadding } from '../hooks/features/statusline'
 import { conf, DIR, run, start, world } from './world'
@@ -141,4 +141,28 @@ test('auto memory with the settings read refused and no file to read: unknown, n
   await $.session.start(start)
 
   expect(files.get(MEMORY)).toBe('unknown\n')
+})
+
+test("an option another session saved reaches the shared config file, not this session's old value", async ($, on) => {
+  const { saved, config } = world(on, { clock: false })
+  const clock = mock.clock(on)
+
+  await $.session.start(start)
+  expect(config()).toBe(conf(true, false, 'matrix'))
+
+  saved.borders = false
+  saved.borderStyle = 'line'
+  await clock.advance(5000)
+  expect(config()).toBe(conf(true, false, 'matrix', 'default', false, false, true, true, 'line'))
+})
+
+test('the history pane stays the session own when another session saves it', async ($, on) => {
+  const { saved, config, panes } = world(on, { clock: false })
+  const clock = mock.clock(on)
+
+  await $.session.start(start)
+  saved.history = true
+  await clock.advance(5000)
+  expect(config()).toBe(conf(true, false, 'matrix'))
+  expect(panes.open).toEqual([])
 })
