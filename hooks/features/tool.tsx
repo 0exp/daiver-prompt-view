@@ -87,4 +87,22 @@ export function registerTool(on: On) {
       </Box>
     )
   }).catch(($, e, next) => next(e))
+
+  // a group of calls Claude Code folds into one line (`Ran 5 commands`): the
+  // line framed as a call's row is; an expanded group (ctrl+o, --verbose) draws
+  // each call as its own row, framed above, and is left as it is
+  on('ui.render', { component: 'ToolGroup' }, async ($, e, next) => {
+    if (!config.borders || !config.chatBorders || e.props.isExpanded) return next(e)
+
+    const row = await next(e)
+    const { Box } = $.ui.resolve(e)
+
+    return (
+      <Box borderStyle={frameStyle()} borderColor={hexOf(THEMES[config.theme]!.tool)} paddingX={1} marginTop={1}>
+        <Box flexDirection="column" marginTop={-1}>
+          {row}
+        </Box>
+      </Box>
+    )
+  }).catch(($, e, next) => next(e))
 }

@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.48.0] - 2026-11-16
+
+### Added
+
+- A group of tool calls folded into one line (`Ran 5 commands`) sits in the tool calls' frame too; expanded, each call keeps its own.
+
 ## [1.47.3] - 2026-11-16
 
 ### Changed

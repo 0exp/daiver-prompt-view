@@ -98,3 +98,52 @@ test('a row the engine draws empty is left unframed, and framed again once it gr
   expect(await isFramed(ui)).toBe(true)
   await ui.unmount()
 })
+
+const GROUP = {
+  plugin: 'daiver-prompt-view',
+  component: 'ToolGroup',
+  requestId: 'g1',
+  surface: 'terminal',
+  props: {
+    calls: [
+      { tool_use_id: 'a', tool: 'Bash', input: { command: 'date' }, isRunning: false, isErrored: false, isInterrupted: false },
+      { tool_use_id: 'b', tool: 'Bash', input: { command: 'ls' }, isRunning: false, isErrored: false, isInterrupted: false },
+    ],
+    isActive: false,
+    isExpanded: false,
+  },
+} as const
+
+test("a folded group of calls is framed as a call's row; an expanded one is left as it is", async ($, on) => {
+  world(on)
+  on('ui.render', ($, e) => {
+    const { Text } = $.ui.resolve(e)
+    return <Text>Ran 2 commands</Text>
+  })
+
+  await $.session.start(start)
+
+  const folded = await $.ui.mount(GROUP)
+  const box = await folded.find({ type: 'Box' })
+  expect(box?.props).toMatchObject({ borderStyle: 'dashed', borderColor: '#6a34a3', marginTop: 1 })
+  expect((await folded.find({ type: 'Text' }))?.text).toBe('Ran 2 commands')
+  await folded.unmount()
+
+  const expanded = await $.ui.mount({ ...GROUP, props: { ...GROUP.props, isExpanded: true } })
+  expect(await expanded.find({ type: 'Box' })).toBeUndefined()
+  await expanded.unmount()
+})
+
+test('with the frames off a folded group is left as Claude Code draws it', { options: { chatBorders: false } }, async ($, on) => {
+  world(on)
+  on('ui.render', ($, e) => {
+    const { Text } = $.ui.resolve(e)
+    return <Text>Ran 2 commands</Text>
+  })
+
+  await $.session.start(start)
+
+  const ui = await $.ui.mount(GROUP)
+  expect(await ui.find({ type: 'Box' })).toBeUndefined()
+  await ui.unmount()
+})
