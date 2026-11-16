@@ -30,6 +30,7 @@ export type Theme = {
   history: string // the frame of the prompt history pane
   hover: string // the frame of the history pane's message under the pointer, on its own (the ctx bar's fuchsia by default)
   buttons: string // the buttons row above the prompt, on and off alike (gray, as a dim label, by default)
+  buttonsFrame: string // the frame around the buttons row (a muted dark red by default)
   paneBackground: string // what is painted under the history pane's body, darker than the terminal's
   effort: string // the effort level on the modes line
   ostyle: string // the output style on the modes line
@@ -66,6 +67,7 @@ export const THEMES: Record<string, Theme> = {
     history: '38;2;215;119;87',
     hover: '38;2;255;0;255',
     buttons: '38;2;128;128;128',
+    buttonsFrame: '38;2;150;60;60',
     paneBackground: '38;2;16;16;22',
     effort: '38;2;215;119;87',
     ostyle: '38;2;230;200;110',

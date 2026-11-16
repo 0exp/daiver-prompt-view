@@ -141,7 +141,9 @@ A row above the prompt with two switches, each showing where it stands:
 | `≡ history` | `h` | opens or closes the prompt history pane, as `/daiver-prompt-view:history:show` does |
 
 Both buttons are drawn in the theme's `buttons` color (gray in `default`), on
-and off alike: the label says which.
+and off alike: the label says which. The row sits in a frame of the theme's
+`buttonsFrame` color (a muted dark red in `default`), dashed or a solid line as
+`borderStyle` says, and bare while the frames are off (`▣ borders: off`).
 
 A click presses a button; so does its key while the row holds the focus
 (ctrl+x tab, or a click on it). On the main screen, which takes no clicks, the

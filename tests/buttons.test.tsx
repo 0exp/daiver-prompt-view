@@ -108,3 +108,17 @@ test("the doctor tells whether the row reached the band's list", async ($, on) =
   await $.command.run(run('chat:show-buttons', 'off'))
   expect((await $.command.run(run('mod:doctor'))).text).toContain('buttons row: off (the buttons option)')
 })
+
+test("the row is framed in the theme's buttonsFrame color while the frames are on", async ($, on) => {
+  world(on)
+  await $.session.start(start)
+
+  const ui = await $.ui.mount(BAND)
+  expect((await ui.find({ type: 'Box' }))?.props).toMatchObject({ borderStyle: 'dashed', borderColor: '#963c3c', paddingX: 1 })
+  await ui.press({ key: 'borders' })
+  await ui.unmount()
+
+  const bare = await $.ui.mount(BAND)
+  expect((await bare.find({ type: 'Box' }))?.props.borderStyle).toBeUndefined()
+  await bare.unmount()
+})
