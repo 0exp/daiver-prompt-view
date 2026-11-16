@@ -25,9 +25,17 @@ export function paddingOf(value: unknown) {
   return Number.isInteger(n) && n >= PADDING.min && n <= PADDING.max ? n : PADDING.default
 }
 
+// the most characters of a subagent's current work on its agents row, as the
+// agentActivityLength option holds it; 0 hides it
+export const ACTIVITY_LENGTH = { min: 0, max: 200, default: 40 }
+export function activityLengthOf(value: unknown) {
+  const n = typeof value === 'number' ? value : Number(value)
+  return Number.isInteger(n) && n >= ACTIVITY_LENGTH.min && n <= ACTIVITY_LENGTH.max ? n : ACTIVITY_LENGTH.default
+}
+
 // the options the status line script reads, from the plugin's userConfig;
 // a change in /config reloads the module, and session.start fires again
-export const config = { clodik: true, animate: false, animation: 'matrix', theme: 'default', history: false, historyMode: 'fullstory', toasts: false, buttons: true, borders: true, chatBorders: true, statuslineBorders: true, usage: true, borderStyle: 'dashed', padding: PADDING.default, drawnPadding: undefined as number | undefined }
+export const config = { clodik: true, animate: false, animation: 'matrix', theme: 'default', history: false, historyMode: 'fullstory', toasts: false, buttons: true, borders: true, chatBorders: true, statuslineBorders: true, usage: true, borderStyle: 'dashed', padding: PADDING.default, activityLength: ACTIVITY_LENGTH.default, drawnPadding: undefined as number | undefined }
 
 export function loadConfig(options: Record<string, unknown>) {
   config.clodik = options.clodik !== false
@@ -44,6 +52,7 @@ export function loadConfig(options: Record<string, unknown>) {
   config.usage = options.statuslineUsage !== false
   config.borderStyle = BORDER_STYLES.includes(String(options.borderStyle)) ? String(options.borderStyle) : 'dashed'
   config.padding = paddingOf(options.statuslinePadding)
+  config.activityLength = activityLengthOf(options.agentActivityLength)
 }
 
 // the config as the userConfig options name it, loadConfig's input
@@ -53,6 +62,7 @@ function optionsOf(): Record<string, unknown> {
     history: config.history, toasts: config.toasts, buttons: config.buttons, historyMode: config.historyMode,
     borders: config.borders, chatBorders: config.chatBorders, statuslineBorders: config.statuslineBorders,
     statuslineUsage: config.usage, borderStyle: config.borderStyle, statuslinePadding: config.padding,
+    agentActivityLength: config.activityLength,
   }
 }
 

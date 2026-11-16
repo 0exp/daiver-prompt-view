@@ -1,6 +1,6 @@
 {
   "name": "daiver-prompt-view",
-  "version": "1.49.0",
+  "version": "1.50.0",
   "description": "A multi-line status line under the prompt: model, session, modes, agents, usage bars, git state and Clawd",
   "author": {
     "name": "Rustam Ibragimov",
@@ -50,6 +50,14 @@
       "default": -1,
       "min": -2,
       "max": 20
+    },
+    "agentActivityLength": {
+      "type": "number",
+      "title": "Subagent's current work length",
+      "description": "The most characters of a subagent's current work (its last tool call) shown in parentheses on its status line row, the cut end marked with …; 0 hides it",
+      "default": 40,
+      "min": 0,
+      "max": 200
     },
     "history": {
       "type": "boolean",

@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.50.0] - 2026-11-17
+
+### Added
+
+- The `agentActivityLength` option: how many characters of a subagent's current work its status line row shows (40 by default, 0 hides it).
+
 ## [1.49.0] - 2026-11-17
 
 ### Added

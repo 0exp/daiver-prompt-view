@@ -23,8 +23,6 @@ const RESET = '\x1b[0m'
 
 // a subagent's task on its `->` line is cut to this many characters
 const TASK_MAX = 60
-// and its current work after it (its last tool call) to this many
-const ACTIVITY_MAX = 40
 
 const toState = (status: string): State =>
   status === 'pending' ? 'pending' : status === 'waiting' ? 'waiting' : status === 'idle' ? 'idle' : 'running'
@@ -143,7 +141,8 @@ async function refresh($: EngineInterface) {
   for (const agent of agents) if (!agentSince.has(agent.id)) agentSince.set(agent.id, now)
 
   // one `-> <type> (time:<run time>) [<task>] (<current work>)` line per live
-  // agent, oldest first; a teammate goes by its name
+  // agent, oldest first; a teammate goes by its name; the current work cut to
+  // the agentActivityLength option, left out at 0
   const subs = agents
     .map(agent => ({ agent, since: agentSince.get(agent.id) ?? now }))
     .sort((a, b) => a.since - b.since)
@@ -153,7 +152,7 @@ async function refresh($: EngineInterface) {
       return (
         `${GRAY}-> ${KIND_COLOR('sub')}${who}${GRAY} (time:${ELAPSED_COLOR}${elapsed(now - since)}${GRAY}) ` +
         `[${WHITE}${clip(agent.description)}${GRAY}]` +
-        (activity === undefined ? '' : ` (${WHITE}${clip(activity, ACTIVITY_MAX)}${GRAY})`) +
+        (activity === undefined || config.activityLength === 0 ? '' : ` (${WHITE}${clip(activity, config.activityLength)}${GRAY})`) +
         RESET
       )
     })

@@ -52,7 +52,8 @@ else as wide as the widest line, Clawd inside it at the right border.
      a reload), the Agent call's `description`, cut to 60 characters, and what it
      works on now: its last tool call, as `Bash(git status)` or
      `Read(/path/to/file)` (the command's first line, the file, the pattern...),
-     cut to 40 characters; left out until its first call.
+     cut to the `agentActivityLength` option (40 characters by default, `0`
+     hides it); left out until its first call.
 
    The line is always there: while a session has no state of its own yet (its
    start hook has not run, nothing was launched), the status line shows an idle
@@ -273,6 +274,7 @@ Every option is in `/config`, or in `~/.claude/settings.json` under
 | `clodikAnimation` | Clawd's animation | choice | `matrix` | `random`, `jump`, `spin`, `sway`, `blink`, `cheer`, `wave`, `stretch`, `hop`, `tap`, `shiver`, `pixels`, `matrix` | `clodik:animation` |
 | `theme` | Color theme | choice | `default` | `default` | `view:theme` |
 | `statuslinePadding` | Status line padding | number | `-1` | whole numbers from `-2` to `20` | (none) |
+| `agentActivityLength` | Subagent's current work length | number | `40` | whole numbers from `0` to `200`; `0` hides it | (none) |
 
 For example, in `~/.claude/settings.json`:
 
@@ -280,24 +282,38 @@ For example, in `~/.claude/settings.json`:
 "pluginConfigs": {
   "daiver-prompt-view@daiver-prompt-view": {
     "options": {
-      "history":           false,
-      "historyMode":       "fullstory",
-      "toasts":            false,
-      "borders":           true,
-      "chatBorders":       true,
-      "statuslineBorders": true,
-      "statuslineUsage":   true,
-      "buttons":           true,
-      "borderStyle":       "dashed",
-      "clodik":            true,
-      "clodikAnimate":     false,
-      "clodikAnimation":   "pixels",
-      "theme":             "default",
-      "statuslinePadding": -1
+      "history":             false,
+      "historyMode":         "fullstory",
+      "toasts":              false,
+      "borders":             true,
+      "chatBorders":         true,
+      "statuslineBorders":   true,
+      "statuslineUsage":     true,
+      "buttons":             true,
+      "borderStyle":         "dashed",
+      "clodik":              true,
+      "clodikAnimate":       false,
+      "clodikAnimation":     "pixels",
+      "theme":               "default",
+      "statuslinePadding":   -1,
+      "agentActivityLength": 40
     }
   }
 }
 ```
+
+### Subagent's current work
+
+Each live subagent's row in the agents line ends with what it works on now,
+its last tool call, in parentheses. `agentActivityLength` is the most
+characters shown there, the name of the tool included; a longer one is cut,
+its end marked with `…`. The row for a subagent running `git status`:
+
+| `agentActivityLength` | The row |
+| --- | --- |
+| `40` (default) | `-> Explore (time:12s) [Find the lock usages] (Bash(git status))` |
+| `12` | `-> Explore (time:12s) [Find the lock usages] (Bash(git st…)` |
+| `0` | `-> Explore (time:12s) [Find the lock usages]` |
 
 ### Prompt history pane
 

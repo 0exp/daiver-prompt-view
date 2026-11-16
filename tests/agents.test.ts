@@ -56,3 +56,27 @@ test("a subagent's line shows its current work, its last tool call, after its ta
   const plain = agents()!.replace(/\x1b\[[0-9;]*m/g, '')
   expect(plain.split('\n')[1]).toBe('-> Explore (time:0s) [Find the lock usages] (Bash(git status))')
 })
+
+test("a subagent's current work is cut to the agentActivityLength option", { options: { agentActivityLength: 12 } }, async ($, on) => {
+  const { agents, live } = world(on)
+  on('tool.call', () => ({ deny: 'not run in a test' }))
+
+  await $.session.start(start)
+  live.push({ id: 'a1', type: 'Explore', description: 'Find the lock usages', status: 'running' })
+  await $.tool.call({ tool: 'Bash', command: 'git status', agentId: 'a1' })
+
+  const plain = agents()!.replace(/\x1b\[[0-9;]*m/g, '')
+  expect(plain.split('\n')[1]).toBe('-> Explore (time:0s) [Find the lock usages] (Bash(git st…)')
+})
+
+test("agentActivityLength 0 leaves a subagent's current work out", { options: { agentActivityLength: 0 } }, async ($, on) => {
+  const { agents, live } = world(on)
+  on('tool.call', () => ({ deny: 'not run in a test' }))
+
+  await $.session.start(start)
+  live.push({ id: 'a1', type: 'Explore', description: 'Find the lock usages', status: 'running' })
+  await $.tool.call({ tool: 'Bash', command: 'git status', agentId: 'a1' })
+
+  const plain = agents()!.replace(/\x1b\[[0-9;]*m/g, '')
+  expect(plain.split('\n')[1]).toBe('-> Explore (time:0s) [Find the lock usages]')
+})
