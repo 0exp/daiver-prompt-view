@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.48.1] - 2026-11-16
+
+### Changed
+
+- The history pane shows a tool call as one line again (its first line, up to 80 characters, `…` past them), as before 1.47.3; its copy button still copies the call with its whole result.
+
 ## [1.48.0] - 2026-11-16
 
 ### Added
