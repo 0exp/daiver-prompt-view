@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.50.1] - 2026-11-17
+
+### Changed
+
+- The mod's description names what it gives you: live agents, usage limits and git state under the prompt, a framed chat with copy buttons, and the prompt history pane.
+
 ## [1.50.0] - 2026-11-17
 
 ### Added

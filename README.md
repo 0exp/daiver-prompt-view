@@ -1,8 +1,8 @@
 # daiver-prompt-view
 
-A Claude Code mod that ships a multi-line status line for under the prompt:
-model, session, modes, the session's agents, usage bars, git state,
-and Clawd, Claude's mascot, at the right edge.
+A Claude Code mod that shows what your session is doing: a status line under
+the prompt with live agents, usage limits and git state, a framed chat with
+copy buttons, and a pane with your prompt history.
 
 ```
 Opus 5.5 -> [demo] (sid:419e75ee) <stime:1h23m> <automemory:on> <in:1.2M·out:85k·cash:$4.31>
