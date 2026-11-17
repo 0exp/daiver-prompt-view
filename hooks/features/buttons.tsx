@@ -63,11 +63,15 @@ export function registerButtons(on: On) {
     const color = hexOf(THEMES[config.theme]!.buttons)
     const borders = switchLabel('▣ borders', config.borders)
     const history = switchLabel('≡ history', config.history)
-    // framed in the theme's buttonsFrame color while the frames are on, as every frame of the mod
-    const frame = config.borders ? { borderStyle: frameStyle(), borderColor: hexOf(THEMES[config.theme]!.buttonsFrame), paddingX: 1 } : {}
+    // framed in the theme's buttonsFrame color while the frames are on, as every frame of the mod;
+    // lighter (buttonsFrameHover) while the pointer is over the row, back as it leaves
+    const theme = THEMES[config.theme]!
+    const frame = config.borders
+      ? { borderStyle: frameStyle(), borderColor: hexOf(theme.buttonsFrame), paddingX: 1, hover: { borderColor: hexOf(theme.buttonsFrameHover) } }
+      : {}
 
     return (
-      <Box flexDirection="row" {...frame}>
+      <Box key="buttons-row" flexDirection="row" {...frame}>
         <Button key="borders" hotkey="b" label={borders} dimColor onPress={() => void pressBorders($).catch(() => undefined)}>
           <Text color={color}>{borders}</Text>
         </Button>

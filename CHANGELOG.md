@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.51.0] - 2026-11-17
+
+### Added
+
+- The frame around the row of buttons turns a lighter red while the pointer is over it, and back as the pointer leaves.
+
 ## [1.50.1] - 2026-11-17
 
 ### Changed

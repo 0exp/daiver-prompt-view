@@ -1,4 +1,5 @@
 import { expect, test } from 'claude-code/testing'
+import { hexOf, THEMES } from '../hooks/shared/themes'
 import { conf, run, start, world } from './world'
 
 const BAND = {
@@ -114,11 +115,18 @@ test("the row is framed in the theme's buttonsFrame color while the frames are o
   await $.session.start(start)
 
   const ui = await $.ui.mount(BAND)
-  expect((await ui.find({ type: 'Box' }))?.props).toMatchObject({ borderStyle: 'dashed', borderColor: '#963c3c', paddingX: 1 })
+  expect((await ui.find({ type: 'Box' }))?.props).toMatchObject({ key: 'buttons-row', borderStyle: 'dashed', borderColor: '#963c3c', paddingX: 1 })
   await ui.press({ key: 'borders' })
   await ui.unmount()
 
   const bare = await $.ui.mount(BAND)
   expect((await bare.find({ type: 'Box' }))?.props.borderStyle).toBeUndefined()
   await bare.unmount()
+})
+
+// the kit's drawing leaves hover styles out: the row is a keyed Box (a hover scope),
+// and the color under the pointer is pinned on the theme
+test("the row's frame under the pointer takes the theme's buttonsFrameHover color, lighter than its own", () => {
+  expect(hexOf(THEMES.default!.buttonsFrameHover)).toBe('#f58c8c')
+  expect(hexOf(THEMES.default!.buttonsFrame)).toBe('#963c3c')
 })

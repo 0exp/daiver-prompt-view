@@ -149,7 +149,10 @@ A row above the prompt with two switches, each showing where it stands:
 Both buttons are drawn in the theme's `buttons` color (gray in `default`), on
 and off alike: the label says which. The row sits in a frame of the theme's
 `buttonsFrame` color (a muted dark red in `default`), dashed or a solid line as
-`borderStyle` says, and bare while the frames are off (`▣ borders: off`).
+`borderStyle` says, and bare while the frames are off (`▣ borders: off`). Under
+the pointer the frame turns the theme's `buttonsFrameHover` color (a lighter red
+in `default`) and turns back as the pointer leaves (in the fullscreen terminal,
+where the mouse reaches Claude Code).
 
 A click presses a button; so does its key while the row holds the focus
 (ctrl+x tab, or a click on it). On the main screen, which takes no clicks, the
@@ -244,7 +247,7 @@ Option `theme` (Color theme), default `default`.
 
 | Value | Colors |
 | --- | --- |
-| `default` (default) | white, gray, fuchsia (ctx), lavender (the context's size beside it), sky blue (lmt), light green (rst), Clawd orange, gray-green (pch), khaki (sha), violet (branch), coral (flags), light green (+added), coral (-removed), Clawd orange (the matrix rain, the frame around your prompts, in the chat and in the history pane, and the frame around the status line too), neon blue (the frame around Claude's replies, in the chat and in the history pane), dark violet (the frame around the tool calls, in the chat and in the history pane), yellow (the frame around the spinner, as the output style), gray (the frame around a command's output), Clawd orange (the prompt history pane's frame too), fuchsia (the history message's frame under the pointer, as the ctx bar), near black (the history pane's background) |
+| `default` (default) | white, gray, fuchsia (ctx), lavender (the context's size beside it), sky blue (lmt), light green (rst), Clawd orange, gray-green (pch), khaki (sha), violet (branch), coral (flags), light green (+added), coral (-removed), Clawd orange (the matrix rain, the frame around your prompts, in the chat and in the history pane, and the frame around the status line too), neon blue (the frame around Claude's replies, in the chat and in the history pane), dark violet (the frame around the tool calls, in the chat and in the history pane), yellow (the frame around the spinner, as the output style), gray (the frame around a command's output), Clawd orange (the prompt history pane's frame too), fuchsia (the history message's frame under the pointer, as the ctx bar), near black (the history pane's background), gray (the buttons), muted dark red (the buttons row's frame), lighter red (that frame under the pointer) |
 
 | Usage | Result |
 | --- | --- |
