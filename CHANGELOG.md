@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.51.1] - 2026-11-18
+
+### Fixed
+
+- The status line keeps updating in a long session with many subagents at work: the session's token totals are counted only from what was added since the last refresh, instead of reading every transcript again each second.
+
 ## [1.51.0] - 2026-11-17
 
 ### Added

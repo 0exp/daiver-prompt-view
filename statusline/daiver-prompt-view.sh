@@ -87,27 +87,67 @@ esac
 # before the first request. The input's context_window.total_*_tokens are the
 # last request's alone, so the sums come from the transcript and the
 # subagents' ones beside it (<session>/subagents/agent-*.jsonl): each response
-# once (it has a row per content block, all with its usage), kept in
-# tokens/<session_id> with the files' sizes and summed again only when one
-# grows. Names braced: bash 3.2 as sh takes the dot's first byte for part of a
-# bare $name. The statuslineUsage option off (statusline:show-usage, `usage=`
-# in config): no segment, nothing summed
+# once (it has a row per content block, all with its usage, the rows of one
+# response side by side). Read incrementally: tokens/<session_id> holds, after
+# a `v2` line, one tab-separated line per file: its path, the lines read so
+# far (whole lines only: a row being written waits for the next run), the
+# sums of the responses before the last one, and the last response's id and
+# usage (its later rows replace it). Only the lines a file grew by are read
+# (sed: BSD tail and head take a second on 30 MB), and each file's line is
+# saved as soon as it is read, so a run cut short by the next tick (refreshInterval 1, ten subagents writing) keeps its progress;
+# summing every transcript again each tick took longer than a tick and the
+# status line never finished. A file that shrank is read again from its
+# start. Names braced: bash 3.2 as sh takes the dot's first byte for part of
+# a bare $name. The statuslineUsage option off (statusline:show-usage,
+# `usage=` in config): no segment, nothing summed
 if ! grep -qx 'usage=false' "$mod/config" 2>/dev/null; then
   tsum='0 0'
   if [ -n "$tp" ] && [ -f "$tp" ]; then
-    tfiles=$(ls "$tp" "${tp%.jsonl}"/subagents/*.jsonl 2>/dev/null)
-    tsig=$(echo "$tfiles" | while IFS= read -r f; do printf '%s,' "$(wc -c < "$f" | tr -d ' ')"; done)
+    tab=$(printf '\t')
     tc="$mod/tokens/$(echo "$input" | jq -r '.session_id // "none"')"
-    csig='' cin='' cout=''
-    [ -f "$tc" ] && read -r csig cin cout < "$tc"
-    if [ "$csig" = "$tsig" ] && [ -n "$cout" ]; then
-      tsum="$cin $cout"
-    else
-      tsum=$(echo "$tfiles" | while IFS= read -r f; do grep '"usage"' "$f"; done |
-        jq -rs '[.[] | select(.type == "assistant" and .message.usage) | {key: .message.id, value: .message.usage}] | from_entries | [.[]]
-          | "\(map((.input_tokens // 0) + (.cache_creation_input_tokens // 0) + (.cache_read_input_tokens // 0)) | add // 0) \(map(.output_tokens // 0) | add // 0)"' 2>/dev/null)
-      case "$tsum" in *[0-9]' '[0-9]*) mkdir -p "$mod/tokens" && printf '%s %s\n' "$tsig" "$tsum" > "$tc.$$" && mv "$tc.$$" "$tc" ;; *) tsum='0 0' ;; esac
-    fi
+    mkdir -p "$mod/tokens"
+    # a cache in the old format (one line of sizes and sums) is dropped, and
+    # the leftovers of runs cut short are cleared
+    [ -f "$tc" ] && [ "$(head -n 1 "$tc")" != 'v2' ] && rm -f "$tc"
+    find "$mod/tokens" -name "${tc##*/}.*" -mmin +1 -exec rm -f {} + 2>/dev/null
+    [ -f "$tc" ] || echo v2 > "$tc"
+    tall=0 oall=0
+    tfiles=$(ls "$tp" "${tp%.jsonl}"/subagents/*.jsonl 2>/dev/null)
+    while IFS= read -r f; do
+      [ -f "$f" ] || continue
+      # whole lines only: wc -l counts the newlines, a row still being
+      # written has none yet
+      n=$(wc -l < "$f" | tr -d ' ')
+      off='' bin='' bout='' lid='' lin='' lout=''
+      ent=$(awk -F "$tab" -v p="$f" '$1 == p { print $2; exit }' "$tc" 2>/dev/null)
+      read -r off bin bout lid lin lout <<EOF
+$ent
+EOF
+      case "${off}x${bin}x${bout}x${lin}x${lout}" in *[!0-9x]*|*xx*|x*|*x) off=0 bin=0 bout=0 lid=- lin=0 lout=0 ;; esac
+      [ "$n" -lt "$off" ] && off=0 bin=0 bout=0 lid=- lin=0 lout=0
+      if [ "$n" -gt "$off" ]; then
+        res=$(sed -n "$((off + 1)),${n}p" "$f" | grep '"usage"' |
+          jq -Rrn --argjson bin "$bin" --argjson bout "$bout" --arg lid "${lid:--}" --argjson lin "$lin" --argjson lout "$lout" '
+            reduce (inputs | fromjson? | select(.type == "assistant" and .message.usage)
+              | [(.message.id // "-"), (.message.usage | (.input_tokens // 0) + (.cache_creation_input_tokens // 0) + (.cache_read_input_tokens // 0)), (.message.usage.output_tokens // 0)]) as $r
+              ({bin: $bin, bout: $bout, lid: $lid, lin: $lin, lout: $lout};
+               if $r[0] == .lid then .lin = $r[1] | .lout = $r[2]
+               else .bin += .lin | .bout += .lout | .lid = $r[0] | .lin = $r[1] | .lout = $r[2] end)
+            | "\(.bin) \(.bout) \(.lid) \(.lin) \(.lout)"' 2>/dev/null)
+        case "$res" in
+          *[0-9]' '[0-9]*' '*' '[0-9]*' '[0-9]*)
+            read -r bin bout lid lin lout <<EOF
+$res
+EOF
+            off=$n
+            { awk -F "$tab" -v p="$f" '$1 != p' "$tc"; printf '%s\t%s %s %s %s %s %s\n' "$f" "$off" "$bin" "$bout" "$lid" "$lin" "$lout"; } > "$tc.$$" && mv "$tc.$$" "$tc" ;;
+        esac
+      fi
+      tall=$((tall + bin + lin)) oall=$((oall + bout + lout))
+    done <<EOF
+$tfiles
+EOF
+    tsum="$tall $oall"
   fi
   tin=$(echo "${tsum% *}" | jq -r "$human"' h')
   tout=$(echo "${tsum#* }" | jq -r "$human"' h')
