@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.51.2] - 2026-11-18
+
+### Changed
+
+- A subagent's current work, in the parentheses at the end of its line, is shown in gray.
+
 ## [1.51.1] - 2026-11-18
 
 ### Fixed

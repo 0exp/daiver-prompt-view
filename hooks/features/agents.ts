@@ -152,7 +152,7 @@ async function refresh($: EngineInterface) {
       return (
         `${GRAY}-> ${KIND_COLOR('sub')}${who}${GRAY} (time:${ELAPSED_COLOR}${elapsed(now - since)}${GRAY}) ` +
         `[${WHITE}${clip(agent.description)}${GRAY}]` +
-        (activity === undefined || config.activityLength === 0 ? '' : ` (${WHITE}${clip(activity, config.activityLength)}${GRAY})`) +
+        (activity === undefined || config.activityLength === 0 ? '' : ` (${clip(activity, config.activityLength)})`) +
         RESET
       )
     })
