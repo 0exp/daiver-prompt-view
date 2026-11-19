@@ -158,22 +158,34 @@ esac
 # summing every transcript again each tick took longer than a tick and the
 # status line never finished. A file that shrank is read again from its
 # start. Names braced: bash 3.2 as sh takes the dot's first byte for part of
-# a bare $name. The statuslineUsage option off (statusline:show-usage,
-# `usage=` in config): no segment, nothing summed
+# a bare $name. While no transcript changed size and none was added since the
+# last sum, the sum is taken as it is from tokens/<session_id>.sum (the sizes
+# and paths, one stat run, then the sums): nothing is read. The
+# statuslineUsage option off (statusline:show-usage, `usage=` in config): no
+# segment, nothing summed
 if [ "$o_usage" != false ]; then
   tsum='0 0'
   if [ -n "$tp" ] && [ -f "$tp" ]; then
-    tab=$(printf '\t')
     tc="$mod/tokens/${sidfull:-none}"
+    set -- "$tp"
+    for f in "${tp%.jsonl}"/subagents/*.jsonl; do [ -f "$f" ] && set -- "$@" "$f"; done
+    tsig=$(stat -n -f '%z:%N|' "$@" 2>/dev/null) || tsig=''
+    ssig='' ssum=''
+    [ -n "$tsig" ] && [ -f "$tc.sum" ] && { IFS= read -r ssig; IFS= read -r ssum; } < "$tc.sum"
+    case "$ssum" in [0-9]*' '[0-9]*) ;; *) ssig='' ;; esac
+  fi
+  if [ -n "$tp" ] && [ -f "$tp" ] && [ -n "$tsig" ] && [ "$ssig" = "$tsig" ]; then
+    tsum=$ssum
+  elif [ -n "$tp" ] && [ -f "$tp" ]; then
+    tab=$(printf '\t')
     mkdir -p "$mod/tokens"
     # a cache in the old format (one line of sizes and sums) is dropped, and
     # the leftovers of runs cut short are cleared
     [ -f "$tc" ] && [ "$(head -n 1 "$tc")" != 'v2' ] && rm -f "$tc"
-    find "$mod/tokens" -name "${tc##*/}.*" -mmin +1 -exec rm -f {} + 2>/dev/null
+    find "$mod/tokens" -name "${tc##*/}.*" ! -name '*.sum' -mmin +1 -exec rm -f {} + 2>/dev/null
     [ -f "$tc" ] || echo v2 > "$tc"
-    tall=0 oall=0
-    tfiles=$(ls "$tp" "${tp%.jsonl}"/subagents/*.jsonl 2>/dev/null)
-    while IFS= read -r f; do
+    tall=0 oall=0 tdone=1
+    for f in "$@"; do
       [ -f "$f" ] || continue
       # whole lines only: wc -l counts the newlines, a row still being
       # written has none yet
@@ -201,13 +213,15 @@ $res
 EOF
             off=$n
             { awk -F "$tab" -v p="$f" '$1 != p' "$tc"; printf '%s\t%s %s %s %s %s %s\n' "$f" "$off" "$bin" "$bout" "$lid" "$lin" "$lout"; } > "$tc.$$" && mv "$tc.$$" "$tc" ;;
+          # not read this time: the sum is not kept, the next run reads again
+          *) tdone='' ;;
         esac
       fi
       tall=$((tall + bin + lin)) oall=$((oall + bout + lout))
-    done <<EOF
-$tfiles
-EOF
+    done
     tsum="$tall $oall"
+    # every file read to its last whole line: the sum kept with the sizes
+    [ -n "$tdone" ] && [ -n "$tsig" ] && printf '%s\n%s\n' "$tsig" "$tsum" > "$tc.sum.$$" && mv -f "$tc.sum.$$" "$tc.sum"
   fi
   hum "${tsum% *}"; tin=$hv
   hum "${tsum#* }"; tout=$hv
