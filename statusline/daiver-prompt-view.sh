@@ -8,6 +8,12 @@
 #   5. git sha, branch, flags, +added/-removed lines | directory
 # with Clawd, Claude's mascot, at the right edge of the terminal
 # Requires jq. Usage in statusLine.command: sh <path>/daiver-prompt-view.sh
+#
+# The status line runs once a second in every open session, so the script
+# keeps its processes few: one jq for the whole input, the config and the
+# agents lines read by the shell itself, one awk for Clawd and the frame, and
+# the last drawing kept per session (render/<session_id>) and printed again
+# while nothing it shows has changed (git at most 5 seconds late)
 
 input=$(cat)
 modes=''
@@ -16,6 +22,7 @@ esc() { printf '\033[%sm' "$1"; }
 reset=$(esc 0)
 bold=$(esc 1)
 unbold=$(esc 22)
+e=$(printf '\033')
 
 # the mod's folder: config, theme, agents lines and auto memory, written by the
 # hooks module
@@ -33,6 +40,26 @@ gray=$(esc "$c_gray")
 white=$(esc "$c_white")
 orange=$(esc "$c_orange")
 
+# the options the hooks module writes to config (key=value lines), read once:
+# usage (statusline:show-usage), borders and statuslineBorders
+# (chat:show-borders, chat:show-statusline-borders), borderStyle
+# (chat:border-style), clodik, animate and animation (clodik:*), padding
+o_usage='' o_borders='' o_slborders='' o_style='' o_clodik='' o_animate='' o_animation='' o_padding=''
+if [ -f "$mod/config" ]; then
+  while IFS= read -r l || [ -n "$l" ]; do
+    case "$l" in
+      usage=false) o_usage=false ;;
+      borders=false) o_borders=false ;;
+      statuslineBorders=false) o_slborders=false ;;
+      borderStyle=line) o_style=line ;;
+      clodik=false) o_clodik=false ;;
+      animate=true) o_animate=true ;;
+      animation=*) o_animation=${l#animation=} ;;
+      padding=*) o_padding=${l#padding=} ;;
+    esac
+  done < "$mod/config"
+fi
+
 # a 10-cell bar of a percentage
 bar() {
   f=$(($1 / 10))
@@ -47,26 +74,58 @@ bar() {
   printf '%s' "$o"
 }
 
-# a jq definition: a token count in short, 950, 74k, 1.2M
+# a token count in short, 950, 74k, 1.2M (hv), as the jq definition below
+hum() {
+  if [ "$1" -ge 1000000 ]; then
+    q=$(($1 / 100000))
+    if [ $((q % 10)) -eq 0 ]; then hv="$((q / 10))M"; else hv="$((q / 10)).$((q % 10))M"; fi
+  elif [ "$1" -ge 1000 ]; then
+    hv="$(($1 / 1000))k"
+  else
+    hv=$1
+  fi
+}
 human='def h: if . >= 1000000 then ((. / 100000 | floor) / 10 | tostring) + "M" elif . >= 1000 then (. / 1000 | floor | tostring) + "k" else (floor | tostring) end;'
 
-dir=$(echo "$input" | jq -r '.workspace.current_dir // .cwd // empty')
+# every field of the input in one jq run, as shell assignments
+rawdir='' mname='' sidfull='' sid='' tp='' dur=0 cost=0 effort='' ostyle='' thinking='' fast='' session='' ver='' ctx=0 five=0 rst='' csz='0' cch=0
+eval "$(printf '%s' "$input" | jq -r "$human"'
+  @sh "rawdir=\(.workspace.current_dir // .cwd // "" | tostring)",
+  @sh "mname=\(.model.display_name | tostring)",
+  @sh "sidfull=\(.session_id // "" | tostring)",
+  @sh "sid=\(.session_id // "" | tostring | .[0:8])",
+  @sh "tp=\(.transcript_path // "" | tostring)",
+  @sh "dur=\(.cost.total_duration_ms // 0 | tonumber? // 0 | floor)",
+  @sh "cost=\(.cost.total_cost_usd // 0 | tostring)",
+  @sh "effort=\(.effort.level // "" | tostring)",
+  @sh "ostyle=\(.output_style.name // "" | tostring)",
+  @sh "thinking=\(.thinking.enabled | tostring)",
+  @sh "fast=\(.fast_mode | tostring)",
+  @sh "session=\(.session_name // "" | tostring)",
+  @sh "ver=\(.version // "" | tostring)",
+  @sh "ctx=\(.context_window.used_percentage // 0 | tonumber? // 0 | floor)",
+  @sh "five=\(.rate_limits.five_hour.used_percentage // 0 | tostring)",
+  @sh "rst=\(.rate_limits.five_hour.resets_at // "" | tostring)",
+  @sh "csz=\(((.context_window.current_usage // {}) | (.input_tokens // 0) + (.cache_creation_input_tokens // 0) + (.cache_read_input_tokens // 0) | h)
+    + ((.context_window.context_window_size // 0) | if . > 0 then "/" + h else "" end))",
+  @sh "cch=\((.context_window.current_usage // {}) | ((.input_tokens // 0) + (.cache_creation_input_tokens // 0) + (.cache_read_input_tokens // 0)) as $t | if $t > 0 then ((.cache_read_input_tokens // 0) * 100 / $t | floor) else 0 end)"' 2>/dev/null)"
+
+dir=$rawdir
 case "$dir" in "$HOME"*) dir="~${dir#"$HOME"}" ;; esac
+now=$(date +%s)
 
 # line 1: model -> [session] (sid:…) <stime:…> <automemory:on|off|?> <in:…·out:…·cash:…>
-mname="${white}$(echo "$input" | jq -r '.model.display_name')${reset}"
+mname="${white}$mname${reset}"
 model=''
-sid=$(echo "$input" | jq -r '.session_id // empty' | cut -c1-8)
 [ -n "$sid" ] && model="${gray}(${bold}sid:${unbold}$sid)${reset} $model"
 
 # session time: from the transcript's birth time, else the session's duration
-tp=$(echo "$input" | jq -r '.transcript_path // empty')
 st0=''
 [ -n "$tp" ] && [ -f "$tp" ] && st0=$(stat -f %B "$tp" 2>/dev/null)
 if [ -n "$st0" ] && [ "$st0" -gt 0 ] 2>/dev/null; then
-  el=$(($(date +%s) - st0))
+  el=$((now - st0))
 else
-  el=$(($(echo "$input" | jq -r '.cost.total_duration_ms // 0' | awk '{printf "%d", $1}') / 1000))
+  el=$((dur / 1000))
 fi
 [ $el -lt 0 ] && el=0
 stm="$((el / 3600))h$(printf '%02d' $((el % 3600 / 60)))m"
@@ -74,7 +133,8 @@ model="${model}${gray}<${bold}stime:${unbold}$stm>${reset} "
 
 # auto memory: the status line's input has no such field, the hooks module
 # writes it for this session (on, off, unknown); no file, no segment
-am=$(cat "$mod/automemory/$(echo "$input" | jq -r '.session_id // empty')" 2>/dev/null)
+am=''
+[ -n "$sidfull" ] && { IFS= read -r am < "$mod/automemory/$sidfull"; } 2>/dev/null
 case "$am" in
   on | off) model="${model}${gray}<${bold}automemory:${unbold}$am>${reset} " ;;
   # nothing could be read (a plugin above refused it): unknown, never a guess
@@ -100,11 +160,11 @@ esac
 # start. Names braced: bash 3.2 as sh takes the dot's first byte for part of
 # a bare $name. The statuslineUsage option off (statusline:show-usage,
 # `usage=` in config): no segment, nothing summed
-if ! grep -qx 'usage=false' "$mod/config" 2>/dev/null; then
+if [ "$o_usage" != false ]; then
   tsum='0 0'
   if [ -n "$tp" ] && [ -f "$tp" ]; then
     tab=$(printf '\t')
-    tc="$mod/tokens/$(echo "$input" | jq -r '.session_id // "none"')"
+    tc="$mod/tokens/${sidfull:-none}"
     mkdir -p "$mod/tokens"
     # a cache in the old format (one line of sizes and sums) is dropped, and
     # the leftovers of runs cut short are cleared
@@ -149,26 +209,21 @@ $tfiles
 EOF
     tsum="$tall $oall"
   fi
-  tin=$(echo "${tsum% *}" | jq -r "$human"' h')
-  tout=$(echo "${tsum#* }" | jq -r "$human"' h')
-  cash=$(printf '%.2f' "$(echo "$input" | jq -r '.cost.total_cost_usd // 0')")
+  hum "${tsum% *}"; tin=$hv
+  hum "${tsum#* }"; tout=$hv
+  cash=$(printf '%.2f' "$cost")
   model="${model}${gray}<${bold}in:${unbold}${tin}·${bold}out:${unbold}${tout}·${bold}cash:${unbold}\$${cash}>${reset} "
 fi
 
 # line 2: modes; the effort level and the output style in their theme colors
-effort=$(echo "$input" | jq -r '.effort.level // empty')
 [ -n "$effort" ] && modes="$modes (${bold}effort${unbold}:$(esc "$c_effort")$effort${reset})"
-ostyle=$(echo "$input" | jq -r '.output_style.name // empty')
 [ -n "$ostyle" ] && modes="$modes (${bold}outputstyle${unbold}:$(esc "$c_ostyle")$ostyle${reset})"
-thinking=$(echo "$input" | jq -r '.thinking.enabled')
 case "$thinking" in
   true) modes="$modes (${bold}thinkmode${unbold}:thinking)" ;;
   false) modes="$modes (${bold}thinkmode${unbold}:non-thinking)" ;;
 esac
-fast=$(echo "$input" | jq -r '.fast_mode')
 case "$fast" in true | false) modes="$modes (${bold}fastmode${unbold}:$fast)" ;; esac
 
-session=$(echo "$input" | jq -r '.session_name // empty')
 model="$(esc "$c_session")[${bold}$session${unbold}]${reset} $model"
 model="$mname -> ${model% }"
 
@@ -176,11 +231,8 @@ model="$mname -> ${model% }"
 # the start: with no rate limits yet (no response in this session) or a 5-hour
 # window that has already reset, nothing is used and a whole window is ahead;
 # with no request yet the cache is 0%
-ctx=$(echo "$input" | jq -r '.context_window.used_percentage // 0' | awk '{printf "%d", $1}')
-five=$(printf '%.0f' "$(echo "$input" | jq -r '.rate_limits.five_hour.used_percentage // 0')")
-now=$(date +%s)
+five=$(printf '%.0f' "$five")
 left=18000
-rst=$(echo "$input" | jq -r '.rate_limits.five_hour.resets_at // empty')
 if [ -n "$rst" ]; then
   left=$((rst - now))
   [ $left -le 0 ] && five=0 left=18000
@@ -190,9 +242,6 @@ fi
 # (new, written to and read from the cache) over the window's size, as 74k/200k
 # (1.2M over a million); 0 before the first request, the size alone left out
 # when the input does not carry it; in the theme's ctxSize color
-csz=$(echo "$input" | jq -r "$human"'
-  ((.context_window.current_usage // {}) | (.input_tokens // 0) + (.cache_creation_input_tokens // 0) + (.cache_read_input_tokens // 0) | h)
-  + ((.context_window.context_window_size // 0) | if . > 0 then "/" + h else "" end)')
 out="ctx $(esc "$c_ctx")$(bar $ctx)${reset} ${ctx}% $(esc "$c_ctxSize")(${csz})${reset}"
 out="$out | lmt $(esc "$c_lmt")$(bar $five)${reset} ${five}%"
 out="$out | rst $(esc "$c_rst")$(bar $(((18000 - left) * 100 / 18000)))${reset} $((left / 3600))h$(printf '%02d' $((left % 3600 / 60)))m"
@@ -200,28 +249,36 @@ out="$out | rst $(esc "$c_rst")$(bar $(((18000 - left) * 100 / 18000)))${reset} 
 # GNU date -d); with no window yet, when one that starts now resets
 hm=$(date -r $((now + left)) +%Hh%Mm 2>/dev/null || date -d "@$((now + left))" +%Hh%Mm 2>/dev/null)
 [ -n "$hm" ] && out="$out ${orange}(at $hm)${reset}"
-cch=$(echo "$input" | jq -r '(.context_window.current_usage // {}) | ((.input_tokens // 0) + (.cache_creation_input_tokens // 0) + (.cache_read_input_tokens // 0)) as $t | if $t > 0 then ((.cache_read_input_tokens // 0) * 100 / $t | floor) else 0 end')
 out="$out | pch $(esc "$c_pch")$(bar $cch)${reset} ${cch}%"
 
 # line 3: the agents lines, which the mod writes for this session. With none
 # yet (the session's start hook has not run, or the mod is not loaded): the
 # mod's idle line (an idle main loop, zeros everywhere), in the theme's colors;
-# with not even that, the same line drawn here
-af="$mod/agents/$(echo "$input" | jq -r '.session_id // empty')"
-[ -f "$af" ] && [ -s "$af" ] || af="$mod/agents.idle"
-idle="${gray}⚙ ${bold}main${unbold}:${white}idle${gray} │ ${bold}agents${unbold}:0 (${bold}sub${unbold}:0 ${bold}sh${unbold}:0 ${bold}mon${unbold}:0) -> ${bold}pending${unbold}:0 ${bold}running${unbold}:0 ${bold}waiting${unbold}:0 ${bold}idle${unbold}:0${reset}"
+# with not even that, the same line drawn here. Read by the shell, its first
+# line kept for Clawd
+af="$mod/agents/$sidfull"
+[ -n "$sidfull" ] && [ -f "$af" ] && [ -s "$af" ] || af="$mod/agents.idle"
+agents='' first=''
+if [ -s "$af" ]; then
+  while IFS= read -r l || [ -n "$l" ]; do
+    [ -z "$agents" ] && first=$l
+    agents="$agents$l
+"
+  done < "$af"
+fi
+[ -z "$agents" ] && agents="${gray}⚙ ${bold}main${unbold}:${white}idle${gray} │ ${bold}agents${unbold}:0 (${bold}sub${unbold}:0 ${bold}sh${unbold}:0 ${bold}mon${unbold}:0) -> ${bold}pending${unbold}:0 ${bold}running${unbold}:0 ${bold}waiting${unbold}:0 ${bold}idle${unbold}:0${reset}
+"
 
 # the panel's lines, before Clawd is added
 panel() {
   printf '%s\n' "$model"
   [ -n "$modes" ] && printf '%s\n' "${modes# }"
-  if [ -s "$af" ]; then cat "$af"; else printf '%s\n' "$idle"; fi
+  printf '%s' "$agents"
   printf '%s\n' "$out"
 
   # line 5: git sha, branch, flags (+ staged, # untracked, ? unstaged),
   # +added/-removed lines of the diff against HEAD (+N/-N with none) | directory
   if [ -n "$dir" ]; then
-    rawdir=$(echo "$input" | jq -r '.workspace.current_dir // .cwd // empty')
     branch=''
     if git -C "$rawdir" --no-optional-locks rev-parse --is-inside-work-tree >/dev/null 2>&1; then
       branch=$(git -C "$rawdir" --no-optional-locks branch --show-current 2>/dev/null)
@@ -230,9 +287,15 @@ panel() {
       [ -n "$sha" ] && sha="${gray}($(esc "$c_sha")$sha${gray})${reset} "
       st=$(git -C "$rawdir" --no-optional-locks status --porcelain 2>/dev/null)
       flags=''
-      printf '%s\n' "$st" | grep -q '^[MADRCTU]' && flags="$flags+"
-      printf '%s\n' "$st" | grep -q '^??' && flags="$flags#"
-      printf '%s\n' "$st" | grep -q '^.[MADRCTU]' && flags="$flags?"
+      case "
+$st" in *"
+"[MADRCTU]*) flags="$flags+" ;; esac
+      case "
+$st" in *"
+??"*) flags="$flags#" ;; esac
+      case "
+$st" in *"
+"?[MADRCTU]*) flags="$flags?" ;; esac
       added='N' removed='N'
       ns=$(git -C "$rawdir" --no-optional-locks diff HEAD --numstat 2>/dev/null | awk '{ if ($1 != "-") a += $1; if ($2 != "-") d += $2 } END { printf "%d %d", a, d }')
       if [ "$ns" != "0 0" ] && [ -n "$ns" ]; then
@@ -250,18 +313,13 @@ panel() {
   fi
 }
 
-e=$(printf '\033')
-# the visible width of a line: no color escapes, one cell per UTF-8 character
-vis() { printf '%s' "$1" | sed "s/$e\[[0-9;]*m//g" | LC_ALL=C tr -d '\200-\277' | wc -c | tr -d ' '; }
-
 # the status line's indent on each side: Claude Code's own 2 columns plus
 # statusLine.padding, which is added to them (so -1 leaves 1 column, -2 none;
 # a positive one widens the indent). The mod sets the padding from its
 # statuslinePadding option and writes it to its config (`padding=`); with no
 # such line, the one in settings.json
-padding=$(sed -n 's/^padding=//p' "$mod/config" 2>/dev/null)
-case "$padding" in
-  [0-9] | [0-9][0-9] | -[0-9] | -[0-9][0-9]) pad=$((padding + 2)); [ "$pad" -lt 0 ] && pad=0 ;;
+case "$o_padding" in
+  [0-9] | [0-9][0-9] | -[0-9] | -[0-9][0-9]) pad=$((o_padding + 2)); [ "$pad" -lt 0 ] && pad=0 ;;
   *) pad=$(jq -r '((.statusLine.padding // 0) + 2) | floor | if . < 0 then 0 else . end' "$HOME/.claude/settings.json" 2>/dev/null) ;;
 esac
 case "$pad" in '' | *[!0-9]*) pad=2 ;; esac
@@ -270,57 +328,27 @@ case "$pad" in '' | *[!0-9]*) pad=2 ;; esac
 # as wide as the widest line; `inner` is the room between its borders
 inner=''
 case "$COLUMNS" in '' | *[!0-9]*) ;; *) [ "$COLUMNS" -gt $((2 * pad + 13)) ] && inner=$((COLUMNS - 2 * pad - 2)) ;; esac
-frame() {
-  # the borders option (/daiver-prompt-view:chat:show-borders) or the status
-  # line's own (chat:show-statusline-borders) off: no frame
-  if grep -qx 'borders=false' "$mod/config" 2>/dev/null || grep -qx 'statuslineBorders=false' "$mod/config" 2>/dev/null; then
-    cat
-    return
-  fi
-  body=$(cat)
-  # never narrower than the widest line (a narrow terminal, Clawd beside the panel)
-  fw=${inner:-0}
-  while IFS= read -r l; do
-    v=$(vis "$l")
-    [ "$v" -gt "$fw" ] && fw=$v
-  done <<EOF
-$body
-EOF
-  fc=$(esc "$c_frame")
-  # the borderStyle option (/daiver-prompt-view:chat:border-style): `line` a
-  # solid rounded frame, else `dashed`, one with open corners (as the
-  # transcript's dashed frames are drawn)
-  if grep -qx 'borderStyle=line' "$mod/config" 2>/dev/null; then
-    fh='─' fv='│' ftl='╭' ftr='╮' fbl='╰' fbr='╯'
-  else
-    fh='╌' fv='╎' ftl=' ' ftr=' ' fbl=' ' fbr=' '
-  fi
-  bar=$(printf '%*s' "$fw" '' | sed "s/ /$fh/g")
-  printf '%s\n' "${fc}${ftl}${bar}${ftr}${reset}"
-  while IFS= read -r l; do
-    fill=$((fw - $(vis "$l")))
-    [ $fill -lt 0 ] && fill=0
-    printf '%s%s%*s%s\n' "${fc}${fv}${reset}" "$l" $fill '' "${fc}${fv}${reset}"
-  done <<EOF
-$body
-EOF
-  printf '%s\n' "${fc}${fbl}${bar}${fbr}${reset}"
-}
-
-# Clawd is the mod's option (userConfig `clodik`, on by default): the hooks
-# module writes it to the config file next to this script
-if grep -qx 'clodik=false' "$mod/config" 2>/dev/null; then
-  panel | frame
-  exit 0
+# the borders option (/daiver-prompt-view:chat:show-borders) or the status
+# line's own (chat:show-statusline-borders) off: no frame. The borderStyle
+# option (/daiver-prompt-view:chat:border-style): `line` a solid rounded frame,
+# else `dashed`, one with open corners (as the transcript's dashed frames are
+# drawn)
+framed=1
+[ "$o_borders" = false ] || [ "$o_slborders" = false ] && framed=0
+if [ "$o_style" = line ]; then
+  fh='─' fv='│' ftl='╭' ftr='╮' fbl='╰' fbr='╯'
+else
+  fh='╌' fv='╎' ftl=' ' ftr=' ' fbl=' ' fbr=' '
 fi
 
+# Clawd is the mod's option (userConfig `clodik`, on by default): the hooks
+# module writes it to the config file next to this script.
 # Clawd, Claude's mascot, at the right edge (vertically centered): as far from
 # the edge as the status line is from the left one; next to the panel when the
 # terminal width ($COLUMNS) is unknown or too narrow; the Claude Code version
 # centered under its feet. While Claude Code is busy (the agents line's
 # main loop is not idle) Clawd plays one of twelve animations, a new random one
 # every few seconds, a frame per refresh (the status line runs once a second)
-ver=$(echo "$input" | jq -r '.version // empty')
 
 # a pose on Clawd's 11-cell canvas: r0 is the spare line above it, r1-r3 its
 # body (at rest in cells 1-9: cell 0 and 10 are room to move sideways); pcol is
@@ -381,84 +409,149 @@ anim() {
     matrix) echo 'rest crack scatter dust m1 m2 m3 m4 m5 m6 m7 m8 m1 m2 m3 m4 dust scatter crack' ;; # to pixels, then the rain
   esac
 }
-# the clodikAnimation option (/daiver-prompt-view:clodik:animation): one of
-# them, or random (empty here); none, or one unknown: matrix, the default
-animation=$(sed -n 's/^animation=//p' "$mod/config" 2>/dev/null)
-case " $anims random " in *" $animation "*) ;; *) animation=matrix ;; esac
-[ "$animation" = random ] && animation=''
 
 busy=''
-# the clodikAnimate option (/daiver-prompt-view:clodik:animate): animate whether busy or not
-grep -qx 'animate=true' "$mod/config" 2>/dev/null && busy=1
-[ -z "$busy" ] && [ -f "$af" ] && head -n 1 "$af" | sed "s/$e\[[0-9;]*m//g" | grep -q 'main:' &&
-  ! head -n 1 "$af" | sed "s/$e\[[0-9;]*m//g" | grep -q 'main:idle' && busy=1
+clawdrows=''
+if [ "$o_clodik" != false ]; then
+  # the clodikAnimation option (/daiver-prompt-view:clodik:animation): one of
+  # them, or random (empty here); none, or one unknown: matrix, the default
+  animation=$o_animation
+  case " $anims random " in *" $animation "*) ;; *) animation=matrix ;; esac
+  [ "$animation" = random ] && animation=''
 
-if [ -n "$busy" ]; then
-  now=$(date +%s)
-  # random: a new one every 8 seconds, never the same twice in a row
-  rnd() {
-    x=$((($1 * 2654435761) & 4294967295))
-    x=$((((x ^ (x >> 16)) * 73244475) & 4294967295))
-    echo $(((x ^ (x >> 16)) % 12))
-  }
-  if [ -z "$animation" ]; then
-    k=$(rnd $((now / 8)))
-    [ "$k" -eq "$(rnd $((now / 8 - 1)))" ] && k=$(((k + 1) % 12))
-    set -- $anims
-    shift $k
-    animation=$1
+  # the clodikAnimate option (/daiver-prompt-view:clodik:animate): animate
+  # whether busy or not; else while the agents line's main loop is not idle
+  # (its first line, the color escapes taken out by the shell)
+  if [ "$o_animate" = true ]; then
+    busy=1
+  else
+    s=$first t=''
+    while :; do
+      case "$s" in
+        *"$e["*) t="$t${s%%"$e["*}" s=${s#*"$e["} s=${s#*m} ;;
+        *) t="$t$s"; break ;;
+      esac
+    done
+    case "$t" in *main:idle*) ;; *main:*) busy=1 ;; esac
   fi
-  set -- $(anim "$animation")
-  shift $((now % $#))
-  sh=''
-  case "$1" in *:*) sh=${1##*:} ;; esac
-  pose "${1%%:*}" "$sh"
-else
-  pose rest
+
+  if [ -n "$busy" ]; then
+    # random: a new one every 8 seconds, never the same twice in a row
+    rnd() {
+      x=$((($1 * 2654435761) & 4294967295))
+      x=$((((x ^ (x >> 16)) * 73244475) & 4294967295))
+      echo $(((x ^ (x >> 16)) % 12))
+    }
+    if [ -z "$animation" ]; then
+      k=$(rnd $((now / 8)))
+      [ "$k" -eq "$(rnd $((now / 8 - 1)))" ] && k=$(((k + 1) % 12))
+      set -- $anims
+      shift $k
+      animation=$1
+    fi
+    set -- $(anim "$animation")
+    shift $((now % $#))
+    sh=''
+    case "$1" in *:*) sh=${1##*:} ;; esac
+    pose "${1%%:*}" "$sh"
+  else
+    pose rest
+  fi
+  # Clawd's rows, each in its color, the version centered under its feet
+  for r in r0 r1 r2 r3; do
+    eval "v=\$$r"
+    [ -n "$v" ] && v="${pcol}$v${reset}"
+    clawdrows="$clawdrows$v
+"
+  done
+  [ -n "$ver" ] && clawdrows="$clawdrows${pcol}$(printf '%*s' $(((11 - ${#ver}) / 2)) '')${gray}$ver${reset}
+"
 fi
 
-clawd() {
-  case "$1" in
-    -1) r=$r0 ;;
-    0) r=$r1 ;;
-    1) r=$r2 ;;
-    2) r=$r3 ;;
-    3) r="$(printf '%*s' $(((11 - ${#ver}) / 2)) '')${gray}$ver" ;;
-  esac
-  [ -n "$r" ] && printf '%s' "${pcol}$r${reset}"
-}
-h=3
-[ -n "$ver" ] && h=4
-lines=$(panel)
-n=$(printf '%s\n' "$lines" | wc -l | tr -d ' ')
-# at least one spare line, so Clawd sits off the prompt (and has room to jump)
-while [ "$n" -le $h ]; do lines="$lines
-"; n=$((n + 1)); done
-w=0
-while IFS= read -r l; do
-  v=$(vis "$l")
-  [ "$v" -gt "$w" ] && w=$v
-done <<EOF
-$lines
-EOF
-top=$(((n - h + 1) / 2)) # an odd spare line goes above, off the prompt
-# the canvas' first cell: the whole canvas (a step right included) ends at
-# the frame's right border
-col=$((w + 1))
-[ -n "$inner" ] && [ $((inner - 11)) -gt $col ] && col=$((inner - 11))
-{
-i=0
-while IFS= read -r l; do
-  a=$((i - top))
-  c=''
-  [ $a -ge -1 ] && [ $a -lt $h ] && c=$(clawd $a)
-  if [ -n "$c" ]; then
-    printf '%s%*s%s\n' "$l" $((col - $(vis "$l"))) '' "$c"
-  else
-    printf '%s\n' "$l"
+# the last drawing is printed again while everything it shows is the same
+# (busy Clawd moves every second, so it is drawn anew then); git is not in
+# the key, so the drawing is redone at least every 5 seconds
+SEP='--daiver-prompt-view--'
+key="$COLUMNS|$pad|$framed|$o_style|$c_frame|$c_gray|$c_white|$c_sha|$c_branch|$c_flags|$c_added|$c_removed|$rawdir
+$model
+$modes
+$agents$out
+$clawdrows"
+rc=''
+if [ -z "$busy" ] && [ -n "$sidfull" ]; then
+  rc="$mod/render/$sidfull"
+  if [ -f "$rc" ]; then
+    cts='' ck='' co=''
+    {
+      IFS= read -r cts
+      while IFS= read -r l; do
+        [ "$l" = "$SEP" ] && break
+        ck="$ck$l
+"
+      done
+      while IFS= read -r l || [ -n "$l" ]; do co="$co$l
+"; done
+    } < "$rc"
+    case "$cts" in
+      '' | *[!0-9]*) ;;
+      *)
+        if [ "$ck" = "$key
+" ] && [ $((now - cts)) -ge 0 ] && [ $((now - cts)) -lt 5 ]; then
+          printf '%s' "$co"
+          exit 0
+        fi ;;
+    esac
   fi
-  i=$((i + 1))
-done <<EOF
-$lines
-EOF
-} | frame
+fi
+
+# Clawd beside the panel and the frame around both, drawn in one awk run:
+# the visible width of a line is its length without color escapes, one cell
+# per UTF-8 character (the continuation bytes not counted)
+draw='
+function vis(s) { gsub(/\033\[[0-9;]*m/, "", s); gsub(/[\200-\277]/, "", s); return length(s) }
+function sp(k,  o) { o = ""; while (k-- > 0) o = o " "; return o }
+{ L[++n] = $0 }
+END {
+  E["inner"] = ENVIRON["DPV_INNER"]
+  if (ENVIRON["DPV_CLAWD"] != "") {
+    # Clawd, h rows (3, 4 with the version), with a spare line above it
+    split(ENVIRON["DPV_CLAWD"], C, "\n")
+    h = (C[5] != "") ? 4 : 3
+    # at least one spare line, so Clawd sits off the prompt (and has room to jump)
+    while (n <= h) L[++n] = ""
+    w = 0
+    for (i = 1; i <= n; i++) { v = vis(L[i]); if (v > w) w = v }
+    top = int((n - h + 1) / 2) # an odd spare line goes above, off the prompt
+    # the canvas first cell: the whole canvas (a step right included) ends at
+    # the frame right border
+    col = w + 1
+    if (E["inner"] != "" && E["inner"] - 11 > col) col = E["inner"] - 11
+    for (i = 1; i <= n; i++) {
+      a = i - 1 - top
+      if (a >= -1 && a < h && C[a + 2] != "") L[i] = L[i] sp(col - vis(L[i])) C[a + 2]
+    }
+  }
+  if (ENVIRON["DPV_FRAMED"] != "1") { for (i = 1; i <= n; i++) print L[i]; exit }
+  # the frame: never narrower than the widest line (a narrow terminal, Clawd
+  # beside the panel)
+  while (n > 0 && L[n] == "") n--
+  fw = E["inner"] + 0
+  for (i = 1; i <= n; i++) { V[i] = vis(L[i]); if (V[i] > fw) fw = V[i] }
+  fc = ENVIRON["DPV_FC"]; rs = ENVIRON["DPV_RESET"]; fv = ENVIRON["DPV_FV"]
+  b = ""
+  for (j = 0; j < fw; j++) b = b ENVIRON["DPV_FH"]
+  print fc ENVIRON["DPV_FTL"] b ENVIRON["DPV_FTR"] rs
+  for (i = 1; i <= n; i++) print fc fv rs L[i] sp(fw - V[i]) fc fv rs
+  print fc ENVIRON["DPV_FBL"] b ENVIRON["DPV_FBR"] rs
+}'
+res=$(panel | DPV_INNER=$inner DPV_CLAWD=$clawdrows DPV_FRAMED=$framed DPV_FC=$(esc "$c_frame") DPV_RESET=$reset \
+  DPV_FH=$fh DPV_FV=$fv DPV_FTL=$ftl DPV_FTR=$ftr DPV_FBL=$fbl DPV_FBR=$fbr LC_ALL=C awk "$draw"; printf x)
+res=${res%x}
+printf '%s' "$res"
+
+# kept for the next run while Clawd stands still
+if [ -n "$rc" ]; then
+  [ -d "$mod/render" ] || mkdir -p "$mod/render"
+  { printf '%s\n' "$now"; printf '%s\n' "$key"; printf '%s\n' "$SEP"; printf '%s' "$res"; } > "$rc.$$" 2>/dev/null && mv -f "$rc.$$" "$rc" 2>/dev/null
+fi
+exit 0

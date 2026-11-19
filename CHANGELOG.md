@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.51.3] - 2026-11-19
+
+### Fixed
+
+- The status line takes about a tenth of the CPU it took: with many sessions open at once it no longer loads the computer, and while a session stands idle its last drawing is shown again, refreshed at least every 5 seconds.
+- A session name or folder with a backslash in it is shown as written, not cut or garbled.
+
 ## [1.51.2] - 2026-11-18
 
 ### Changed
