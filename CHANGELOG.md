@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.51.5] - 2026-11-19
+
+### Fixed
+
+- The status line keeps updating, its times included, while many subagents are at work: only the transcripts that grew are read for the token totals.
+
 ## [1.51.4] - 2026-11-19
 
 ### Fixed

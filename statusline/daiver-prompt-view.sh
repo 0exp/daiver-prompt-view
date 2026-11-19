@@ -184,9 +184,21 @@ if [ "$o_usage" != false ]; then
     [ -f "$tc" ] && [ "$(head -n 1 "$tc")" != 'v2' ] && rm -f "$tc"
     find "$mod/tokens" -name "${tc##*/}.*" ! -name '*.sum' -mmin +1 -exec rm -f {} + 2>/dev/null
     [ -f "$tc" ] || echo v2 > "$tc"
-    tall=0 oall=0 tdone=1
-    for f in "$@"; do
-      [ -f "$f" ] || continue
+    tdone=1
+    # only the files whose size changed since the last whole sum (all of them
+    # with no sum yet) are looked at: wc and awk on each of a hundred
+    # subagents' transcripts took longer than a tick, the run was cut short by
+    # the next one and the status line stood still while subagents worked
+    changed=$(DPV_OLD=$ssig DPV_NEW=$tsig awk 'BEGIN {
+      n = split(ENVIRON["DPV_OLD"], a, "|"); for (i = 1; i <= n; i++) if (a[i] != "") o[a[i]] = 1
+      m = split(ENVIRON["DPV_NEW"], b, "|")
+      for (i = 1; i <= m; i++) if (b[i] != "" && !(b[i] in o)) { sub(/^[0-9]+:/, "", b[i]); print b[i] }
+    }')
+    tset=$tsig
+    [ -n "$tsig" ] || { changed='' tset=''; for f in "$@"; do changed="$changed$f
+" tset="${tset}0:$f|"; done; }
+    while IFS= read -r f <&3; do
+      [ -n "$f" ] && [ -f "$f" ] || continue
       # whole lines only: wc -l counts the newlines, a row still being
       # written has none yet
       n=$(wc -l < "$f" | tr -d ' ')
@@ -217,9 +229,17 @@ EOF
           *) tdone='' ;;
         esac
       fi
-      tall=$((tall + bin + lin)) oall=$((oall + bout + lout))
-    done
-    tsum="$tall $oall"
+    done 3<<EOF
+$changed
+EOF
+    # the sums of every transcript of the session, in one pass over the cache
+    tsum=$(DPV_SET=$tset awk -F "$tab" 'BEGIN {
+      n = split(ENVIRON["DPV_SET"], a, "|")
+      for (i = 1; i <= n; i++) if (a[i] != "") { sub(/^[0-9]+:/, "", a[i]); s[a[i]] = 1 }
+    }
+    ($1 in s) { split($2, v, " "); t += v[2] + v[5]; o += v[3] + v[6] }
+    END { printf "%d %d", t, o }' "$tc" 2>/dev/null)
+    case "$tsum" in [0-9]*' '[0-9]*) ;; *) tsum='0 0' ;; esac
     # every file read to its last whole line: the sum kept with the sizes
     [ -n "$tdone" ] && [ -n "$tsig" ] && printf '%s\n%s\n' "$tsig" "$tsum" > "$tc.sum.$$" && mv -f "$tc.sum.$$" "$tc.sum"
   fi
