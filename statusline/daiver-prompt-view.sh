@@ -298,9 +298,9 @@ if [ -n "$week" ]; then
   out="$out $(esc "$c_lmt")(${week}%${wd:+ -> $wd})${reset}"
 fi
 out="$out | rst $(esc "$c_rst")$(bar $(((18000 - left) * 100 / 18000)))${reset} $((left / 3600))h$(printf '%02d' $((left % 3600 / 60)))m"
-# the reset's local time, 24-hour HHhMMm, in Clawd's orange (BSD date -r, else
+# the reset's local time, 24-hour HH:MM, in Clawd's orange (BSD date -r, else
 # GNU date -d); with no window yet, when one that starts now resets
-hm=$(date -r $((now + left)) +%Hh%Mm 2>/dev/null || date -d "@$((now + left))" +%Hh%Mm 2>/dev/null)
+hm=$(date -r $((now + left)) +%H:%M 2>/dev/null || date -d "@$((now + left))" +%H:%M 2>/dev/null)
 [ -n "$hm" ] && out="$out ${orange}(at $hm)${reset}"
 out="$out | pch $(esc "$c_pch")$(bar $cch)${reset} ${cch}%"
 

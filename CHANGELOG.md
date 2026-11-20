@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.52.1] - 2026-11-20
+
+### Changed
+
+- The 5-hour limit's reset time after `rst` reads as `(at 17:48)` instead of `(at 17h48m)`.
+
 ## [1.52.0] - 2026-11-20
 
 ### Added

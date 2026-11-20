@@ -9,7 +9,7 @@ Opus 5.5 -> [demo] (sid:419e75ee) <stime:1h23m> <automemory:on> <in:1.2M·out:85
 (effort:high) (outputstyle:Proactive) (thinkmode:thinking) (fastmode:false)                      ▐▛███▜▌
 ⚙ main:thinking (1m13s) │ agents:2 (sub:1 sh:1 mon:0) -> pending:0 running:2 waiting:0 idle:0  ▝▜█████▛▘
 -> Explore (time:1m01s) [Find lock index usages] (Grep(lock_index))                              ▘▘ ▝▝
-ctx ███░░░░░░░ 37% (74k/200k) | lmt ████░░░░░░ 43% (12% -> 25-11-2026) | rst ██████░░░░ 1h56m (at 17h48m) | pch ████████░░ 85%  2.1.303
+ctx ███░░░░░░░ 37% (74k/200k) | lmt ████░░░░░░ 43% (12% -> 25-11-2026) | rst ██████░░░░ 1h56m (at 17:48) | pch ████████░░ 85%  2.1.303
  (08d3788a) main [+#?] | ~/Projects/demo
 ```
 
@@ -69,7 +69,7 @@ else as wide as the widest line, Clawd inside it at the right border.
    limit used and the date it resets, `dd-mm-yyyy` (`43% (12% -> 25-11-2026)`; a
    week that has already reset reads `(0%)`; no brackets while Claude Code sends
    no weekly limit), `rst` time to
-   its reset and, in orange, its local time (24-hour `HHhMMm`), `pch` prompt
+   its reset and, in orange, its local time (24-hour `HH:MM`), `pch` prompt
    cache hits of the last request. All four show from the start: before the
    first response (or once the 5-hour window has reset) `lmt` is 0%, `rst` a
    whole 5h00m window and `pch` 0%.
