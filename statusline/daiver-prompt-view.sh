@@ -88,7 +88,7 @@ hum() {
 human='def h: if . >= 1000000 then ((. / 100000 | floor) / 10 | tostring) + "M" elif . >= 1000 then (. / 1000 | floor | tostring) + "k" else (floor | tostring) end;'
 
 # every field of the input in one jq run, as shell assignments
-rawdir='' mname='' sidfull='' sid='' tp='' dur=0 cost=0 effort='' ostyle='' thinking='' fast='' session='' ver='' ctx=0 five=0 rst='' csz='0' cch=0
+rawdir='' mname='' sidfull='' sid='' tp='' dur=0 cost=0 effort='' ostyle='' thinking='' fast='' session='' ver='' ctx=0 five=0 rst='' week='' wrst='' csz='0' cch=0
 eval "$(printf '%s' "$input" | jq -r "$human"'
   @sh "rawdir=\(.workspace.current_dir // .cwd // "" | tostring)",
   @sh "mname=\(.model.display_name | tostring)",
@@ -106,6 +106,8 @@ eval "$(printf '%s' "$input" | jq -r "$human"'
   @sh "ctx=\(.context_window.used_percentage // 0 | tonumber? // 0 | floor)",
   @sh "five=\(.rate_limits.five_hour.used_percentage // 0 | tostring)",
   @sh "rst=\(.rate_limits.five_hour.resets_at // "" | tostring)",
+  @sh "week=\(.rate_limits.seven_day.used_percentage // "" | tostring)",
+  @sh "wrst=\(.rate_limits.seven_day.resets_at // "" | tostring)",
   @sh "csz=\(((.context_window.current_usage // {}) | (.input_tokens // 0) + (.cache_creation_input_tokens // 0) + (.cache_read_input_tokens // 0) | h)
     + ((.context_window.context_window_size // 0) | if . > 0 then "/" + h else "" end))",
   @sh "cch=\((.context_window.current_usage // {}) | ((.input_tokens // 0) + (.cache_creation_input_tokens // 0) + (.cache_read_input_tokens // 0)) as $t | if $t > 0 then ((.cache_read_input_tokens // 0) * 100 / $t | floor) else 0 end)"' 2>/dev/null)"
@@ -278,6 +280,23 @@ fi
 # when the input does not carry it; in the theme's ctxSize color
 out="ctx $(esc "$c_ctx")$(bar $ctx)${reset} ${ctx}% $(esc "$c_ctxSize")(${csz})${reset}"
 out="$out | lmt $(esc "$c_lmt")$(bar $five)${reset} ${five}%"
+# the weekly limit beside it, in parentheses: its percentage and its reset's
+# date, dd-mm-yyyy (BSD date -r, else GNU date -d); a week that has already
+# reset is 0% with no date; no weekly limit in the input, no parentheses
+if [ -n "$week" ]; then
+  week=$(printf '%.0f' "$week" 2>/dev/null) || week=0
+  wd=''
+  case "$wrst" in
+    '' | *[!0-9]*) ;;
+    *)
+      if [ "$wrst" -le "$now" ]; then
+        week=0
+      else
+        wd=$(date -r "$wrst" +%d-%m-%Y 2>/dev/null || date -d "@$wrst" +%d-%m-%Y 2>/dev/null)
+      fi ;;
+  esac
+  out="$out $(esc "$c_lmt")(${week}%${wd:+ -> $wd})${reset}"
+fi
 out="$out | rst $(esc "$c_rst")$(bar $(((18000 - left) * 100 / 18000)))${reset} $((left / 3600))h$(printf '%02d' $((left % 3600 / 60)))m"
 # the reset's local time, 24-hour HHhMMm, in Clawd's orange (BSD date -r, else
 # GNU date -d); with no window yet, when one that starts now resets

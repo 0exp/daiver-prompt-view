@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.52.0] - 2026-11-20
+
+### Added
+
+- The status line shows the weekly limit beside the 5-hour one: its percentage used and the date it resets, as dd-mm-yyyy, in brackets after `lmt`, as `(12% -> 25-11-2026)`.
+
 ## [1.51.5] - 2026-11-19
 
 ### Fixed

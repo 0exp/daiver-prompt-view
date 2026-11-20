@@ -10,7 +10,7 @@ Opus 5.5 -> [demo] (sid:419e75ee) <stime:1h23m> <automemory:on> <in:1.2M·out:85
 (effort:high) (outputstyle:Proactive) (thinkmode:thinking) (fastmode:false)          ▐▛███▜▌
 ⚙ main:thinking (1m13s) │ agents:1 (sub:1 sh:0 mon:0) -> pending:0 running:1 …    ▝▜█████▛▘
 -> Explore (time:1m01s) [Find lock index usages] (Grep(lock_index))                  ▘▘ ▝▝
-ctx ███░░░░░░░ 37% (74k/200k) | lmt ████░░░░░░ 43% | rst ██████░░░░ 1h56m (at 17h48m) | pch …  2.1.303
+ctx ███░░░░░░░ 37% (74k/200k) | lmt ████░░░░░░ 43% (12% -> 25-11-2026) | rst ██████░░░░ 1h56m (at 17h48m) | pch …  2.1.303
  (08d3788a) main [+#?] +12/-3 | ~/Projects/demo
 ```
 
@@ -55,7 +55,7 @@ ctx ███░░░░░░░ 37% (74k/200k) | lmt ████░░░░
 
 **Change it**
 1. Edit the feature file (no semicolons, single quotes, 2 spaces) or the script (2-space indent, a comment per segment).
-2. Script changes: render before and after with a full sample input (`session_id`, `session_name`, `model.display_name`, `workspace.current_dir`, `transcript_path`, `cost.total_duration_ms`, `effort.level`, `thinking.enabled`, `output_style.name`, `fast_mode`, `context_window.*`, `rate_limits.five_hour.*`, `version`) and show plain text (`sed $'s/\e\\[[0-9;]*m//g'`).
+2. Script changes: render before and after with a full sample input (`session_id`, `session_name`, `model.display_name`, `workspace.current_dir`, `transcript_path`, `cost.total_duration_ms`, `effort.level`, `thinking.enabled`, `output_style.name`, `fast_mode`, `context_window.*`, `rate_limits.five_hour.*`, `rate_limits.seven_day.*`, `version`) and show plain text (`sed $'s/\e\\[[0-9;]*m//g'`).
 3. `claude plugin test ~/Projects/daiver-prompt-view` and `claude plugin validate ~/Projects/daiver-prompt-view` (expected warning: no icon).
 4. Type-check: load `plugin-authoring` for this build's `claude-code.d.ts`; tsconfig in the scratchpad (`strict`, `target: es2023`, `module: esnext`, `moduleResolution: bundler`, `lib: [es2023]`, `noEmit`, `types: []`, `include` = the d.ts + the repo's `hooks/`), `npx -y -p typescript@5.6.3 tsc -p <scratchpad>`.
 5. Bump `version` in `.claude-plugin/plugin.json` (patch fixes, minor features), update `README.md`, and add the change to `CHANGELOG.md` under the new version.
