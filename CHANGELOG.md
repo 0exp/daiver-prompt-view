@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.54.1] - 2026-11-21
+
+### Changed
+
+- The session's cost at the end of the status line's first line is labelled `cost:` instead of `cash:`, as `<in:1.2M·out:85k·cost:$4.31>`.
+
 ## [1.54.0] - 2026-11-21
 
 ### Added

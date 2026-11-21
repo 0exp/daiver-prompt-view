@@ -5,7 +5,7 @@ the prompt with live agents, usage limits and git state, a framed chat with
 copy buttons, and a pane with your prompt history.
 
 ```
-Opus 5.5 -> [demo] (sid:419e75ee) <stime:1h23m> <automemory:on> <in:1.2M·out:85k·cash:$4.31>
+Opus 5.5 -> [demo] (sid:419e75ee) <stime:1h23m> <automemory:on> <in:1.2M·out:85k·cost:$4.31>
 (effort:high) (outputstyle:Proactive) (thinkmode:thinking) (fastmode:false)                      ▐▛███▜▌
 ⚙ main:thinking (1m13s) │ agents:2 (sub:1 sh:1 mon:0) -> pending:0 running:2 waiting:0 idle:0  ▝▜█████▛▘
 -> Explore (time:1m01s) [Find lock index usages] (Grep(lock_index))                              ▘▘ ▝▝
@@ -29,9 +29,9 @@ else as wide as the widest line, Clawd inside it at the right border.
    refuses the mod's settings read, and `?` when nothing could be read, never a
    guessed `on`), and last the session's tokens and cost: `in` input and `out`
    output tokens of every request so far, subagents included, summed from the
-   session's transcripts (`k` thousands, `M` millions), `cash`
+   session's transcripts (`k` thousands, `M` millions), `cost`
    the cost in dollars at API prices, subagents included (on a subscription an
-   estimate, not a bill); `<in:0·out:0·cash:$0.00>` before the first request.
+   estimate, not a bill); `<in:0·out:0·cost:$0.00>` before the first request.
    Hidden with the `statuslineUsage` option off
    (`/daiver-prompt-view:statusline:show-usage`).
 2. Modes: reasoning effort, output style, thinking, fast mode (each only when known).
@@ -554,7 +554,7 @@ and the session's cost in dollars at API prices.
 
 | Value | Effect |
 | --- | --- |
-| `on` | the first line ends with the segment: `Opus 5.5 -> [demo] (sid:419e75ee) <stime:1h23m> <automemory:on> <in:1.2M·out:85k·cash:$4.31>` |
+| `on` | the first line ends with the segment: `Opus 5.5 -> [demo] (sid:419e75ee) <stime:1h23m> <automemory:on> <in:1.2M·out:85k·cost:$4.31>` |
 | `off` | the first line ends where it did before: `Opus 5.5 -> [demo] (sid:419e75ee) <stime:1h23m> <automemory:on>`, and the session's transcripts are not read |
 
 | Usage | Result |

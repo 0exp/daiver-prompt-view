@@ -1,7 +1,7 @@
 #!/bin/sh
 # daiver-prompt-view: the status line under the prompt.
 # Reads the status line JSON on stdin and prints:
-#   1. model -> [session] (sid:…) <stime:…> <automemory:on|off|?> <in:…·out:…·cash:…>
+#   1. model -> [session] (sid:…) <stime:…> <automemory:on|off|?> <in:…·out:…·cost:…>
 #   2. modes: effort, outputstyle, thinkmode, fastmode
 #   3. the agents lines, which the mod writes for this session
 #   4. ctx / lmt / rst / pch bars
@@ -117,7 +117,7 @@ dir=$rawdir
 case "$dir" in "$HOME"*) dir="~${dir#"$HOME"}" ;; esac
 now=$(date +%s)
 
-# line 1: model -> [session] (sid:…) <stime:…> <automemory:on|off|?> <in:…·out:…·cash:…>
+# line 1: model -> [session] (sid:…) <stime:…> <automemory:on|off|?> <in:…·out:…·cost:…>
 mname="${white}$mname${reset}"
 model=''
 [ -n "$sid" ] && model="${gray}(${bold}sid:${unbold}$sid)${reset} $model"
@@ -249,7 +249,7 @@ EOF
   hum "${tsum% *}"; tin=$hv
   hum "${tsum#* }"; tout=$hv
   cash=$(printf '%.2f' "$cost")
-  model="${model}${gray}<${bold}in:${unbold}${tin}·${bold}out:${unbold}${tout}·${bold}cash:${unbold}\$${cash}>${reset} "
+  model="${model}${gray}<${bold}in:${unbold}${tin}·${bold}out:${unbold}${tout}·${bold}cost:${unbold}\$${cash}>${reset} "
 fi
 
 # line 2: modes; the effort level and the output style in their theme colors

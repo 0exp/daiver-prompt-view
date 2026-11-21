@@ -1,6 +1,6 @@
 {
   "name": "daiver-prompt-view",
-  "version": "1.54.0",
+  "version": "1.54.1",
   "description": "A Claude Code mod that shows what your session is doing: a status line under the prompt with live agents, usage limits and git state, a framed chat with copy buttons, and a pane with your prompt history",
   "author": {
     "name": "Rustam Ibragimov",
@@ -30,7 +30,7 @@
     "statuslineUsage": {
       "type": "boolean",
       "title": "Show the session's tokens and cost",
-      "description": "The session's input and output tokens and its cost at the end of the status line's first line, as <in:1.2M·out:85k·cash:$4.31> (also /daiver-prompt-view:statusline:show-usage [on|off])",
+      "description": "The session's input and output tokens and its cost at the end of the status line's first line, as <in:1.2M·out:85k·cost:$4.31> (also /daiver-prompt-view:statusline:show-usage [on|off])",
       "default": true
     },
     "statuslineWeekReset": {
