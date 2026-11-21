@@ -41,14 +41,15 @@ white=$(esc "$c_white")
 orange=$(esc "$c_orange")
 
 # the options the hooks module writes to config (key=value lines), read once:
-# usage (statusline:show-usage), borders and statuslineBorders
+# usage (statusline:show-usage), weekReset (statusline:show-week-reset), borders and statuslineBorders
 # (chat:show-borders, chat:show-statusline-borders), borderStyle
 # (chat:border-style), clodik, animate and animation (clodik:*), padding
-o_usage='' o_borders='' o_slborders='' o_style='' o_clodik='' o_animate='' o_animation='' o_padding=''
+o_usage='' o_wreset='' o_borders='' o_slborders='' o_style='' o_clodik='' o_animate='' o_animation='' o_padding=''
 if [ -f "$mod/config" ]; then
   while IFS= read -r l || [ -n "$l" ]; do
     case "$l" in
       usage=false) o_usage=false ;;
+      weekReset=true) o_wreset=true ;;
       borders=false) o_borders=false ;;
       statuslineBorders=false) o_slborders=false ;;
       borderStyle=line) o_style=line ;;
@@ -282,7 +283,9 @@ out="ctx $(esc "$c_ctx")$(bar $ctx)${reset} ${ctx}% $(esc "$c_ctxSize")(${csz})$
 out="$out | lmt $(esc "$c_lmt")$(bar $five)${reset} ${five}%"
 # the weekly limit beside it, in parentheses: its percentage and its reset's
 # date and local time, dd-mm-yyyy HH:MM (BSD date -r, else GNU date -d); a week that has already
-# reset is 0% with no date; no weekly limit in the input, no parentheses
+# reset is 0% with no date; the date only with the statuslineWeekReset option
+# on (statusline:show-week-reset, `weekReset=` in config); no weekly limit in
+# the input, no parentheses
 if [ -n "$week" ]; then
   week=$(printf '%.0f' "$week" 2>/dev/null) || week=0
   wd=''
@@ -291,7 +294,7 @@ if [ -n "$week" ]; then
     *)
       if [ "$wrst" -le "$now" ]; then
         week=0
-      else
+      elif [ "$o_wreset" = true ]; then
         wd=$(date -r "$wrst" '+%d-%m-%Y %H:%M' 2>/dev/null || date -d "@$wrst" '+%d-%m-%Y %H:%M' 2>/dev/null)
       fi ;;
   esac

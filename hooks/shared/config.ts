@@ -35,7 +35,7 @@ export function activityLengthOf(value: unknown) {
 
 // the options the status line script reads, from the plugin's userConfig;
 // a change in /config reloads the module, and session.start fires again
-export const config = { clodik: true, animate: false, animation: 'matrix', theme: 'default', history: false, historyMode: 'fullstory', toasts: false, buttons: true, borders: true, chatBorders: true, statuslineBorders: true, usage: true, borderStyle: 'dashed', padding: PADDING.default, activityLength: ACTIVITY_LENGTH.default, drawnPadding: undefined as number | undefined }
+export const config = { clodik: true, animate: false, animation: 'matrix', theme: 'default', history: false, historyMode: 'fullstory', toasts: false, buttons: true, borders: true, chatBorders: true, statuslineBorders: true, usage: true, weekReset: false, borderStyle: 'dashed', padding: PADDING.default, activityLength: ACTIVITY_LENGTH.default, drawnPadding: undefined as number | undefined }
 
 export function loadConfig(options: Record<string, unknown>) {
   config.clodik = options.clodik !== false
@@ -50,6 +50,7 @@ export function loadConfig(options: Record<string, unknown>) {
   config.chatBorders = options.chatBorders !== false
   config.statuslineBorders = options.statuslineBorders !== false
   config.usage = options.statuslineUsage !== false
+  config.weekReset = options.statuslineWeekReset === true
   config.borderStyle = BORDER_STYLES.includes(String(options.borderStyle)) ? String(options.borderStyle) : 'dashed'
   config.padding = paddingOf(options.statuslinePadding)
   config.activityLength = activityLengthOf(options.agentActivityLength)
@@ -61,7 +62,7 @@ function optionsOf(): Record<string, unknown> {
     clodik: config.clodik, clodikAnimate: config.animate, clodikAnimation: config.animation, theme: config.theme,
     history: config.history, toasts: config.toasts, buttons: config.buttons, historyMode: config.historyMode,
     borders: config.borders, chatBorders: config.chatBorders, statuslineBorders: config.statuslineBorders,
-    statuslineUsage: config.usage, borderStyle: config.borderStyle, statuslinePadding: config.padding,
+    statuslineUsage: config.usage, statuslineWeekReset: config.weekReset, borderStyle: config.borderStyle, statuslinePadding: config.padding,
     agentActivityLength: config.activityLength,
   }
 }
@@ -85,6 +86,6 @@ export function adoptSaved(saved: Record<string, unknown>) {
 export async function writeConfig($: EngineInterface) {
   const dir = await home($)
 
-  await sync($, `${dir}/config`, `clodik=${config.clodik}\nanimate=${config.animate}\nanimation=${config.animation}\ntheme=${config.theme}\nhistory=${config.history}\nborders=${config.borders}\nchatBorders=${config.chatBorders}\nstatuslineBorders=${config.statuslineBorders}\nborderStyle=${config.borderStyle}\npadding=${config.drawnPadding ?? config.padding}\nusage=${config.usage}\n`)
+  await sync($, `${dir}/config`, `clodik=${config.clodik}\nanimate=${config.animate}\nanimation=${config.animation}\ntheme=${config.theme}\nhistory=${config.history}\nborders=${config.borders}\nchatBorders=${config.chatBorders}\nstatuslineBorders=${config.statuslineBorders}\nborderStyle=${config.borderStyle}\npadding=${config.drawnPadding ?? config.padding}\nusage=${config.usage}\nweekReset=${config.weekReset}\n`)
   await sync($, `${dir}/theme.sh`, themeShell(config.theme))
 }

@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.54.0] - 2026-11-21
+
+### Added
+
+- The `statuslineWeekReset` option and `/daiver-prompt-view:statusline:show-week-reset [on|off]` show or hide the weekly limit's reset date and time in `lmt`'s brackets.
+
+### Changed
+
+- By default the weekly limit shows only its percentage, as `(12%)`; the reset date and time appear with the new option on.
+
 ## [1.53.0] - 2026-11-21
 
 ### Changed

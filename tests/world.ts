@@ -77,6 +77,7 @@ export function world(on: On, { configRows = true, clock: hasClock = true, setti
       { key: `${$.plugin.name}.chatBorders`, label: "Show the chat's frames", kind: 'boolean', value: true, provider, isLocked: false },
       { key: `${$.plugin.name}.statuslineBorders`, label: "Show the status line's frame", kind: 'boolean', value: true, provider, isLocked: false },
       { key: `${$.plugin.name}.statuslineUsage`, label: "Show the session's tokens and cost", kind: 'boolean', value: true, provider, isLocked: false },
+      { key: `${$.plugin.name}.statuslineWeekReset`, label: "Show the weekly limit's reset date and time", kind: 'boolean', value: false, provider, isLocked: false },
       { key: `${$.plugin.name}.buttons`, label: 'Show the buttons row', kind: 'boolean', value: true, provider, isLocked: false },
       { key: `${$.plugin.name}.borderStyle`, label: 'Frame style', kind: 'choice', value: 'dashed', provider, isLocked: false },
     ] as const).map(row => ({ ...row, value: saved[row.key.split('.').at(-1)!] ?? row.value })),
@@ -108,5 +109,5 @@ export const typed = (text: string) => {
   return { text, cursor: text.length, token: text.slice(start), start }
 }
 
-export const conf = (clodik: boolean, animate: boolean, animation: string, theme = 'default', history = false, borders = true, statuslineBorders = true, chatBorders = true, borderStyle = 'dashed', padding = -1, usage = true) =>
-  `clodik=${clodik}\nanimate=${animate}\nanimation=${animation}\ntheme=${theme}\nhistory=${history}\nborders=${borders}\nchatBorders=${chatBorders}\nstatuslineBorders=${statuslineBorders}\nborderStyle=${borderStyle}\npadding=${padding}\nusage=${usage}\n`
+export const conf = (clodik: boolean, animate: boolean, animation: string, theme = 'default', history = false, borders = true, statuslineBorders = true, chatBorders = true, borderStyle = 'dashed', padding = -1, usage = true, weekReset = false) =>
+  `clodik=${clodik}\nanimate=${animate}\nanimation=${animation}\ntheme=${theme}\nhistory=${history}\nborders=${borders}\nchatBorders=${chatBorders}\nstatuslineBorders=${statuslineBorders}\nborderStyle=${borderStyle}\npadding=${padding}\nusage=${usage}\nweekReset=${weekReset}\n`

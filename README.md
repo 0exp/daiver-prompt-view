@@ -9,7 +9,7 @@ Opus 5.5 -> [demo] (sid:419e75ee) <stime:1h23m> <automemory:on> <in:1.2M·out:85
 (effort:high) (outputstyle:Proactive) (thinkmode:thinking) (fastmode:false)                      ▐▛███▜▌
 ⚙ main:thinking (1m13s) │ agents:2 (sub:1 sh:1 mon:0) -> pending:0 running:2 waiting:0 idle:0  ▝▜█████▛▘
 -> Explore (time:1m01s) [Find lock index usages] (Grep(lock_index))                              ▘▘ ▝▝
-ctx ███░░░░░░░ 37% (74k/200k) | lmt ████░░░░░░ 43% (12% -> 25-11-2026 09:30) | rst ██████░░░░ 1h56m (at 17:48) | pch ████████░░ 85%  2.1.303
+ctx ███░░░░░░░ 37% (74k/200k) | lmt ████░░░░░░ 43% (12%) | rst ██████░░░░ 1h56m (at 17:48) | pch ████████░░ 85%  2.1.303
  (08d3788a) main [+#?] | ~/Projects/demo
 ```
 
@@ -66,7 +66,9 @@ else as wide as the widest line, Clawd inside it at the right border.
 4. Bars: `ctx` context window used, with its size in tokens in brackets
    (`37% (74k/200k)`: the last request's input over the window, `k` thousands,
    `M` millions; `(0/200k)` before the first request), `lmt` 5-hour rate limit used, then in brackets the weekly
-   limit used and the local date and time it resets, `dd-mm-yyyy HH:MM` (`43% (12% -> 25-11-2026 09:30)`; a
+   limit used (`43% (12%)`), and with the `statuslineWeekReset` option on
+   (`/daiver-prompt-view:statusline:show-week-reset`) the local date and time it
+   resets, `dd-mm-yyyy HH:MM` (`43% (12% -> 25-11-2026 09:30)`); a
    week that has already reset reads `(0%)`; no brackets while Claude Code sends
    no weekly limit), `rst` time to
    its reset and, in orange, its local time (24-hour `HH:MM`), `pch` prompt
@@ -201,6 +203,7 @@ after the command.
 | `/daiver-prompt-view:chat:border-style` | `dashed`, `line`, or nothing | `dashed` | Draw every frame dashed (`dashed`) or as a solid line (`line`); with no argument, shows the current one and the list |
 | `/daiver-prompt-view:mod:doctor` | nothing | (none) | Check what of the mod works in this session: the hooks a plugin above may pass by and which plugin does it, the status line padding, where auto memory is read from |
 | `/daiver-prompt-view:statusline:show-usage` | `on`, `off`, or nothing | `on` | Show (`on`) or hide (`off`) the session's tokens and cost at the end of the status line's first line; with no argument, toggles |
+| `/daiver-prompt-view:statusline:show-week-reset` | `on`, `off`, or nothing | `off` | Show (`on`) or hide (`off`) the weekly limit's reset date and time after its percentage in `lmt`'s brackets; with no argument, toggles |
 
 ### `/daiver-prompt-view:clodik:animate [on|off]`
 
@@ -273,6 +276,7 @@ Every option is in `/config`, or in `~/.claude/settings.json` under
 | `chatBorders` | Show the chat's frames | boolean | `true` | `true`, `false` | `chat:show-chat-borders` |
 | `statuslineBorders` | Show the status line's frame | boolean | `true` | `true`, `false` | `chat:show-statusline-borders` |
 | `statuslineUsage` | Show the session's tokens and cost | boolean | `true` | `true`, `false` | `statusline:show-usage` |
+| `statuslineWeekReset` | Show the weekly limit's reset date and time | boolean | `false` | `true`, `false` | `statusline:show-week-reset` |
 | `buttons` | Show the buttons row | boolean | `true` | `true`, `false` | `chat:show-buttons` |
 | `borderStyle` | Frame style | choice | `dashed` | `dashed`, `line` | `chat:border-style` |
 | `clodik` | Show Clawd | boolean | `true` | `true`, `false` | (none) |
@@ -295,6 +299,7 @@ For example, in `~/.claude/settings.json`:
       "chatBorders":         true,
       "statuslineBorders":   true,
       "statuslineUsage":     true,
+      "statuslineWeekReset": false,
       "buttons":             true,
       "borderStyle":         "dashed",
       "clodik":              true,
@@ -558,6 +563,24 @@ and the session's cost in dollars at API prices.
 | `/daiver-prompt-view:statusline:show-usage off` | `The session's tokens and cost are now hidden.` |
 | `/daiver-prompt-view:statusline:show-usage` | toggles: `The session's tokens and cost are now hidden.` when they were shown, `The session's tokens and cost are now shown.` when they were hidden |
 | `/daiver-prompt-view:statusline:show-usage maybe` | nothing changes: `Usage: /daiver-prompt-view:statusline:show-usage [on\|off]` |
+
+### `/daiver-prompt-view:statusline:show-week-reset [on|off]`
+
+Option `statuslineWeekReset` (Show the weekly limit's reset date and time),
+default `false` (`off`). It covers what follows the weekly limit's percentage in
+`lmt`'s brackets: the local date and time the week resets, `dd-mm-yyyy HH:MM`.
+
+| Value | Effect |
+| --- | --- |
+| `on` | the brackets hold the percentage and the reset: `lmt ████░░░░░░ 43% (12% -> 25-11-2026 09:30)` |
+| `off` | the brackets hold the percentage alone: `lmt ████░░░░░░ 43% (12%)` |
+
+| Usage | Result |
+| --- | --- |
+| `/daiver-prompt-view:statusline:show-week-reset on` | `The weekly limit's reset date and time are now shown.` |
+| `/daiver-prompt-view:statusline:show-week-reset off` | `The weekly limit's reset date and time are now hidden.` |
+| `/daiver-prompt-view:statusline:show-week-reset` | toggles: `The weekly limit's reset date and time are now shown.` when they were hidden, `The weekly limit's reset date and time are now hidden.` when they were shown |
+| `/daiver-prompt-view:statusline:show-week-reset maybe` | nothing changes: `Usage: /daiver-prompt-view:statusline:show-week-reset [on\|off]` |
 
 ### `/daiver-prompt-view:chat:border-style [dashed|line]`
 

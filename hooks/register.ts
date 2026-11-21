@@ -16,7 +16,7 @@ import { registerReply } from './features/reply'
 import { registerSpinner } from './features/spinner'
 import { registerTool } from './features/tool'
 import { commandToast, registerToasts, TOASTS } from './features/toasts'
-import { registerStatusline, startStatusline, USAGE } from './features/statusline'
+import { registerStatusline, startStatusline, USAGE, WEEK_RESET } from './features/statusline'
 import { registerView, THEME } from './features/view'
 
 export const register: Register = (on, options) => {
@@ -81,6 +81,7 @@ export const register: Register = (on, options) => {
       [BUTTONS]: { values: ['on', 'off'], current: config.buttons ? 'on' : 'off' },
       [BORDER_STYLE]: { values: BORDER_STYLES, current: config.borderStyle },
       [USAGE]: { values: ['on', 'off'], current: config.usage ? 'on' : 'off' },
+      [WEEK_RESET]: { values: ['on', 'off'], current: config.weekReset ? 'on' : 'off' },
     })
 
     if (rows.length === 0) return next(e)

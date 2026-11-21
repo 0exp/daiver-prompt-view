@@ -11,6 +11,7 @@ import { markSeen } from '../shared/seen'
 const SCRIPT = 'statusline/daiver-prompt-view.sh'
 
 export const USAGE = command('statusline', 'show-usage')
+export const WEEK_RESET = command('statusline', 'show-week-reset')
 // how statusLine.command names the script: the installed copy's path
 const SCRIPT_COPY = 'daiver-prompt-view/statusline.sh'
 // the status line's input has no auto memory state: <mod dir>/automemory holds
@@ -175,6 +176,25 @@ export function registerStatusline(on: On) {
     await writeConfig($)
 
     return { text: `The session's tokens and cost are now ${value ? 'shown' : 'hidden'}.` }
+  }).catch(($, e, next) => failed(next.error.message ?? next.error.kind))
+
+  // statusline:show-week-reset [on|off]: the statuslineWeekReset option, the
+  // weekly limit's reset date and time after its percentage; toggled when no
+  // argument
+  on('command.run', { command: WEEK_RESET }, async ($, e) => {
+    const arg = e.args.trim().toLowerCase()
+
+    if (arg !== '' && arg !== 'on' && arg !== 'off') return { text: `Usage: /${WEEK_RESET} [on|off]` }
+
+    const value = arg === '' ? !config.weekReset : arg === 'on'
+    const deny = await setOption($, 'statuslineWeekReset', value)
+
+    if (deny !== undefined) return { text: `The weekly limit's reset date and time were not changed: ${deny}` }
+
+    config.weekReset = value
+    await writeConfig($)
+
+    return { text: `The weekly limit's reset date and time are now ${value ? 'shown' : 'hidden'}.` }
   }).catch(($, e, next) => failed(next.error.message ?? next.error.kind))
 
   on('settings.read', async ($, e, next) => {

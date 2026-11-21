@@ -91,6 +91,29 @@ test('a statuslineUsage value reaches the config file', { options: { statuslineU
   expect(config()).toContain('\nusage=false\n')
 })
 
+test("show-week-reset toggles the weekly limit's reset date and time, on and off set them", async ($, on) => {
+  const { sets, config } = world(on)
+
+  await $.session.start(start)
+
+  expect(config()).toContain('\nweekReset=false\n')
+  expect((await $.command.run(run('statusline:show-week-reset'))).text).toBe("The weekly limit's reset date and time are now shown.")
+  expect(config()).toBe(conf(true, false, 'matrix', 'default', false, true, true, true, 'dashed', -1, true, true))
+  expect((await $.command.run(run('statusline:show-week-reset'))).text).toBe("The weekly limit's reset date and time are now hidden.")
+  expect((await $.command.run(run('statusline:show-week-reset', 'on'))).text).toBe("The weekly limit's reset date and time are now shown.")
+  expect((await $.command.run(run('statusline:show-week-reset', 'off'))).text).toBe("The weekly limit's reset date and time are now hidden.")
+  expect(sets).toEqual(['statuslineWeekReset=true', 'statuslineWeekReset=false', 'statuslineWeekReset=true', 'statuslineWeekReset=false'])
+  expect((await $.command.run(run('statusline:show-week-reset', 'maybe'))).text).toBe('Usage: /daiver-prompt-view:statusline:show-week-reset [on|off]')
+})
+
+test('a statuslineWeekReset value reaches the config file', { options: { statuslineWeekReset: true } }, async ($, on) => {
+  const { config } = world(on)
+
+  await $.session.start(start)
+
+  expect(config()).toContain('\nweekReset=true\n')
+})
+
 test('the padding Claude Code draws with: statusLine.padding while it runs the mod\'s script, 0 with none', () => {
   expect(drawnPadding({ ...WIRED, padding: 3 })).toBe(3)
   expect(drawnPadding(WIRED)).toBe(0)
