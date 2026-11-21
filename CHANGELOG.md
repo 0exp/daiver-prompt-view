@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.53.0] - 2026-11-21
+
+### Changed
+
+- The weekly limit's reset after `lmt` shows the local time of day after the date, as `(12% -> 25-11-2026 09:30)`.
+
 ## [1.52.1] - 2026-11-20
 
 ### Changed

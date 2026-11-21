@@ -281,7 +281,7 @@ fi
 out="ctx $(esc "$c_ctx")$(bar $ctx)${reset} ${ctx}% $(esc "$c_ctxSize")(${csz})${reset}"
 out="$out | lmt $(esc "$c_lmt")$(bar $five)${reset} ${five}%"
 # the weekly limit beside it, in parentheses: its percentage and its reset's
-# date, dd-mm-yyyy (BSD date -r, else GNU date -d); a week that has already
+# date and local time, dd-mm-yyyy HH:MM (BSD date -r, else GNU date -d); a week that has already
 # reset is 0% with no date; no weekly limit in the input, no parentheses
 if [ -n "$week" ]; then
   week=$(printf '%.0f' "$week" 2>/dev/null) || week=0
@@ -292,7 +292,7 @@ if [ -n "$week" ]; then
       if [ "$wrst" -le "$now" ]; then
         week=0
       else
-        wd=$(date -r "$wrst" +%d-%m-%Y 2>/dev/null || date -d "@$wrst" +%d-%m-%Y 2>/dev/null)
+        wd=$(date -r "$wrst" '+%d-%m-%Y %H:%M' 2>/dev/null || date -d "@$wrst" '+%d-%m-%Y %H:%M' 2>/dev/null)
       fi ;;
   esac
   out="$out $(esc "$c_lmt")(${week}%${wd:+ -> $wd})${reset}"
