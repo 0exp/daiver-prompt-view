@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.54.2] - 2026-11-21
+
+### Fixed
+
+- With several sessions open, turning the frames (or another status line option) on or off in one no longer makes the status line's frame in the others flicker on and off: each session's status line follows its own options.
+
 ## [1.54.1] - 2026-11-21
 
 ### Changed

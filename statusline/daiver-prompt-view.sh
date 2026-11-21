@@ -28,39 +28,6 @@ e=$(printf '\033')
 # hooks module
 mod="$HOME/.claude/daiver-prompt-view"
 
-# the colors of the active theme (the `theme` option, /daiver-prompt-view:view:theme):
-# c_<name>='<SGR params>' lines the hooks module writes from its themes; with
-# none yet, no colors
-c_gray='' c_white='' c_orange='' c_session='' c_ctx='' c_ctxSize='' c_lmt='' c_rst='' c_pch='' c_sha='' c_branch='' c_flags='' c_added='' c_removed='' c_matrix='' c_frame='' c_effort='' c_ostyle=''
-[ -f "$mod/theme.sh" ] && . "$mod/theme.sh"
-# a theme.sh written before the context's size had a color of its own: the
-# reset time's, until the mod writes the theme again
-[ -z "$c_ctxSize" ] && c_ctxSize=$c_orange
-gray=$(esc "$c_gray")
-white=$(esc "$c_white")
-orange=$(esc "$c_orange")
-
-# the options the hooks module writes to config (key=value lines), read once:
-# usage (statusline:show-usage), weekReset (statusline:show-week-reset), borders and statuslineBorders
-# (chat:show-borders, chat:show-statusline-borders), borderStyle
-# (chat:border-style), clodik, animate and animation (clodik:*), padding
-o_usage='' o_wreset='' o_borders='' o_slborders='' o_style='' o_clodik='' o_animate='' o_animation='' o_padding=''
-if [ -f "$mod/config" ]; then
-  while IFS= read -r l || [ -n "$l" ]; do
-    case "$l" in
-      usage=false) o_usage=false ;;
-      weekReset=true) o_wreset=true ;;
-      borders=false) o_borders=false ;;
-      statuslineBorders=false) o_slborders=false ;;
-      borderStyle=line) o_style=line ;;
-      clodik=false) o_clodik=false ;;
-      animate=true) o_animate=true ;;
-      animation=*) o_animation=${l#animation=} ;;
-      padding=*) o_padding=${l#padding=} ;;
-    esac
-  done < "$mod/config"
-fi
-
 # a 10-cell bar of a percentage
 bar() {
   f=$(($1 / 10))
@@ -112,6 +79,47 @@ eval "$(printf '%s' "$input" | jq -r "$human"'
   @sh "csz=\(((.context_window.current_usage // {}) | (.input_tokens // 0) + (.cache_creation_input_tokens // 0) + (.cache_read_input_tokens // 0) | h)
     + ((.context_window.context_window_size // 0) | if . > 0 then "/" + h else "" end))",
   @sh "cch=\((.context_window.current_usage // {}) | ((.input_tokens // 0) + (.cache_creation_input_tokens // 0) + (.cache_read_input_tokens // 0)) as $t | if $t > 0 then ((.cache_read_input_tokens // 0) * 100 / $t | floor) else 0 end)"' 2>/dev/null)"
+
+# the colors of the active theme (the `theme` option, /daiver-prompt-view:view:theme):
+# c_<name>='<SGR params>' lines the hooks module writes from its themes; with
+# none yet, no colors
+c_gray='' c_white='' c_orange='' c_session='' c_ctx='' c_ctxSize='' c_lmt='' c_rst='' c_pch='' c_sha='' c_branch='' c_flags='' c_added='' c_removed='' c_matrix='' c_frame='' c_effort='' c_ostyle=''
+# this session's copy (themes/<session_id>.sh), else the shared one
+th="$mod/themes/$sidfull.sh"
+[ -n "$sidfull" ] && [ -f "$th" ] || th="$mod/theme.sh"
+[ -f "$th" ] && . "$th"
+# a theme.sh written before the context's size had a color of its own: the
+# reset time's, until the mod writes the theme again
+[ -z "$c_ctxSize" ] && c_ctxSize=$c_orange
+gray=$(esc "$c_gray")
+white=$(esc "$c_white")
+orange=$(esc "$c_orange")
+
+# the options the hooks module writes to config (key=value lines), read once,
+# from this session's copy (configs/<session_id>: every session writes its own,
+# so an option changed in one session does not flicker in another), else the
+# shared config:
+# usage (statusline:show-usage), weekReset (statusline:show-week-reset), borders and statuslineBorders
+# (chat:show-borders, chat:show-statusline-borders), borderStyle
+# (chat:border-style), clodik, animate and animation (clodik:*), padding
+o_usage='' o_wreset='' o_borders='' o_slborders='' o_style='' o_clodik='' o_animate='' o_animation='' o_padding=''
+cf="$mod/configs/$sidfull"
+[ -n "$sidfull" ] && [ -f "$cf" ] || cf="$mod/config"
+if [ -f "$cf" ]; then
+  while IFS= read -r l || [ -n "$l" ]; do
+    case "$l" in
+      usage=false) o_usage=false ;;
+      weekReset=true) o_wreset=true ;;
+      borders=false) o_borders=false ;;
+      statuslineBorders=false) o_slborders=false ;;
+      borderStyle=line) o_style=line ;;
+      clodik=false) o_clodik=false ;;
+      animate=true) o_animate=true ;;
+      animation=*) o_animation=${l#animation=} ;;
+      padding=*) o_padding=${l#padding=} ;;
+    esac
+  done < "$cf"
+fi
 
 dir=$rawdir
 case "$dir" in "$HOME"*) dir="~${dir#"$HOME"}" ;; esac

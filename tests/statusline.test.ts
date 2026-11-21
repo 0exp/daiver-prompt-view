@@ -19,6 +19,17 @@ test('the session start installs the script, its config and the default theme', 
   expect(files.get(`${DIR}/theme.sh`)).toBe(THEME_SH)
 })
 
+test("the session's own config and theme, which its status line reads, follow its options; the shared ones too", async ($, on) => {
+  const { files, config } = world(on)
+
+  await $.session.start(start)
+  await $.command.run(run('chat:show-borders', 'off'))
+
+  expect(files.get(`${DIR}/configs/s1`)).toBe(conf(true, false, 'matrix', 'default', false, false))
+  expect(files.get(`${DIR}/configs/s1`)).toBe(config())
+  expect(files.get(`${DIR}/themes/s1.sh`)).toBe(THEME_SH)
+})
+
 test('the options reach the config file', { options: { clodik: false, clodikAnimate: true, clodikAnimation: 'pixels' } }, async ($, on) => {
   const { config } = world(on)
 

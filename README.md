@@ -613,7 +613,7 @@ Whether a frame is drawn at all is still up to `borders`, `chatBorders` and
 
 Every theme is written once, in `hooks/shared/themes.ts`: the hooks module draws
 the agents line with it and writes the status line's colors to
-`~/.claude/daiver-prompt-view/theme.sh` for the script. A new theme is an entry
+`~/.claude/daiver-prompt-view/themes/<session_id>.sh` (and `theme.sh`) for the script. A new theme is an entry
 in `THEMES` there, its name in the `theme` option's `options` in
 `.claude-plugin/plugin.json`, and in `commands/view/theme.md`'s `argument-hint`.
 
@@ -667,8 +667,11 @@ it, and the debug log says the option is not applied; set the same value in
 Requires `jq` and `git`; the branch glyph needs a Nerd Font. The script uses
 macOS `stat -f`; elsewhere `stime` falls back to the session's duration.
 
-What the mod keeps in `~/.claude/daiver-prompt-view/`: `statusline.sh`, `config`
-(the options), `theme.sh` (the active theme's colors), `agents/<session_id>`, `agents.idle` (the agents line of a session with no state yet),
+What the mod keeps in `~/.claude/daiver-prompt-view/`: `statusline.sh`,
+`configs/<session_id>` (the session's options) and `themes/<session_id>.sh` (its
+theme's colors), which its status line reads, so an option changed in one session
+never makes another's frames flicker; `config` and `theme.sh`, the same for a
+status line with no session id; `agents/<session_id>`, `agents.idle` (the agents line of a session with no state yet),
 and `automemory/<session_id>`.
 
 ## Develop

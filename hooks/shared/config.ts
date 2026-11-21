@@ -82,10 +82,20 @@ export function adoptSaved(saved: Record<string, unknown>) {
   return JSON.stringify(optionsOf()) !== before
 }
 
-// the config file and the active theme's colors, next to the script
+// the config file and the active theme's colors, next to the script: the
+// session's own (configs/<session id>, themes/<session id>.sh), which its
+// status line reads, so sessions that disagree for a while (one changed an
+// option, another has not adopted it yet, each with its own padding and history
+// pane) do not overwrite each other's every few seconds; and the shared ones,
+// for a status line input with no session id
 export async function writeConfig($: EngineInterface) {
   const dir = await home($)
+  const id = await $.session.id()
+  const text = `clodik=${config.clodik}\nanimate=${config.animate}\nanimation=${config.animation}\ntheme=${config.theme}\nhistory=${config.history}\nborders=${config.borders}\nchatBorders=${config.chatBorders}\nstatuslineBorders=${config.statuslineBorders}\nborderStyle=${config.borderStyle}\npadding=${config.drawnPadding ?? config.padding}\nusage=${config.usage}\nweekReset=${config.weekReset}\n`
+  const theme = themeShell(config.theme)
 
-  await sync($, `${dir}/config`, `clodik=${config.clodik}\nanimate=${config.animate}\nanimation=${config.animation}\ntheme=${config.theme}\nhistory=${config.history}\nborders=${config.borders}\nchatBorders=${config.chatBorders}\nstatuslineBorders=${config.statuslineBorders}\nborderStyle=${config.borderStyle}\npadding=${config.drawnPadding ?? config.padding}\nusage=${config.usage}\nweekReset=${config.weekReset}\n`)
-  await sync($, `${dir}/theme.sh`, themeShell(config.theme))
+  await sync($, `${dir}/configs/${id}`, text)
+  await sync($, `${dir}/themes/${id}.sh`, theme)
+  await sync($, `${dir}/config`, text)
+  await sync($, `${dir}/theme.sh`, theme)
 }
