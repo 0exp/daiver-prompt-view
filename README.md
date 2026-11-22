@@ -72,9 +72,12 @@ else as wide as the widest line, Clawd inside it at the right border.
    week that has already reset reads `(0%)`; no brackets while Claude Code sends
    no weekly limit), `rst` time to
    its reset and, in orange, its local time (24-hour `HH:MM`), `pch` prompt
-   cache hits of the last request. All four show from the start: before the
-   first response (or once the 5-hour window has reset) `lmt` is 0%, `rst` a
-   whole 5h00m window and `pch` 0%.
+   cache hits of the last request. The limits are your account's, so every
+   open session shows the same `lmt` and `rst`: the newest figures any of them
+   has received, not only those of its own last response (an idle session no
+   longer lags behind a busy one). All four show from the start: before the
+   first response in any session (or once the 5-hour window has reset) `lmt`
+   is 0%, `rst` a whole 5h00m window and `pch` 0%.
 5. Git: short sha, branch, flags (`+` staged, `#` untracked, `?` unstaged),
    the lines added and removed in the diff against HEAD (`+12/-3`; `+N/-N`
    when the tree is clean) and the working directory.

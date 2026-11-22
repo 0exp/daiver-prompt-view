@@ -272,6 +272,48 @@ case "$fast" in true | false) modes="$modes (${bold}fastmode${unbold}:$fast)" ;;
 model="$(esc "$c_session")[${bold}$session${unbold}]${reset} $model"
 model="$mname -> ${model% }"
 
+# the limits are the account's, but each session only knows them from its own
+# last response, so an idle session shows an old figure; every session keeps
+# the newest it has seen in one shared file (limits: `five rst week wrst`) and
+# draws that: of two figures for a window, the later window wins (a reset more
+# than an hour, or a day for the week, apart), within the same window the
+# higher (a window's use only grows); written only when it changes
+# a percentage as an integer in ten-thousandths of a point, 43.5 -> 435000
+lnum() {
+  li=${1%%.*} lfr=''
+  case "$1" in *.*) lfr=${1#*.} ;; esac
+  lfr="${lfr}0000"
+  lfr=${lfr%"${lfr#????}"}
+  case "$li$lfr" in '' | *[!0-9]*) ln=0 ;; *) ln="$li$lfr" ;; esac
+}
+lmerge() { # $1 $2 mine (pct reset), $3 $4 shared, $5 the gap of a new window
+  mp=$1 mr=$2
+  case "$4" in '' | *[!0-9]*) return ;; esac
+  case "$mr" in '' | *[!0-9]*) mp=$3 mr=$4; return ;; esac
+  if [ $(($4 - mr)) -gt "$5" ]; then
+    mp=$3 mr=$4
+  elif [ $((mr - $4)) -le "$5" ]; then
+    lnum "$mp"; la=$ln
+    lnum "$3"
+    [ "$ln" -gt "$la" ] && mp=$3
+    [ "$4" -gt "$mr" ] && mr=$4
+  fi
+}
+lf="$mod/limits"
+lfive='' lrst='' lweek='' lwrst=''
+[ -f "$lf" ] && read -r lfive lrst lweek lwrst < "$lf" 2>/dev/null
+lmerge "$five" "$rst" "$lfive" "$lrst" 3600
+five=$mp rst=$mr
+lmerge "${week:--}" "$wrst" "${lweek:--}" "$lwrst" 86400
+case "$mp" in -) week='' ;; *) week=$mp ;; esac
+wrst=$mr
+lline="$five ${rst:--} ${week:--} ${wrst:--}"
+if [ -n "$rst" ] && [ "$lline" != "$lfive ${lrst:--} ${lweek:--} ${lwrst:--}" ]; then
+  [ -d "$mod" ] || mkdir -p "$mod"
+  printf '%s\n' "$lline" > "$lf.$$" 2>/dev/null && mv -f "$lf.$$" "$lf" 2>/dev/null
+fi
+case "$wrst" in -) wrst='' ;; esac
+
 # line 4: context, 5-hour limit, its reset, prompt cache hits; all four from
 # the start: with no rate limits yet (no response in this session) or a 5-hour
 # window that has already reset, nothing is used and a whole window is ahead;

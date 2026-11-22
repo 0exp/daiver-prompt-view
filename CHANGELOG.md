@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.54.3] - 2026-11-22
+
+### Fixed
+
+- With several sessions open, the 5-hour and weekly limits on the status line read the same in all of them: each shows the newest figures any session has received, so an idle session no longer shows a lower, outdated percentage.
+
 ## [1.54.2] - 2026-11-21
 
 ### Fixed
