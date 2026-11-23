@@ -658,8 +658,9 @@ fi
 # per UTF-8 character (the continuation bytes not counted). Clawd has a block
 # of his own at the right, its left side a line of the frame from the top
 # border to the bottom one. The usage block's rules run across the panel, from
-# the left border to Clawd's block (or the right border), and leave the cell
-# inside either end blank, so each block reads as rounded
+# the left border to Clawd's block (or the right border), as long as the top
+# and bottom borders at the left (the borders unbroken beside them, a rounded
+# corner), a blank cell before Clawd's block
 draw='
 function vis(s) { gsub(/\033\[[0-9;]*m/, "", s); gsub(/[\200-\277]/, "", s); return length(s) }
 function sp(k,  o) { o = ""; while (k-- > 0) o = o " "; return o }
@@ -703,9 +704,10 @@ END {
   if (framed) print fc ENVIRON["DPV_FTL"] rule(fw) ENVIRON["DPV_FTR"] rs
   for (i = 1; i <= n; i++) {
     if (R[i]) {
-      # the rule: a blank cell at either end, inside the block lines beside it
-      # (the frame borders, Clawd block line), which run on unbroken
-      body = " " fc rule(pw - 2) rs " "
+      # the rule: as long as the top and bottom borders at the left, right
+      # against the left border, which runs on unbroken (a rounded corner);
+      # a blank cell before Clawd block line
+      body = clawd ? fc rule(pw - 1) rs " " : fc rule(pw) rs
     } else body = L[i] sp(pw - V[i])
     if (clawd) body = body (framed ? fv : " ") K[i] sp(11 - vis(K[i]))
     if (!framed) { sub(/ +$/, "", body); print body; continue }

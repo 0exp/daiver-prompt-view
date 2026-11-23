@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.57.2] - 2026-11-23
+
+### Changed
+
+- The usage block's lines start at the frame's left border, as long there as its top and bottom borders, so the block's corners look rounded.
+
 ## [1.57.1] - 2026-11-23
 
 ### Changed
