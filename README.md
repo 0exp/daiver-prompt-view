@@ -12,7 +12,7 @@ copy buttons, and a pane with your prompt history.
 │-> Explore (time:1m01s) [Find lock index usages] (Grep(lock_index))                              │ ▝▜█████▛▘ │
 │──────────────────────────────────────────────────────────────────────────────────────────────── │   ▘▘ ▝▝   │
 │ctx ███░░░░░░░ 37% (74k/200k)        | pch ████████░░ 85%                                        │  2.1.303  │
-│lmt ████░░░░░░ 43% (12%) (fable:23%) | rst ██████░░░░ 1h56m (at 17:48) (fable:27-11-2026 02:00)  │           │
+│lmt ████░░░░░░ 43% (12%) (fable:23%) | rst ██████░░░░ 1h56m (at 17:48) (fable: 27-11-2026 02:00) │           │
 │──────────────────────────────────────────────────────────────────────────────────────────────── │           │
 │ (08d3788a) main [+#?] | ~/Projects/demo                                                         │           │
 ╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
@@ -89,7 +89,7 @@ bottom one.
    no Fable limit or is not signed in to Claude), `rst` time to
    its reset and, in orange, its local time (24-hour `HH:MM`), then, in the
    Fable limit's purple, the local date and time the Fable limit resets
-   (`1h56m (at 17:48) (fable:27-11-2026 02:00)`; only with the Fable brackets
+   (`1h56m (at 17:48) (fable: 27-11-2026 02:00)`; only with the Fable brackets
    shown), `pch` prompt
    cache hits of the last request. The limits are your account's, so every
    open session shows the same `lmt` and `rst`: the newest figures any of them

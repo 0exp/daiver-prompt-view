@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.57.3] - 2026-11-23
+
+### Changed
+
+- The Fable limit's reset after `rst` has a space after the colon, as `(fable: 27-11-2026 02:00)`.
+
 ## [1.57.2] - 2026-11-23
 
 ### Changed

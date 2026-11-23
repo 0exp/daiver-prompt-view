@@ -378,7 +378,7 @@ srst="rst $(esc "$c_rst")$(bar $(((18000 - left) * 100 / 18000)))${reset} $((lef
 hm=$(date -r $((now + left)) +%H:%M 2>/dev/null || date -d "@$((now + left))" +%H:%M 2>/dev/null)
 [ -n "$hm" ] && srst="$srst ${orange}(at $hm)${reset}"
 # the weekly Fable limit's reset after it, in the theme's fable color, as
-# (fable:27-11-2026 02:00): its local date and time, dd-mm-yyyy HH:MM, whatever
+# (fable: 27-11-2026 02:00): its local date and time, dd-mm-yyyy HH:MM, whatever
 # statuslineWeekReset says; none with no Fable brackets or a reset already past
 case "$fpct" in '' | -) ;; *)
   case "$frst" in
@@ -386,7 +386,7 @@ case "$fpct" in '' | -) ;; *)
     *)
       if [ "$frst" -gt "$now" ]; then
         frd=$(date -r "$frst" '+%d-%m-%Y %H:%M' 2>/dev/null || date -d "@$frst" '+%d-%m-%Y %H:%M' 2>/dev/null)
-        [ -n "$frd" ] && srst="$srst $(esc "$c_fable")(fable:$frd)${reset}"
+        [ -n "$frd" ] && srst="$srst $(esc "$c_fable")(fable: $frd)${reset}"
       fi ;;
   esac ;;
 esac
