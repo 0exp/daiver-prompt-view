@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.55.0] - 2026-11-23
+
+### Added
+
+- The weekly Fable limit used shows on the status line in purple brackets of its own after the weekly limit, as `lmt ████░░░░░░ 43% (12%) (fable:23%)`, with its reset date and time when `statuslineWeekReset` is on; it is left out when the account has no Fable limit.
+
 ## [1.54.3] - 2026-11-22
 
 ### Fixed

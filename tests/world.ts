@@ -25,6 +25,9 @@ export function world(on: On, { configRows = true, clock: hasClock = true, setti
   const session = { id: 's1' }
   // the session's live agents, as $.agent.list answers them; a test pushes one
   const live: AgentInfo[] = []
+  // the session's credential handle, as $.session.authorize answers it: none
+  // (no first-party login) unless a test sets `auth.value`
+  const auth = { value: null as { handle: string; kind: 'bearer' | 'api-key' } | null }
 
   on('fs.exists', ($, e) => ({ value: files.has(e.path) || e.path.endsWith('/statusline/daiver-prompt-view.sh') }))
   on('fs.read', ($, e) => ({ value: files.get(e.path) ?? '#!/bin/sh\n' }))
@@ -35,6 +38,7 @@ export function world(on: On, { configRows = true, clock: hasClock = true, setti
   })
   on('agent.list', () => ({ value: live }))
   on('session.id', () => ({ value: session.id }))
+  on('session.authorize', () => ({ value: auth.value }))
   on('session.cwd', () => ({ value: '/home/me/proj' }))
   if (hasClock) on('clock.now', () => ({ value: clock.now }))
   on('settings.read', () => (settingsDenied ? { deny: 'refused by a plugin above' } : { value: settings.value }))
@@ -90,7 +94,7 @@ export function world(on: On, { configRows = true, clock: hasClock = true, setti
   on('session.start', ($, e) => ({ cwd: e.cwd }))
   on('prompt.autocomplete', () => ({ suggestions: [] }))
 
-  return { files, settings, clock, session, live, saved, sets, panes, toasts, logs, state, config: () => files.get(`${DIR}/config`), agents: () => files.get(`${DIR}/agents/s1`) }
+  return { files, settings, clock, session, auth, live, saved, sets, panes, toasts, logs, state, config: () => files.get(`${DIR}/config`), agents: () => files.get(`${DIR}/agents/s1`) }
 }
 
 export const start = { cwd: '/tmp', surface: 'terminal', isInteractive: true } as const

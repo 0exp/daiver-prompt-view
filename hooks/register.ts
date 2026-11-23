@@ -18,6 +18,7 @@ import { registerTool } from './features/tool'
 import { commandToast, registerToasts, TOASTS } from './features/toasts'
 import { registerStatusline, startStatusline, USAGE, WEEK_RESET } from './features/statusline'
 import { registerView, THEME } from './features/view'
+import { startFable } from './features/fable'
 
 export const register: Register = (on, options) => {
   loadConfig(options)
@@ -27,6 +28,7 @@ export const register: Register = (on, options) => {
     await startStatusline($)
     await startAgents($)
     await startHistory($)
+    startFable($)
 
     return next(e)
   }).catch(($, e, next) => next(e))

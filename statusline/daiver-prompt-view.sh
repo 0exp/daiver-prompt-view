@@ -83,7 +83,7 @@ eval "$(printf '%s' "$input" | jq -r "$human"'
 # the colors of the active theme (the `theme` option, /daiver-prompt-view:view:theme):
 # c_<name>='<SGR params>' lines the hooks module writes from its themes; with
 # none yet, no colors
-c_gray='' c_white='' c_orange='' c_session='' c_ctx='' c_ctxSize='' c_lmt='' c_rst='' c_pch='' c_sha='' c_branch='' c_flags='' c_added='' c_removed='' c_matrix='' c_frame='' c_effort='' c_ostyle=''
+c_gray='' c_white='' c_orange='' c_session='' c_ctx='' c_ctxSize='' c_lmt='' c_fable='' c_rst='' c_pch='' c_sha='' c_branch='' c_flags='' c_added='' c_removed='' c_matrix='' c_frame='' c_effort='' c_ostyle=''
 # this session's copy (themes/<session_id>.sh), else the shared one
 th="$mod/themes/$sidfull.sh"
 [ -n "$sidfull" ] && [ -f "$th" ] || th="$mod/theme.sh"
@@ -350,6 +350,28 @@ if [ -n "$week" ]; then
   esac
   out="$out $(esc "$c_lmt")(${week}%${wd:+ -> $wd})${reset}"
 fi
+# the weekly Fable limit, in brackets of its own in the theme's fable color, as
+# (fable:23%): the mod reads it from the plan's usage into the shared file
+# fable (`pct resets_at asked_at`); a window that has already reset is 0%, its
+# reset date and time with the same option as the week's; no Fable access
+# (`-`) or no file yet, no brackets
+ffile="$mod/fable"
+fpct='' frst=''
+[ -f "$ffile" ] && read -r fpct frst _ < "$ffile" 2>/dev/null
+case "$fpct" in '' | -) ;; *)
+  fpct=$(printf '%.0f' "$fpct" 2>/dev/null) || fpct=0
+  fd=''
+  case "$frst" in
+    '' | *[!0-9]*) ;;
+    *)
+      if [ "$frst" -le "$now" ]; then
+        fpct=0
+      elif [ "$o_wreset" = true ]; then
+        fd=$(date -r "$frst" '+%d-%m-%Y %H:%M' 2>/dev/null || date -d "@$frst" '+%d-%m-%Y %H:%M' 2>/dev/null)
+      fi ;;
+  esac
+  out="$out $(esc "$c_fable")(fable:${fpct}%${fd:+ -> $fd})${reset}" ;;
+esac
 out="$out | rst $(esc "$c_rst")$(bar $(((18000 - left) * 100 / 18000)))${reset} $((left / 3600))h$(printf '%02d' $((left % 3600 / 60)))m"
 # the reset's local time, 24-hour HH:MM, in Clawd's orange (BSD date -r, else
 # GNU date -d); with no window yet, when one that starts now resets

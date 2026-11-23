@@ -70,7 +70,11 @@ else as wide as the widest line, Clawd inside it at the right border.
    (`/daiver-prompt-view:statusline:show-week-reset`) the local date and time it
    resets, `dd-mm-yyyy HH:MM` (`43% (12% -> 25-11-2026 09:30)`); a
    week that has already reset reads `(0%)`; no brackets while Claude Code sends
-   no weekly limit), `rst` time to
+   no weekly limit), then, in purple brackets of their own, the weekly Fable
+   limit used (`43% (12%) (fable:23%)`; with `statuslineWeekReset` on its reset
+   too, `(fable:23% -> 27-11-2026 02:00)`; read from your plan's usage, as
+   `/usage` shows it, every few minutes; no Fable brackets when your account has
+   no Fable limit or is not signed in to Claude), `rst` time to
    its reset and, in orange, its local time (24-hour `HH:MM`), `pch` prompt
    cache hits of the last request. The limits are your account's, so every
    open session shows the same `lmt` and `rst`: the newest figures any of them
@@ -256,7 +260,7 @@ Option `theme` (Color theme), default `default`.
 
 | Value | Colors |
 | --- | --- |
-| `default` (default) | white, gray, fuchsia (ctx), lavender (the context's size beside it), sky blue (lmt), light green (rst), Clawd orange, gray-green (pch), khaki (sha), violet (branch), coral (flags), light green (+added), coral (-removed), Clawd orange (the matrix rain, the frame around your prompts, in the chat and in the history pane, and the frame around the status line too), neon blue (the frame around Claude's replies, in the chat and in the history pane), dark violet (the frame around the tool calls, in the chat and in the history pane), yellow (the frame around the spinner, as the output style), gray (the frame around a command's output), Clawd orange (the prompt history pane's frame too), fuchsia (the history message's frame under the pointer, as the ctx bar), near black (the history pane's background), gray (the buttons), muted dark red (the buttons row's frame), lighter red (that frame under the pointer) |
+| `default` (default) | white, gray, fuchsia (ctx), lavender (the context's size beside it), sky blue (lmt), purple (the Fable limit's brackets), light green (rst), Clawd orange, gray-green (pch), khaki (sha), violet (branch), coral (flags), light green (+added), coral (-removed), Clawd orange (the matrix rain, the frame around your prompts, in the chat and in the history pane, and the frame around the status line too), neon blue (the frame around Claude's replies, in the chat and in the history pane), dark violet (the frame around the tool calls, in the chat and in the history pane), yellow (the frame around the spinner, as the output style), gray (the frame around a command's output), Clawd orange (the prompt history pane's frame too), fuchsia (the history message's frame under the pointer, as the ctx bar), near black (the history pane's background), gray (the buttons), muted dark red (the buttons row's frame), lighter red (that frame under the pointer) |
 
 | Usage | Result |
 | --- | --- |
@@ -571,12 +575,13 @@ and the session's cost in dollars at API prices.
 
 Option `statuslineWeekReset` (Show the weekly limit's reset date and time),
 default `false` (`off`). It covers what follows the weekly limit's percentage in
-`lmt`'s brackets: the local date and time the week resets, `dd-mm-yyyy HH:MM`.
+`lmt`'s brackets: the local date and time the week resets, `dd-mm-yyyy HH:MM`,
+and the same after the Fable limit's percentage when it is shown.
 
 | Value | Effect |
 | --- | --- |
-| `on` | the brackets hold the percentage and the reset: `lmt ████░░░░░░ 43% (12% -> 25-11-2026 09:30)` |
-| `off` | the brackets hold the percentage alone: `lmt ████░░░░░░ 43% (12%)` |
+| `on` | the brackets hold the percentage and the reset: `lmt ████░░░░░░ 43% (12% -> 25-11-2026 09:30) (fable:23% -> 27-11-2026 02:00)` |
+| `off` | the brackets hold the percentage alone: `lmt ████░░░░░░ 43% (12%) (fable:23%)` |
 
 | Usage | Result |
 | --- | --- |
