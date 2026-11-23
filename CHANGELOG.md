@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.56.0] - 2026-11-23
+
+### Added
+
+- The Fable limit's reset date and time show after `rst`'s reset time in the same purple brackets, as `rst ██████░░░░ 1h56m (at 17:48) (fable:27-11-2026 02:00)`, whenever the Fable limit is shown.
+
 ## [1.55.0] - 2026-11-23
 
 ### Added

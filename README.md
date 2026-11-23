@@ -75,7 +75,10 @@ else as wide as the widest line, Clawd inside it at the right border.
    too, `(fable:23% -> 27-11-2026 02:00)`; read from your plan's usage, as
    `/usage` shows it, every few minutes; no Fable brackets when your account has
    no Fable limit or is not signed in to Claude), `rst` time to
-   its reset and, in orange, its local time (24-hour `HH:MM`), `pch` prompt
+   its reset and, in orange, its local time (24-hour `HH:MM`), then, in the
+   Fable limit's purple, the local date and time the Fable limit resets
+   (`1h56m (at 17:48) (fable:27-11-2026 02:00)`; only with the Fable brackets
+   shown), `pch` prompt
    cache hits of the last request. The limits are your account's, so every
    open session shows the same `lmt` and `rst`: the newest figures any of them
    has received, not only those of its own last response (an idle session no
@@ -260,7 +263,7 @@ Option `theme` (Color theme), default `default`.
 
 | Value | Colors |
 | --- | --- |
-| `default` (default) | white, gray, fuchsia (ctx), lavender (the context's size beside it), sky blue (lmt), purple (the Fable limit's brackets), light green (rst), Clawd orange, gray-green (pch), khaki (sha), violet (branch), coral (flags), light green (+added), coral (-removed), Clawd orange (the matrix rain, the frame around your prompts, in the chat and in the history pane, and the frame around the status line too), neon blue (the frame around Claude's replies, in the chat and in the history pane), dark violet (the frame around the tool calls, in the chat and in the history pane), yellow (the frame around the spinner, as the output style), gray (the frame around a command's output), Clawd orange (the prompt history pane's frame too), fuchsia (the history message's frame under the pointer, as the ctx bar), near black (the history pane's background), gray (the buttons), muted dark red (the buttons row's frame), lighter red (that frame under the pointer) |
+| `default` (default) | white, gray, fuchsia (ctx), lavender (the context's size beside it), sky blue (lmt), purple (the Fable limit's brackets, in lmt and rst), light green (rst), Clawd orange, gray-green (pch), khaki (sha), violet (branch), coral (flags), light green (+added), coral (-removed), Clawd orange (the matrix rain, the frame around your prompts, in the chat and in the history pane, and the frame around the status line too), neon blue (the frame around Claude's replies, in the chat and in the history pane), dark violet (the frame around the tool calls, in the chat and in the history pane), yellow (the frame around the spinner, as the output style), gray (the frame around a command's output), Clawd orange (the prompt history pane's frame too), fuchsia (the history message's frame under the pointer, as the ctx bar), near black (the history pane's background), gray (the buttons), muted dark red (the buttons row's frame), lighter red (that frame under the pointer) |
 
 | Usage | Result |
 | --- | --- |
