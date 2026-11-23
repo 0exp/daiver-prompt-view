@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.57.1] - 2026-11-23
+
+### Changed
+
+- The usage block's lines leave a blank cell at the left end too, as at the right one, with the frame's left border unbroken beside them.
+
+### Fixed
+
+- A change to the status line shows within a few seconds of `/reload-plugins`, even when the reload does not start the session again.
+
 ## [1.57.0] - 2026-11-23
 
 ### Changed

@@ -83,9 +83,14 @@ async function writeAutoMemory($: EngineInterface) {
   await sync($, path, `${(await autoMemory($)).state}\n`)
 }
 
+// the script copy the status line runs, written only when the plugin's own differs
+async function installScript($: EngineInterface) {
+  await sync($, `${await home($)}/statusline.sh`, await $.fs.read(`${$.plugin.root}/${SCRIPT}`))
+}
+
 // on every session start (and so every reload): the script copy, its config and theme, auto memory
 export async function startStatusline($: EngineInterface) {
-  await sync($, `${await home($)}/statusline.sh`, await $.fs.read(`${$.plugin.root}/${SCRIPT}`))
+  await installScript($)
   await readPadding($)
   await writeConfig($)
   await writeAutoMemory($)
@@ -94,7 +99,10 @@ export async function startStatusline($: EngineInterface) {
   // the padding drawn, again every few seconds: a settings file or a plugin above
   // may change it; and the options another session changed, so the shared config
   // file is not written back with this session's old ones (the frames redrawn)
+  // the script copy too: a reload that does not start the session again (or
+  // another session's older plugin) must not leave it behind the plugin's
   $.clock.every(5000, async () => {
+    await installScript($).catch(() => undefined)
     if (adoptSaved(await savedOptions($).catch(() => ({})))) $.ui.invalidate('ui.render')
     await readPadding($)
     await writeConfig($)
