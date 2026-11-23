@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.57.5] - 2026-11-23
+
+### Changed
+
+- In the usage block `pch` and `lmt` trade places: `ctx` and `lmt` on the first line, `pch` and `rst` on the second, so the limits stand in one column.
+
 ## [1.57.4] - 2026-11-23
 
 ### Changed

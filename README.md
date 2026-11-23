@@ -11,8 +11,8 @@ copy buttons, and a pane with your prompt history.
 │⚙ main:thinking (1m13s) │ agents:2 (sub:1 sh:1 mon:0) -> pending:0 running:2 waiting:0 idle:0    │   ▐▛███▜▌   │
 │-> Explore (time:1m01s) [Find lock index usages] (Grep(lock_index))                              │  ▝▜█████▛▘  │
 │──────────────────────────────────────────────────────────────────────────────────────────────── │    ▘▘ ▝▝    │
-│ctx ███░░░░░░░ 37% (74k/200k)        | pch ████████░░ 85%                                        │   2.1.303   │
-│lmt ████░░░░░░ 43% (12%) (fable:23%) | rst ██████░░░░ 1h56m (at 17:48) (fable: 27-11-2026 02:00) │             │
+│ctx ███░░░░░░░ 37% (74k/200k) | lmt ████░░░░░░ 43% (12%) (fable:23%)                             │   2.1.303   │
+│pch ████████░░ 85%            | rst ██████░░░░ 1h56m (at 17:48) (fable: 27-11-2026 02:00)        │             │
 │──────────────────────────────────────────────────────────────────────────────────────────────── │             │
 │ (08d3788a) main [+#?] | ~/Projects/demo                                                         │             │
 ╰───────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
@@ -74,8 +74,9 @@ bottom one.
    the frame's left border to Clawd's block (or the right border without
    Clawd), each as long as the frame's top and bottom borders at the left,
    right against its unbroken left border (a rounded corner), and leaving a
-   blank cell before Clawd's block; the first line `ctx` and `pch`, the
-   second `lmt` and `rst`, their second columns starting at the same cell. The bars: `ctx` context window used, with its size in tokens in brackets
+   blank cell before Clawd's block; the first line `ctx` and `lmt`, the
+   second `pch` and `rst`, so the limits stand in one column, their second
+   columns starting at the same cell. The bars: `ctx` context window used, with its size in tokens in brackets
    (`37% (74k/200k)`: the last request's input over the window, `k` thousands,
    `M` millions; `(0/200k)` before the first request), `lmt` 5-hour rate limit used, then in brackets the weekly
    limit used (`43% (12%)`), and with the `statuslineWeekReset` option on

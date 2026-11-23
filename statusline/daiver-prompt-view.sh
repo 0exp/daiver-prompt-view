@@ -314,9 +314,10 @@ if [ -n "$rst" ] && [ "$lline" != "$lfive ${lrst:--} ${lweek:--} ${lwrst:--}" ];
 fi
 case "$wrst" in -) wrst='' ;; esac
 
-# the usage block, two lines between two rules: context and prompt cache hits,
-# then the 5-hour limit and its reset; all four from the start: with no rate limits yet (no response in this session) or a 5-hour
-# window that has already reset, nothing is used and a whole window is ahead;
+# the usage block, two lines between two rules: context and the 5-hour limit,
+# then prompt cache hits and the limit's reset, the limits in one column; all
+# four from the start: with no rate limits yet (no response in this session)
+# or a 5-hour window that has already reset, nothing is used and a whole window is ahead;
 # with no request yet the cache is 0%
 five=$(printf '%.0f' "$five")
 left=18000
@@ -396,8 +397,8 @@ spch="pch $(esc "$c_pch")$(bar $cch)${reset} ${cch}%"
 # the second column (after US, \037) starts at the same cell
 rs=$(printf '\036') us=$(printf '\037')
 out="$rs
-$sctx$us | $spch
-$slmt$us | $srst
+$sctx$us | $slmt
+$spch$us | $srst
 $rs"
 
 # line 3: the agents lines, which the mod writes for this session. With none
