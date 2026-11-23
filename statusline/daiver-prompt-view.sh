@@ -4,7 +4,7 @@
 #   1. model -> [session] (sid:…) <stime:…> <automemory:on|off|?> <in:…·out:…·cost:…>
 #   2. modes: effort, outputstyle, thinkmode, fastmode
 #   3. the agents lines, which the mod writes for this session
-#   4. ctx / lmt / rst / pch bars
+#   4. ctx / lmt / rst / pch bars: a block between rules, or one line
 #   5. git sha, branch, flags, +added/-removed lines | directory
 # with Clawd, Claude's mascot, at the right edge of the terminal
 # Requires jq. Usage in statusLine.command: sh <path>/daiver-prompt-view.sh
@@ -101,8 +101,9 @@ orange=$(esc "$c_orange")
 # shared config:
 # usage (statusline:show-usage), weekReset (statusline:show-week-reset), borders and statuslineBorders
 # (chat:show-borders, chat:show-statusline-borders), borderStyle
-# (chat:border-style), clodik, animate and animation (clodik:*), padding
-o_usage='' o_wreset='' o_borders='' o_slborders='' o_style='' o_clodik='' o_animate='' o_animation='' o_padding=''
+# (chat:border-style), clodik, animate and animation (clodik:*), padding, view
+# (statusline:view)
+o_usage='' o_wreset='' o_view='' o_borders='' o_slborders='' o_style='' o_clodik='' o_animate='' o_animation='' o_padding=''
 cf="$mod/configs/$sidfull"
 [ -n "$sidfull" ] && [ -f "$cf" ] || cf="$mod/config"
 if [ -f "$cf" ]; then
@@ -110,6 +111,7 @@ if [ -f "$cf" ]; then
     case "$l" in
       usage=false) o_usage=false ;;
       weekReset=true) o_wreset=true ;;
+      view=block-view) o_view=block ;;
       borders=false) o_borders=false ;;
       statuslineBorders=false) o_slborders=false ;;
       borderStyle=line) o_style=line ;;
@@ -392,14 +394,23 @@ case "$fpct" in '' | -) ;; *)
   esac ;;
 esac
 spch="pch $(esc "$c_pch")$(bar $cch)${reset} ${cch}%"
-# the block: a rule (RS, \036, alone on its line) above and below, drawn by
-# the frame's awk from the frame's left border to its right one; in each line
-# the second column (after US, \037) starts at the same cell
+# the statuslineView option (statusline:view, `view=` in config): line-view,
+# the default (no config too), the four on one line, ctx lmt rst pch, no
+# rules, Clawd with no block line beside him. block-view, a block: a rule (RS,
+# \036, alone on its line) above and below, drawn by the frame's awk from the
+# frame's left border to its right one; in each line the second column (after
+# US, \037) starts at the same cell, and Clawd has a block of his own
 rs=$(printf '\036') us=$(printf '\037')
-out="$rs
+if [ "$o_view" != block ]; then
+  block=0
+  out="$sctx | $slmt | $srst | $spch"
+else
+  block=1
+  out="$rs
 $sctx$us | $slmt
 $spch$us | $srst
 $rs"
+fi
 
 # line 3: the agents lines, which the mod writes for this session. With none
 # yet (the session's start hook has not run, or the mod is not loaded): the
@@ -622,7 +633,7 @@ fi
 # (busy Clawd moves every second, so it is drawn anew then); git is not in
 # the key, so the drawing is redone at least every 5 seconds
 SEP='--daiver-prompt-view--'
-key="$COLUMNS|$pad|$framed|$o_style|$c_frame|$c_gray|$c_white|$c_sha|$c_branch|$c_flags|$c_added|$c_removed|$rawdir
+key="$COLUMNS|$pad|$framed|$block|$o_style|$c_frame|$c_gray|$c_white|$c_sha|$c_branch|$c_flags|$c_added|$c_removed|$rawdir
 $model
 $modes
 $agents$out
@@ -656,9 +667,9 @@ fi
 
 # Clawd beside the panel and the frame around both, drawn in one awk run:
 # the visible width of a line is its length without color escapes, one cell
-# per UTF-8 character (the continuation bytes not counted). Clawd has a block
-# of his own at the right, its left side a line of the frame from the top
-# border to the bottom one. The usage block's rules run across the panel, from
+# per UTF-8 character (the continuation bytes not counted). In block-view
+# Clawd has a block of his own at the right, its left side a line of the frame
+# from the top border to the bottom one; in line-view a blank cell there. The usage block's rules run across the panel, from
 # the left border to Clawd's block (or the right border), as long as the top
 # and bottom borders at the left (the borders unbroken beside them, a rounded
 # corner), a blank cell before Clawd's block
@@ -671,6 +682,7 @@ END {
   inner = ENVIRON["DPV_INNER"]
   framed = ENVIRON["DPV_FRAMED"] == "1"
   fc = ENVIRON["DPV_FC"]; rs = ENVIRON["DPV_RESET"]; fv = fc ENVIRON["DPV_FV"] rs
+  block = ENVIRON["DPV_BLOCK"] == "1"
   # the usage block: its second column at the same cell in every line (US the
   # mark), its rules (RS alone on a line)
   cw = 0
@@ -710,13 +722,13 @@ END {
       # a blank cell before Clawd block line
       body = clawd ? fc rule(pw - 1) rs " " : fc rule(pw) rs
     } else body = L[i] sp(pw - V[i])
-    if (clawd) body = body (framed ? fv : " ") " " K[i] sp(12 - vis(K[i]))
+    if (clawd) body = body (framed && block ? fv : " ") " " K[i] sp(12 - vis(K[i]))
     if (!framed) { sub(/ +$/, "", body); print body; continue }
     print fv body fv
   }
   if (framed) print fc ENVIRON["DPV_FBL"] rule(fw) ENVIRON["DPV_FBR"] rs
 }'
-res=$(panel | DPV_INNER=$inner DPV_CLAWD=$clawdrows DPV_FRAMED=$framed DPV_FC=$(esc "$c_frame") DPV_RESET=$reset \
+res=$(panel | DPV_INNER=$inner DPV_CLAWD=$clawdrows DPV_FRAMED=$framed DPV_BLOCK=$block DPV_FC=$(esc "$c_frame") DPV_RESET=$reset \
   DPV_FH=$fh DPV_FV=$fv DPV_FTL=$ftl DPV_FTR=$ftr DPV_FBL=$fbl DPV_FBR=$fbr LC_ALL=C awk "$draw"; printf x)
 res=${res%x}
 printf '%s' "$res"

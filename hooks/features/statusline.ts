@@ -3,7 +3,7 @@
 // a stable path (<mod dir>/statusline.sh), refreshed on every session start
 import type { EngineInterface, On } from 'claude-code'
 import { command, failed } from '../shared/commands'
-import { adoptSaved, config, writeConfig } from '../shared/config'
+import { adoptSaved, config, STATUSLINE_VIEWS, writeConfig } from '../shared/config'
 import { savedOptions, setOption } from '../shared/options'
 import { home, sync } from '../shared/files'
 import { markSeen } from '../shared/seen'
@@ -12,6 +12,7 @@ const SCRIPT = 'statusline/daiver-prompt-view.sh'
 
 export const USAGE = command('statusline', 'show-usage')
 export const WEEK_RESET = command('statusline', 'show-week-reset')
+export const VIEW = command('statusline', 'view')
 // how statusLine.command names the script: the installed copy's path
 const SCRIPT_COPY = 'daiver-prompt-view/statusline.sh'
 // the status line's input has no auto memory state: <mod dir>/automemory holds
@@ -203,6 +204,24 @@ export function registerStatusline(on: On) {
     await writeConfig($)
 
     return { text: `The weekly limit's reset date and time are now ${value ? 'shown' : 'hidden'}.` }
+  }).catch(($, e, next) => failed(next.error.message ?? next.error.kind))
+
+  // statusline:view <line-view|block-view>: the statuslineView option, how the
+  // ctx, lmt, rst and pch bars are drawn; the current one when no argument
+  on('command.run', { command: VIEW }, async ($, e) => {
+    const arg = e.args.trim().toLowerCase()
+
+    if (arg === '') return { text: `Usage bars: ${config.view} (one of ${STATUSLINE_VIEWS.join(', ')})` }
+    if (!STATUSLINE_VIEWS.includes(arg)) return { text: `Usage: /${VIEW} [${STATUSLINE_VIEWS.join('|')}]` }
+
+    const deny = await setOption($, 'statuslineView', arg)
+
+    if (deny !== undefined) return { text: `The usage bars' view was not changed: ${deny}` }
+
+    config.view = arg
+    await writeConfig($)
+
+    return { text: `The usage bars are now drawn as ${arg}.` }
   }).catch(($, e, next) => failed(next.error.message ?? next.error.kind))
 
   on('settings.read', async ($, e, next) => {

@@ -125,6 +125,28 @@ test('a statuslineWeekReset value reaches the config file', { options: { statusl
   expect(config()).toContain('\nweekReset=true\n')
 })
 
+test("view shows the usage bars' view, line-view and block-view set it", async ($, on) => {
+  const { sets, config } = world(on)
+
+  await $.session.start(start)
+
+  expect(config()).toContain('\nview=line-view\n')
+  expect((await $.command.run(run('statusline:view'))).text).toBe('Usage bars: line-view (one of line-view, block-view)')
+  expect((await $.command.run(run('statusline:view', 'block-view'))).text).toBe('The usage bars are now drawn as block-view.')
+  expect(config()).toBe(conf(true, false, 'matrix', 'default', false, true, true, true, 'dashed', -1, true, false, 'block-view'))
+  expect((await $.command.run(run('statusline:view', 'line-view'))).text).toBe('The usage bars are now drawn as line-view.')
+  expect(sets).toEqual(['statuslineView=block-view', 'statuslineView=line-view'])
+  expect((await $.command.run(run('statusline:view', 'grid'))).text).toBe('Usage: /daiver-prompt-view:statusline:view [line-view|block-view]')
+})
+
+test('a statuslineView value reaches the config file', { options: { statuslineView: 'block-view' } }, async ($, on) => {
+  const { config } = world(on)
+
+  await $.session.start(start)
+
+  expect(config()).toContain('\nview=block-view\n')
+})
+
 test('the padding Claude Code draws with: statusLine.padding while it runs the mod\'s script, 0 with none', () => {
   expect(drawnPadding({ ...WIRED, padding: 3 })).toBe(3)
   expect(drawnPadding(WIRED)).toBe(0)

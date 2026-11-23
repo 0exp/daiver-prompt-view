@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.58.0] - 2026-11-23
+
+### Added
+
+- Two views of the status line's usage bars, set by the `statuslineView` option or `/daiver-prompt-view:statusline:view`: `line-view`, the default (`ctx`, `lmt`, `rst`, `pch` on one line, no block around Clawd), and `block-view` (the block between rules, Clawd in his own block, as before).
+
 ## [1.57.5] - 2026-11-23
 
 ### Changed

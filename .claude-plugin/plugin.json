@@ -1,6 +1,6 @@
 {
   "name": "daiver-prompt-view",
-  "version": "1.57.5",
+  "version": "1.58.0",
   "description": "A Claude Code mod that shows what your session is doing: a status line under the prompt with live agents, usage limits and git state, a framed chat with copy buttons, and a pane with your prompt history",
   "author": {
     "name": "Rustam Ibragimov",
@@ -38,6 +38,16 @@
       "title": "Show the weekly limit's reset date and time",
       "description": "The local date and time the weekly limit resets, after its percentage in the status line's lmt brackets, as (12% -> 25-11-2026 09:30); off, only the percentage (also /daiver-prompt-view:statusline:show-week-reset [on|off])",
       "default": false
+    },
+    "statuslineView": {
+      "type": "string",
+      "title": "Status line's usage bars",
+      "description": "How the status line draws the ctx, lmt, rst and pch bars: line-view (one line, ctx lmt rst pch, no rules, no block around Clawd) or block-view (two lines between rules, ctx | lmt and pch | rst, Clawd in a block of his own) (also /daiver-prompt-view:statusline:view <block-view|line-view>)",
+      "default": "line-view",
+      "options": [
+        "block-view",
+        "line-view"
+      ]
     },
     "borderStyle": {
       "type": "string",

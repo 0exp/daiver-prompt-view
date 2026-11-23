@@ -98,6 +98,12 @@ bottom one.
    longer lags behind a busy one). All four show from the start: before the
    first response in any session (or once the 5-hour window has reset) `lmt`
    is 0%, `rst` a whole 5h00m window and `pch` 0%.
+
+   This is the `statuslineView` option's `block-view`
+   (`/daiver-prompt-view:statusline:view block-view`). By default, in
+   `line-view`, the four bars stand on one line instead, `ctx`, `lmt`, `rst`,
+   `pch`, with no rules around them, and Clawd keeps no block of his own (no
+   frame line beside him).
 5. Git: short sha, branch, flags (`+` staged, `#` untracked, `?` unstaged),
    the lines added and removed in the diff against HEAD (`+12/-3`; `+N/-N`
    when the tree is clean) and the working directory.
@@ -227,6 +233,7 @@ after the command.
 | `/daiver-prompt-view:mod:doctor` | nothing | (none) | Check what of the mod works in this session: the hooks a plugin above may pass by and which plugin does it, the status line padding, where auto memory is read from |
 | `/daiver-prompt-view:statusline:show-usage` | `on`, `off`, or nothing | `on` | Show (`on`) or hide (`off`) the session's tokens and cost at the end of the status line's first line; with no argument, toggles |
 | `/daiver-prompt-view:statusline:show-week-reset` | `on`, `off`, or nothing | `off` | Show (`on`) or hide (`off`) the weekly limit's reset date and time after its percentage in `lmt`'s brackets; with no argument, toggles |
+| `/daiver-prompt-view:statusline:view` | `line-view`, `block-view`, or nothing | `line-view` | Draw the `ctx`, `lmt`, `rst` and `pch` bars on one line with no block around Clawd (`line-view`) or as a block between rules with Clawd in his own block (`block-view`); with no argument, shows the current one and the list |
 
 ### `/daiver-prompt-view:clodik:animate [on|off]`
 
@@ -300,6 +307,7 @@ Every option is in `/config`, or in `~/.claude/settings.json` under
 | `statuslineBorders` | Show the status line's frame | boolean | `true` | `true`, `false` | `chat:show-statusline-borders` |
 | `statuslineUsage` | Show the session's tokens and cost | boolean | `true` | `true`, `false` | `statusline:show-usage` |
 | `statuslineWeekReset` | Show the weekly limit's reset date and time | boolean | `false` | `true`, `false` | `statusline:show-week-reset` |
+| `statuslineView` | Status line's usage bars | choice | `line-view` | `line-view`, `block-view` | `statusline:view` |
 | `buttons` | Show the buttons row | boolean | `true` | `true`, `false` | `chat:show-buttons` |
 | `borderStyle` | Frame style | choice | `dashed` | `dashed`, `line` | `chat:border-style` |
 | `clodik` | Show Clawd | boolean | `true` | `true`, `false` | (none) |
@@ -323,6 +331,7 @@ For example, in `~/.claude/settings.json`:
       "statuslineBorders":   true,
       "statuslineUsage":     true,
       "statuslineWeekReset": false,
+      "statuslineView":      "line-view",
       "buttons":             true,
       "borderStyle":         "dashed",
       "clodik":              true,
@@ -605,6 +614,40 @@ and the same after the Fable limit's percentage when it is shown.
 | `/daiver-prompt-view:statusline:show-week-reset off` | `The weekly limit's reset date and time are now hidden.` |
 | `/daiver-prompt-view:statusline:show-week-reset` | toggles: `The weekly limit's reset date and time are now shown.` when they were hidden, `The weekly limit's reset date and time are now hidden.` when they were shown |
 | `/daiver-prompt-view:statusline:show-week-reset maybe` | nothing changes: `Usage: /daiver-prompt-view:statusline:show-week-reset [on\|off]` |
+
+### `/daiver-prompt-view:statusline:view [line-view|block-view]`
+
+Option `statuslineView` (Status line's usage bars), default `line-view`. It
+sets how the status line draws the `ctx`, `lmt`, `rst` and `pch` bars.
+
+| Value | Effect |
+| --- | --- |
+| `line-view` (default) | one line, `ctx \| lmt \| rst \| pch`, no rules; Clawd at the right edge with no block line beside him |
+| `block-view` | two lines between two rules, `ctx \| lmt` then `pch \| rst`, the limits in one column; Clawd in a block of his own, a frame line beside him from the top border to the bottom one |
+
+`line-view`:
+
+```
+╎⚙ main:idle │ agents:0 (sub:0 sh:0 mon:0) -> pending:0 …                                          ▝▜█████▛▘  ╎
+╎ctx ███░░░░░░░ 37% (74k/200k) | lmt ████░░░░░░ 43% (12%) | rst ██████░░░░ 1h56m (at 23:26) | pch █████████░ 94%      ▘▘ ▝▝    ╎
+```
+
+`block-view`:
+
+```
+╎⚙ main:idle │ agents:0 (sub:0 sh:0 mon:0) -> pending:0 …          ╎   ▐▛███▜▌   ╎
+╎╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌ ╎  ▝▜█████▛▘  ╎
+╎ctx ███░░░░░░░ 37% (74k/200k) | lmt ████░░░░░░ 43% (12%)           ╎    ▘▘ ▝▝    ╎
+╎pch █████████░ 94%            | rst ██████░░░░ 1h56m (at 23:26)    ╎   2.1.303   ╎
+╎╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌ ╎             ╎
+```
+
+| Usage | Result |
+| --- | --- |
+| `/daiver-prompt-view:statusline:view line-view` | `The usage bars are now drawn as line-view.` |
+| `/daiver-prompt-view:statusline:view block-view` | `The usage bars are now drawn as block-view.` |
+| `/daiver-prompt-view:statusline:view` | shows the current one: `Usage bars: line-view (one of line-view, block-view)` |
+| `/daiver-prompt-view:statusline:view grid` | nothing changes: `Usage: /daiver-prompt-view:statusline:view [line-view\|block-view]` |
 
 ### `/daiver-prompt-view:chat:border-style [dashed|line]`
 

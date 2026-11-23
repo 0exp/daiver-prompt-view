@@ -2,7 +2,7 @@
 // agents, usage bars, git state, Clawd) as one mod, a file per feature
 import type { Register } from 'claude-code'
 import { choiceRows } from './shared/commands'
-import { ANIMATIONS, BORDER_STYLES, config, HISTORY_MODES, loadConfig } from './shared/config'
+import { ANIMATIONS, BORDER_STYLES, config, HISTORY_MODES, loadConfig, STATUSLINE_VIEWS } from './shared/config'
 import { THEME_NAMES } from './shared/themes'
 import { BORDER_STYLE, BORDERS, CHAT_BORDERS, registerChat, STATUSLINE_BORDERS } from './features/chat'
 import { BUTTONS, registerButtons } from './features/buttons'
@@ -16,7 +16,7 @@ import { registerReply } from './features/reply'
 import { registerSpinner } from './features/spinner'
 import { registerTool } from './features/tool'
 import { commandToast, registerToasts, TOASTS } from './features/toasts'
-import { registerStatusline, startStatusline, USAGE, WEEK_RESET } from './features/statusline'
+import { registerStatusline, startStatusline, USAGE, VIEW, WEEK_RESET } from './features/statusline'
 import { registerView, THEME } from './features/view'
 import { startFable } from './features/fable'
 
@@ -84,6 +84,7 @@ export const register: Register = (on, options) => {
       [BORDER_STYLE]: { values: BORDER_STYLES, current: config.borderStyle },
       [USAGE]: { values: ['on', 'off'], current: config.usage ? 'on' : 'off' },
       [WEEK_RESET]: { values: ['on', 'off'], current: config.weekReset ? 'on' : 'off' },
+      [VIEW]: { values: STATUSLINE_VIEWS, current: config.view },
     })
 
     if (rows.length === 0) return next(e)
