@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.57.4] - 2026-11-23
+
+### Changed
+
+- Clawd's block is a cell wider on each side, so he keeps clear of its edges while he moves.
+
 ## [1.57.3] - 2026-11-23
 
 ### Changed

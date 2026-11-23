@@ -692,10 +692,10 @@ END {
     for (i = 1; i <= n; i++) { a = i - 1 - top; K[i] = (a >= -1 && a < h) ? C[a + 2] : "" }
     # the panel: as wide as the room left of Clawd, a blank cell before his
     # block line, never narrower than its widest line; his canvas, 11 cells,
-    # after that line
+    # after that line with a blank cell on either side, room to move
     pw = w + 1
-    if (inner != "" && inner - 12 > pw) pw = inner - 12
-    fw = pw + 12
+    if (inner != "" && inner - 14 > pw) pw = inner - 14
+    fw = pw + 14
   } else {
     pw = w
     if (inner != "" && inner + 0 > pw) pw = inner + 0
@@ -709,7 +709,7 @@ END {
       # a blank cell before Clawd block line
       body = clawd ? fc rule(pw - 1) rs " " : fc rule(pw) rs
     } else body = L[i] sp(pw - V[i])
-    if (clawd) body = body (framed ? fv : " ") K[i] sp(11 - vis(K[i]))
+    if (clawd) body = body (framed ? fv : " ") " " K[i] sp(12 - vis(K[i]))
     if (!framed) { sub(/ +$/, "", body); print body; continue }
     print fv body fv
   }
