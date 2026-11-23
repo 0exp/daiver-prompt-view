@@ -83,7 +83,7 @@ eval "$(printf '%s' "$input" | jq -r "$human"'
 # the colors of the active theme (the `theme` option, /daiver-prompt-view:view:theme):
 # c_<name>='<SGR params>' lines the hooks module writes from its themes; with
 # none yet, no colors
-c_gray='' c_white='' c_orange='' c_session='' c_ctx='' c_ctxSize='' c_lmt='' c_fable='' c_rst='' c_pch='' c_sha='' c_branch='' c_flags='' c_added='' c_removed='' c_matrix='' c_frame='' c_effort='' c_ostyle=''
+c_gray='' c_white='' c_orange='' c_session='' c_ctx='' c_ctxSize='' c_lmt='' c_fable='' c_rst='' c_weekAll='' c_pch='' c_sha='' c_branch='' c_flags='' c_added='' c_removed='' c_matrix='' c_frame='' c_effort='' c_ostyle=''
 # this session's copy (themes/<session_id>.sh), else the shared one
 th="$mod/themes/$sidfull.sh"
 [ -n "$sidfull" ] && [ -f "$th" ] || th="$mod/theme.sh"
@@ -392,6 +392,18 @@ case "$fpct" in '' | -) ;; *)
         [ -n "$frd" ] && srst="$srst $(esc "$c_fable")(fable: $frd)${reset}"
       fi ;;
   esac ;;
+esac
+# the weekly all-models limit's reset last, in the theme's weekAll color
+# (slate blue-gray), as (all: 25-11-2026 09:30): its local date and time,
+# dd-mm-yyyy HH:MM, whatever statuslineWeekReset says; none with no weekly
+# reset in the input or one already past
+case "$wrst" in
+  '' | *[!0-9]*) ;;
+  *)
+    if [ "$wrst" -gt "$now" ]; then
+      ard=$(date -r "$wrst" '+%d-%m-%Y %H:%M' 2>/dev/null || date -d "@$wrst" '+%d-%m-%Y %H:%M' 2>/dev/null)
+      [ -n "$ard" ] && srst="$srst $(esc "$c_weekAll")(all: $ard)${reset}"
+    fi ;;
 esac
 spch="pch $(esc "$c_pch")$(bar $cch)${reset} ${cch}%"
 # the statuslineView option (statusline:view, `view=` in config): line-view,

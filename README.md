@@ -5,17 +5,17 @@ the prompt with live agents, usage limits and git state, a framed chat with
 copy buttons, and a pane with your prompt history.
 
 ```
-╭───────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│Opus 5.5 -> [demo] (sid:419e75ee) <stime:1h23m> <automemory:on> <in:1.2M·out:85k·cost:$4.31>     │             │
-│(effort:high) (outputstyle:Proactive) (thinkmode:thinking) (fastmode:false)                      │             │
-│⚙ main:thinking (1m13s) │ agents:2 (sub:1 sh:1 mon:0) -> pending:0 running:2 waiting:0 idle:0    │   ▐▛███▜▌   │
-│-> Explore (time:1m01s) [Find lock index usages] (Grep(lock_index))                              │  ▝▜█████▛▘  │
-│──────────────────────────────────────────────────────────────────────────────────────────────── │    ▘▘ ▝▝    │
-│ctx ███░░░░░░░ 37% (74k/200k) | lmt ████░░░░░░ 43% (12%) (fable:23%)                             │   2.1.303   │
-│pch ████████░░ 85%            | rst ██████░░░░ 1h56m (at 17:48) (fable: 27-11-2026 02:00)        │             │
-│──────────────────────────────────────────────────────────────────────────────────────────────── │             │
-│ (08d3788a) main [+#?] | ~/Projects/demo                                                         │             │
-╰───────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+╭────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│Opus 5.5 -> [demo] (sid:419e75ee) <stime:1h23m> <automemory:on> <in:1.2M·out:85k·cost:$4.31>                      │             │
+│(effort:high) (outputstyle:Proactive) (thinkmode:thinking) (fastmode:false)                                       │             │
+│⚙ main:thinking (1m13s) │ agents:2 (sub:1 sh:1 mon:0) -> pending:0 running:2 waiting:0 idle:0                     │   ▐▛███▜▌   │
+│-> Explore (time:1m01s) [Find lock index usages] (Grep(lock_index))                                               │  ▝▜█████▛▘  │
+│───────────────────────────────────────────────────────────────────────────────────────────────────────────────── │    ▘▘ ▝▝    │
+│ctx ███░░░░░░░ 37% (74k/200k) | lmt ████░░░░░░ 43% (12%) (fable:23%)                                              │   2.1.303   │
+│pch ████████░░ 85%            | rst ██████░░░░ 1h56m (at 17:48) (fable: 27-11-2026 02:00) (all: 25-11-2026 09:30) │             │
+│───────────────────────────────────────────────────────────────────────────────────────────────────────────────── │             │
+│ (08d3788a) main [+#?] | ~/Projects/demo                                                                          │             │
+╰────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```
 
 It joins two former mods, [agent-prompt-view](https://github.com/0exp/claude-agent-prompt-view)
@@ -91,7 +91,11 @@ bottom one.
    its reset and, in orange, its local time (24-hour `HH:MM`), then, in the
    Fable limit's purple, the local date and time the Fable limit resets
    (`1h56m (at 17:48) (fable: 27-11-2026 02:00)`; only with the Fable brackets
-   shown), `pch` prompt
+   shown), and last, in slate blue-gray (the theme's `weekAll` color), the local
+   date and time the weekly all-models limit (`/usage`'s "Current week (all
+   models)") resets (`(fable: 27-11-2026 02:00) (all: 25-11-2026 09:30)`;
+   whatever `statuslineWeekReset` says, left out while Claude Code sends no
+   weekly limit or once it has reset), `pch` prompt
    cache hits of the last request. The limits are your account's, so every
    open session shows the same `lmt` and `rst`: the newest figures any of them
    has received, not only those of its own last response (an idle session no

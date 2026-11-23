@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.59.0] - 2026-11-23
+
+### Added
+
+- After `rst`, the date and time the weekly all-models limit resets, in slate blue-gray, as `(all: 25-11-2026 09:30)`.
+
 ## [1.58.0] - 2026-11-23
 
 ### Added

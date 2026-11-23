@@ -15,6 +15,7 @@ export type Theme = {
   lmt: string // lmt bar
   fable: string // the weekly Fable limit's brackets after lmt (purple by default)
   rst: string // rst bar
+  weekAll: string // the weekly all-models limit's reset after rst (slate blue-gray by default)
   pch: string // pch bar
   sha: string // git sha
   branch: string // branch glyph and name
@@ -54,6 +55,7 @@ export const THEMES: Record<string, Theme> = {
     lmt: '38;2;135;206;235',
     fable: '38;2;180;110;255',
     rst: '38;2;144;238;144',
+    weekAll: '38;2;119;136;153',
     pch: '38;2;132;136;132',
     sha: '38;2;212;201;106',
     branch: '1;38;2;170;127;240',
@@ -97,7 +99,7 @@ export const hexOf = (params: string) => {
 export const sgr = (params: string) => `\x1b[${params}m`
 
 // the status line's colors as the script sources them: c_<name>='<params>'
-const SHELL_KEYS = ['gray', 'white', 'orange', 'session', 'ctx', 'ctxSize', 'lmt', 'fable', 'rst', 'pch', 'sha', 'branch', 'flags', 'added', 'removed', 'matrix', 'frame', 'effort', 'ostyle'] as const
+const SHELL_KEYS = ['gray', 'white', 'orange', 'session', 'ctx', 'ctxSize', 'lmt', 'fable', 'rst', 'weekAll', 'pch', 'sha', 'branch', 'flags', 'added', 'removed', 'matrix', 'frame', 'effort', 'ostyle'] as const
 
 export const themeShell = (name: string) =>
   `# daiver-prompt-view theme: ${name}\n` + SHELL_KEYS.map(key => `c_${key}='${THEMES[name][key]}'\n`).join('')
