@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.57.0] - 2026-11-23
+
+### Changed
+
+- The usage bars are a block of their own inside the status line, between two lines drawn across it with blank ends, so the block looks rounded: `ctx` and `pch` on the first line, `lmt` and `rst` on the second, their second columns lined up.
+- Clawd has a block of his own at the right of the status line, set apart by a line of the frame from top to bottom.
+
 ## [1.56.0] - 2026-11-23
 
 ### Added

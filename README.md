@@ -5,12 +5,17 @@ the prompt with live agents, usage limits and git state, a framed chat with
 copy buttons, and a pane with your prompt history.
 
 ```
-Opus 5.5 -> [demo] (sid:419e75ee) <stime:1h23m> <automemory:on> <in:1.2M·out:85k·cost:$4.31>
-(effort:high) (outputstyle:Proactive) (thinkmode:thinking) (fastmode:false)                      ▐▛███▜▌
-⚙ main:thinking (1m13s) │ agents:2 (sub:1 sh:1 mon:0) -> pending:0 running:2 waiting:0 idle:0  ▝▜█████▛▘
--> Explore (time:1m01s) [Find lock index usages] (Grep(lock_index))                              ▘▘ ▝▝
-ctx ███░░░░░░░ 37% (74k/200k) | lmt ████░░░░░░ 43% (12%) | rst ██████░░░░ 1h56m (at 17:48) | pch ████████░░ 85%  2.1.303
- (08d3788a) main [+#?] | ~/Projects/demo
+╭─────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│Opus 5.5 -> [demo] (sid:419e75ee) <stime:1h23m> <automemory:on> <in:1.2M·out:85k·cost:$4.31>     │           │
+│(effort:high) (outputstyle:Proactive) (thinkmode:thinking) (fastmode:false)                      │           │
+│⚙ main:thinking (1m13s) │ agents:2 (sub:1 sh:1 mon:0) -> pending:0 running:2 waiting:0 idle:0    │  ▐▛███▜▌  │
+│-> Explore (time:1m01s) [Find lock index usages] (Grep(lock_index))                              │ ▝▜█████▛▘ │
+ ──────────────────────────────────────────────────────────────────────────────────────────────── │   ▘▘ ▝▝   │
+│ctx ███░░░░░░░ 37% (74k/200k)        | pch ████████░░ 85%                                        │  2.1.303  │
+│lmt ████░░░░░░ 43% (12%) (fable:23%) | rst ██████░░░░ 1h56m (at 17:48) (fable:27-11-2026 02:00)  │           │
+ ──────────────────────────────────────────────────────────────────────────────────────────────── │           │
+│ (08d3788a) main [+#?] | ~/Projects/demo                                                         │           │
+╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```
 
 It joins two former mods, [agent-prompt-view](https://github.com/0exp/claude-agent-prompt-view)
@@ -20,7 +25,9 @@ and [agent-count](https://github.com/0exp/claude-agent-count), with their histor
 
 The whole status line sits in a frame (dashed by default, a solid rounded line with `borderStyle` `line`) in the theme's `frame` color
 (Clawd orange in `default`): as wide as the terminal when its width is known,
-else as wide as the widest line, Clawd inside it at the right border.
+else as wide as the widest line. Clawd has a block of his own inside it at the
+right border, set apart by a line of the frame from its top border to its
+bottom one.
 
 1. Model, session name, short session id, session time (`stime`, from the
    transcript's creation time), whether auto memory is on in this session
@@ -63,7 +70,11 @@ else as wide as the widest line, Clawd inside it at the right border.
    Agents come from `$.agent.list()`, polled every second. Shells and monitors
    are tracked from their `Bash` / `Monitor` calls and dropped on their task
    notification, `TaskStop`, or the `Stop` hook's `background_tasks` snapshot.
-4. Bars: `ctx` context window used, with its size in tokens in brackets
+4. The usage block: two lines between two rules drawn across the panel, from
+   the frame's left border to Clawd's block (or the right border without
+   Clawd), each leaving the cell at either end blank so the block reads as
+   rounded, as the frame's corners do; the first line `ctx` and `pch`, the
+   second `lmt` and `rst`, their second columns starting at the same cell. The bars: `ctx` context window used, with its size in tokens in brackets
    (`37% (74k/200k)`: the last request's input over the window, `k` thousands,
    `M` millions; `(0/200k)` before the first request), `lmt` 5-hour rate limit used, then in brackets the weekly
    limit used (`43% (12%)`), and with the `statuslineWeekReset` option on

@@ -314,8 +314,8 @@ if [ -n "$rst" ] && [ "$lline" != "$lfive ${lrst:--} ${lweek:--} ${lwrst:--}" ];
 fi
 case "$wrst" in -) wrst='' ;; esac
 
-# line 4: context, 5-hour limit, its reset, prompt cache hits; all four from
-# the start: with no rate limits yet (no response in this session) or a 5-hour
+# the usage block, two lines between two rules: context and prompt cache hits,
+# then the 5-hour limit and its reset; all four from the start: with no rate limits yet (no response in this session) or a 5-hour
 # window that has already reset, nothing is used and a whole window is ahead;
 # with no request yet the cache is 0%
 five=$(printf '%.0f' "$five")
@@ -329,8 +329,8 @@ fi
 # (new, written to and read from the cache) over the window's size, as 74k/200k
 # (1.2M over a million); 0 before the first request, the size alone left out
 # when the input does not carry it; in the theme's ctxSize color
-out="ctx $(esc "$c_ctx")$(bar $ctx)${reset} ${ctx}% $(esc "$c_ctxSize")(${csz})${reset}"
-out="$out | lmt $(esc "$c_lmt")$(bar $five)${reset} ${five}%"
+sctx="ctx $(esc "$c_ctx")$(bar $ctx)${reset} ${ctx}% $(esc "$c_ctxSize")(${csz})${reset}"
+slmt="lmt $(esc "$c_lmt")$(bar $five)${reset} ${five}%"
 # the weekly limit beside it, in parentheses: its percentage and its reset's
 # date and local time, dd-mm-yyyy HH:MM (BSD date -r, else GNU date -d); a week that has already
 # reset is 0% with no date; the date only with the statuslineWeekReset option
@@ -348,7 +348,7 @@ if [ -n "$week" ]; then
         wd=$(date -r "$wrst" '+%d-%m-%Y %H:%M' 2>/dev/null || date -d "@$wrst" '+%d-%m-%Y %H:%M' 2>/dev/null)
       fi ;;
   esac
-  out="$out $(esc "$c_lmt")(${week}%${wd:+ -> $wd})${reset}"
+  slmt="$slmt $(esc "$c_lmt")(${week}%${wd:+ -> $wd})${reset}"
 fi
 # the weekly Fable limit, in brackets of its own in the theme's fable color, as
 # (fable:23%): the mod reads it from the plan's usage into the shared file
@@ -370,13 +370,13 @@ case "$fpct" in '' | -) ;; *)
         fd=$(date -r "$frst" '+%d-%m-%Y %H:%M' 2>/dev/null || date -d "@$frst" '+%d-%m-%Y %H:%M' 2>/dev/null)
       fi ;;
   esac
-  out="$out $(esc "$c_fable")(fable:${fpct}%${fd:+ -> $fd})${reset}" ;;
+  slmt="$slmt $(esc "$c_fable")(fable:${fpct}%${fd:+ -> $fd})${reset}" ;;
 esac
-out="$out | rst $(esc "$c_rst")$(bar $(((18000 - left) * 100 / 18000)))${reset} $((left / 3600))h$(printf '%02d' $((left % 3600 / 60)))m"
+srst="rst $(esc "$c_rst")$(bar $(((18000 - left) * 100 / 18000)))${reset} $((left / 3600))h$(printf '%02d' $((left % 3600 / 60)))m"
 # the reset's local time, 24-hour HH:MM, in Clawd's orange (BSD date -r, else
 # GNU date -d); with no window yet, when one that starts now resets
 hm=$(date -r $((now + left)) +%H:%M 2>/dev/null || date -d "@$((now + left))" +%H:%M 2>/dev/null)
-[ -n "$hm" ] && out="$out ${orange}(at $hm)${reset}"
+[ -n "$hm" ] && srst="$srst ${orange}(at $hm)${reset}"
 # the weekly Fable limit's reset after it, in the theme's fable color, as
 # (fable:27-11-2026 02:00): its local date and time, dd-mm-yyyy HH:MM, whatever
 # statuslineWeekReset says; none with no Fable brackets or a reset already past
@@ -386,11 +386,19 @@ case "$fpct" in '' | -) ;; *)
     *)
       if [ "$frst" -gt "$now" ]; then
         frd=$(date -r "$frst" '+%d-%m-%Y %H:%M' 2>/dev/null || date -d "@$frst" '+%d-%m-%Y %H:%M' 2>/dev/null)
-        [ -n "$frd" ] && out="$out $(esc "$c_fable")(fable:$frd)${reset}"
+        [ -n "$frd" ] && srst="$srst $(esc "$c_fable")(fable:$frd)${reset}"
       fi ;;
   esac ;;
 esac
-out="$out | pch $(esc "$c_pch")$(bar $cch)${reset} ${cch}%"
+spch="pch $(esc "$c_pch")$(bar $cch)${reset} ${cch}%"
+# the block: a rule (RS, \036, alone on its line) above and below, drawn by
+# the frame's awk from the frame's left border to its right one; in each line
+# the second column (after US, \037) starts at the same cell
+rs=$(printf '\036') us=$(printf '\037')
+out="$rs
+$sctx$us | $spch
+$slmt$us | $srst
+$rs"
 
 # line 3: the agents lines, which the mod writes for this session. With none
 # yet (the session's start hook has not run, or the mod is not loaded): the
@@ -647,43 +655,64 @@ fi
 
 # Clawd beside the panel and the frame around both, drawn in one awk run:
 # the visible width of a line is its length without color escapes, one cell
-# per UTF-8 character (the continuation bytes not counted)
+# per UTF-8 character (the continuation bytes not counted). Clawd has a block
+# of his own at the right, its left side a line of the frame from the top
+# border to the bottom one. The usage block's rules run across the panel, from
+# the left border to Clawd's block (or the right border), and leave the cell at
+# either end blank, so each block reads as rounded, as the frame's corners do
 draw='
 function vis(s) { gsub(/\033\[[0-9;]*m/, "", s); gsub(/[\200-\277]/, "", s); return length(s) }
 function sp(k,  o) { o = ""; while (k-- > 0) o = o " "; return o }
+function rule(k,  o) { o = ""; while (k-- > 0) o = o ENVIRON["DPV_FH"]; return o }
 { L[++n] = $0 }
 END {
-  E["inner"] = ENVIRON["DPV_INNER"]
-  if (ENVIRON["DPV_CLAWD"] != "") {
-    # Clawd, h rows (3, 4 with the version), with a spare line above it
+  inner = ENVIRON["DPV_INNER"]
+  framed = ENVIRON["DPV_FRAMED"] == "1"
+  fc = ENVIRON["DPV_FC"]; rs = ENVIRON["DPV_RESET"]; fv = fc ENVIRON["DPV_FV"] rs
+  # the usage block: its second column at the same cell in every line (US the
+  # mark), its rules (RS alone on a line)
+  cw = 0
+  for (i = 1; i <= n; i++) {
+    if (L[i] == "\036") { R[i] = 1; L[i] = "" }
+    else if ((k = index(L[i], "\037")) > 0) { v = vis(substr(L[i], 1, k - 1)); if (v > cw) cw = v }
+  }
+  for (i = 1; i <= n; i++) if ((k = index(L[i], "\037")) > 0) L[i] = substr(L[i], 1, k - 1) sp(cw - vis(substr(L[i], 1, k - 1))) substr(L[i], k + 1)
+  while (n > 0 && L[n] == "" && !R[n]) n--
+  w = 0
+  for (i = 1; i <= n; i++) if (!R[i]) { V[i] = vis(L[i]); if (V[i] > w) w = V[i] }
+  clawd = ENVIRON["DPV_CLAWD"] != ""
+  if (clawd) {
+    # Clawd, h rows (3, 4 with the version), with a spare line above it, at
+    # least one, so Clawd sits off the prompt (and has room to jump)
     split(ENVIRON["DPV_CLAWD"], C, "\n")
     h = (C[5] != "") ? 4 : 3
-    # at least one spare line, so Clawd sits off the prompt (and has room to jump)
-    while (n <= h) L[++n] = ""
-    w = 0
-    for (i = 1; i <= n; i++) { v = vis(L[i]); if (v > w) w = v }
+    while (n <= h) { L[++n] = ""; V[n] = 0 }
     top = int((n - h + 1) / 2) # an odd spare line goes above, off the prompt
-    # the canvas first cell: the whole canvas (a step right included) ends at
-    # the frame right border
-    col = w + 1
-    if (E["inner"] != "" && E["inner"] - 11 > col) col = E["inner"] - 11
-    for (i = 1; i <= n; i++) {
-      a = i - 1 - top
-      if (a >= -1 && a < h && C[a + 2] != "") L[i] = L[i] sp(col - vis(L[i])) C[a + 2]
-    }
+    for (i = 1; i <= n; i++) { a = i - 1 - top; K[i] = (a >= -1 && a < h) ? C[a + 2] : "" }
+    # the panel: as wide as the room left of Clawd, a blank cell before his
+    # block line, never narrower than its widest line; his canvas, 11 cells,
+    # after that line
+    pw = w + 1
+    if (inner != "" && inner - 12 > pw) pw = inner - 12
+    fw = pw + 12
+  } else {
+    pw = w
+    if (inner != "" && inner + 0 > pw) pw = inner + 0
+    fw = pw
   }
-  if (ENVIRON["DPV_FRAMED"] != "1") { for (i = 1; i <= n; i++) print L[i]; exit }
-  # the frame: never narrower than the widest line (a narrow terminal, Clawd
-  # beside the panel)
-  while (n > 0 && L[n] == "") n--
-  fw = E["inner"] + 0
-  for (i = 1; i <= n; i++) { V[i] = vis(L[i]); if (V[i] > fw) fw = V[i] }
-  fc = ENVIRON["DPV_FC"]; rs = ENVIRON["DPV_RESET"]; fv = ENVIRON["DPV_FV"]
-  b = ""
-  for (j = 0; j < fw; j++) b = b ENVIRON["DPV_FH"]
-  print fc ENVIRON["DPV_FTL"] b ENVIRON["DPV_FTR"] rs
-  for (i = 1; i <= n; i++) print fc fv rs L[i] sp(fw - V[i]) fc fv rs
-  print fc ENVIRON["DPV_FBL"] b ENVIRON["DPV_FBR"] rs
+  if (framed) print fc ENVIRON["DPV_FTL"] rule(fw) ENVIRON["DPV_FTR"] rs
+  for (i = 1; i <= n; i++) {
+    if (R[i]) {
+      # the rule: a blank cell before Clawd block line; the frame borders
+      # beside it are left blank below
+      body = clawd ? fc rule(pw - 1) rs " " : fc rule(pw) rs
+    } else body = L[i] sp(pw - V[i])
+    if (clawd) body = body (framed ? fv : " ") K[i] sp(11 - vis(K[i]))
+    if (!framed) { sub(/ +$/, "", body); print body; continue }
+    if (R[i]) print " " body (clawd ? fv : " ")
+    else print fv body fv
+  }
+  if (framed) print fc ENVIRON["DPV_FBL"] rule(fw) ENVIRON["DPV_FBR"] rs
 }'
 res=$(panel | DPV_INNER=$inner DPV_CLAWD=$clawdrows DPV_FRAMED=$framed DPV_FC=$(esc "$c_frame") DPV_RESET=$reset \
   DPV_FH=$fh DPV_FV=$fv DPV_FTL=$ftl DPV_FTR=$ftr DPV_FBL=$fbl DPV_FBR=$fbr LC_ALL=C awk "$draw"; printf x)
