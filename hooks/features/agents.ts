@@ -37,6 +37,14 @@ const elapsed = (ms: number) => {
   return `${Math.floor(s / 3600)}h${pad(Math.floor(s / 60) % 60)}m`
 }
 
+// a model id as the agents line shows it: claude-opus-5-5 -> opus-5.5,
+// claude-haiku-4-5-20251001 -> haiku-4.5; anything else as it is
+export const shortModel = (id: string) =>
+  id
+    .replace(/^claude-/, '')
+    .replace(/-\d{8}$/, '')
+    .replace(/-(\d+)-(\d+)(?=$|\[)/, '-$1.$2')
+
 const clip = (text: string, max = TASK_MAX) => (text.length > max ? `${text.slice(0, max - 1)}…` : text)
 
 type Group = 'agents' | 'sub' | 'sh' | 'mon'
@@ -97,6 +105,10 @@ let mainLast: number | undefined
 const agentSince = new Map<string, number>()
 // what each live agent works on now: its last tool call, as `Bash(git status)`
 const agentActivity = new Map<string, string>()
+// the main loop's output style, from its system prompt: a fork copies that
+// prompt, so it runs in the same style; any other subagent has a system prompt
+// of its own, which no output style touches (`none`)
+let mainStyle = 'default'
 let shown = ''
 
 async function refresh($: EngineInterface) {
@@ -140,7 +152,7 @@ async function refresh($: EngineInterface) {
   for (const id of agentActivity.keys()) if (!live.has(id)) agentActivity.delete(id)
   for (const agent of agents) if (!agentSince.has(agent.id)) agentSince.set(agent.id, now)
 
-  // one `-> <type> (time:<run time>) [<task>] (<current work>)` line per live
+  // one `-> (<model>:<effort>:<outputstyle>) <type> (time:<run time>) [<task>] (<current work>)` line per live
   // agent, oldest first; a teammate goes by its name; the current work cut to
   // the agentActivityLength option, left out at 0
   const subs = agents
@@ -149,8 +161,15 @@ async function refresh($: EngineInterface) {
     .map(({ agent, since }) => {
       const who = agent.type === 'teammate' && agent.name !== undefined ? agent.name : agent.type
       const activity = agentActivity.get(agent.id)
+      // (model:effort:outputstyle): the effort set for it, else the one its
+      // last request carried; `-` where nothing is known yet
+      const model = agent.model === undefined ? '-' : shortModel(agent.model)
+      const effort = agent.effort ?? agent.lastRequest?.effort ?? '-'
+      const style = agent.type === 'fork' ? mainStyle : 'none'
+      const how =
+        `(${WHITE}${model}${GRAY}:${sgr(theme.effort)}${effort}${GRAY}:${sgr(theme.ostyle)}${style}${GRAY}) `
       return (
-        `${GRAY}-> ${KIND_COLOR('sub')}${who}${GRAY} (time:${ELAPSED_COLOR}${elapsed(now - since)}${GRAY}) ` +
+        `${GRAY}-> ${how}${KIND_COLOR('sub')}${who}${GRAY} (time:${ELAPSED_COLOR}${elapsed(now - since)}${GRAY}) ` +
         `[${WHITE}${clip(agent.description)}${GRAY}]` +
         (activity === undefined || config.activityLength === 0 ? '' : ` (${clip(activity, config.activityLength)})`) +
         RESET
@@ -208,6 +227,12 @@ export function forgetNotifiedTasks(e: PromptSubmitInput) {
 }
 
 export function registerAgents(on: On) {
+  // the main loop's output style, for a fork's line
+  on('prompt.compose', (_$, e, next) => {
+    mainStyle = e.outputStyle?.name ?? 'default'
+    return next(e)
+  }).catch((_$, e, next) => next(e))
+
   on('turn.start', async ($, e, next) => {
     if (main === 'idle') mainSince = await $.clock.now()
     main = 'thinking'

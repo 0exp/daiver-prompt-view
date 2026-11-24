@@ -54,7 +54,7 @@ test("a subagent's line shows its current work, its last tool call, after its ta
   await $.tool.call({ tool: 'Bash', command: 'git status\ngit log', agentId: 'a1' })
 
   const plain = agents()!.replace(/\x1b\[[0-9;]*m/g, '')
-  expect(plain.split('\n')[1]).toBe('-> Explore (time:0s) [Find the lock usages] (Bash(git status))')
+  expect(plain.split('\n')[1]).toBe('-> (-:-:none) Explore (time:0s) [Find the lock usages] (Bash(git status))')
 })
 
 test("a subagent's current work is cut to the agentActivityLength option", { options: { agentActivityLength: 12 } }, async ($, on) => {
@@ -66,7 +66,7 @@ test("a subagent's current work is cut to the agentActivityLength option", { opt
   await $.tool.call({ tool: 'Bash', command: 'git status', agentId: 'a1' })
 
   const plain = agents()!.replace(/\x1b\[[0-9;]*m/g, '')
-  expect(plain.split('\n')[1]).toBe('-> Explore (time:0s) [Find the lock usages] (Bash(git st…)')
+  expect(plain.split('\n')[1]).toBe('-> (-:-:none) Explore (time:0s) [Find the lock usages] (Bash(git st…)')
 })
 
 test("agentActivityLength 0 leaves a subagent's current work out", { options: { agentActivityLength: 0 } }, async ($, on) => {
@@ -78,5 +78,27 @@ test("agentActivityLength 0 leaves a subagent's current work out", { options: { 
   await $.tool.call({ tool: 'Bash', command: 'git status', agentId: 'a1' })
 
   const plain = agents()!.replace(/\x1b\[[0-9;]*m/g, '')
-  expect(plain.split('\n')[1]).toBe('-> Explore (time:0s) [Find the lock usages]')
+  expect(plain.split('\n')[1]).toBe('-> (-:-:none) Explore (time:0s) [Find the lock usages]')
+})
+
+test("a subagent's line shows its model, effort and output style after the arrow", async ($, on) => {
+  const { agents, live } = world(on)
+
+  await $.session.start(start)
+  live.push({ id: 'a1', type: 'Explore', description: 'Find the lock usages', status: 'running', model: 'claude-haiku-4-5-20251001', effort: 'low' } as never)
+  await $.tool.call({ tool: 'Read', file_path: '/x', agentId: 'a1' }).catch(() => undefined)
+
+  const plain = agents()!.replace(/\x1b\[[0-9;]*m/g, '')
+  expect(plain.split('\n')[1].startsWith('-> (haiku-4.5:low:none) Explore (time:')).toBe(true)
+})
+
+test("a subagent with no effort of its own shows the one its last request carried", async ($, on) => {
+  const { agents, live } = world(on)
+
+  await $.session.start(start)
+  live.push({ id: 'a1', type: 'general-purpose', description: 'Look', status: 'running', model: 'claude-opus-5-5', lastRequest: { at: 0, model: 'claude-opus-5-5', effort: 'high' } } as never)
+  await $.tool.call({ tool: 'Read', file_path: '/x', agentId: 'a1' }).catch(() => undefined)
+
+  const plain = agents()!.replace(/\x1b\[[0-9;]*m/g, '')
+  expect(plain.split('\n')[1].startsWith('-> (opus-5.5:high:none) general-purpose (time:')).toBe(true)
 })

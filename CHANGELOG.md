@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.60.0] - 2026-11-24
+
+### Added
+
+- Each subagent's line in the agents line shows, right after `->`, the model, effort and output style it runs with, as `(opus-5.5:high:none)`.
+
 ## [1.59.1] - 2026-11-23
 
 ### Changed

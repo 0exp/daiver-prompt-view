@@ -9,7 +9,7 @@ copy buttons, and a pane with your prompt history.
 │Opus 5.5 -> [demo] (sid:419e75ee) <stime:1h23m> <automemory:on> <in:1.2M·out:85k·cost:$4.31>                      │             │
 │(effort:high) (outputstyle:Proactive) (thinkmode:thinking) (fastmode:false)                                       │             │
 │⚙ main:thinking (1m13s) │ agents:2 (sub:1 sh:1 mon:0) -> pending:0 running:2 waiting:0 idle:0                     │   ▐▛███▜▌   │
-│-> Explore (time:1m01s) [Find lock index usages] (Grep(lock_index))                                               │  ▝▜█████▛▘  │
+│-> (haiku-4.5:low:none) Explore (time:1m01s) [Find lock index usages] (Grep(lock_index))                          │  ▝▜█████▛▘  │
 │───────────────────────────────────────────────────────────────────────────────────────────────────────────────── │    ▘▘ ▝▝    │
 │ctx ███░░░░░░░ 37% (74k/200k) | lmt ████░░░░░░ 43% (12%) (fable:23%)                                              │   2.1.303   │
 │pch ████████░░ 85%            | rst ██████░░░░ 1h56m (at 17:48) (fable: 27-11-2026 02:00) (all: 25-11-2026 09:30) │             │
@@ -53,8 +53,12 @@ bottom one.
      main loop works, `agents:main` replaces the zero.
    - `pending` / `running` / `waiting` / `idle`: the same work by state
      (finished, failed and killed ones are not counted).
-   - `-> <type> (time:<run time>) [<task>] (<current work>)`: one line per live
-     subagent or teammate, oldest first: its agent type (a teammate's name), how
+   - `-> (<model>:<effort>:<outputstyle>) <type> (time:<run time>) [<task>] (<current work>)`:
+     one line per live subagent or teammate, oldest first: what it runs with
+     (its model, short, as `opus-5.5`; the effort set for it, else the one its
+     last request carried; `-` while unknown; the output style: a fork's is the
+     main conversation's, any other subagent's is `none`, as its own system
+     prompt replaces the session's), its agent type (a teammate's name), how
      long it has been listed (from the first poll that listed it; starts over on
      a reload), the Agent call's `description`, cut to 60 characters, and what it
      works on now: its last tool call, as `Bash(git status)` or
@@ -358,9 +362,9 @@ its end marked with `…`. The row for a subagent running `git status`:
 
 | `agentActivityLength` | The row |
 | --- | --- |
-| `40` (default) | `-> Explore (time:12s) [Find the lock usages] (Bash(git status))` |
-| `12` | `-> Explore (time:12s) [Find the lock usages] (Bash(git st…)` |
-| `0` | `-> Explore (time:12s) [Find the lock usages]` |
+| `40` (default) | `-> (haiku-4.5:low:none) Explore (time:12s) [Find the lock usages] (Bash(git status))` |
+| `12` | `-> (haiku-4.5:low:none) Explore (time:12s) [Find the lock usages] (Bash(git st…)` |
+| `0` | `-> (haiku-4.5:low:none) Explore (time:12s) [Find the lock usages]` |
 
 ### Prompt history pane
 
