@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.60.1] - 2026-11-24
+
+### Added
+
+- `/daiver-prompt-view:mod:doctor` reports whether the hook that gives a fork its output style on the agents line runs, or which plugin passes it by.
+
 ## [1.60.0] - 2026-11-24
 
 ### Added

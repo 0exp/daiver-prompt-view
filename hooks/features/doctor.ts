@@ -22,6 +22,7 @@ const SETTINGS = {
 
 const LATER = {
   'prompt.section': ['runs with each turn', 'tells a session whose auto memory is blocked'],
+  'prompt.compose': ['runs with each turn', "gives a fork's line on the agents line the session's output style"],
   'classic.Stop': ['runs as a turn ends', 'drops finished shells and monitors from the agents line'],
 } as const
 
@@ -95,6 +96,7 @@ export async function doctorReport($: EngineInterface) {
     'daiver-prompt-view doctor',
     `settings.read: ${SETTINGS[hook](above === undefined ? 'a plugin above' : `"${above}"`)}`,
     ran('prompt.section'),
+    ran('prompt.compose'),
     ran('classic.Stop'),
     `padding: ${padding}`,
     bandReport(),

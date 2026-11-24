@@ -1,6 +1,6 @@
 {
   "name": "daiver-prompt-view",
-  "version": "1.60.0",
+  "version": "1.60.1",
   "description": "A Claude Code mod that shows what your session is doing: a status line under the prompt with live agents, usage limits and git state, a framed chat with copy buttons, and a pane with your prompt history",
   "author": {
     "name": "Rustam Ibragimov",

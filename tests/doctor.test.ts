@@ -14,6 +14,7 @@ test('doctor: every hook answered, the padding applied, auto memory from the mer
       'daiver-prompt-view doctor',
       'settings.read: answered by the mod (checked now): the padding option applies',
       'prompt.section: not seen yet (it runs with each turn; still none after one: a plugin above passes it by); it tells a session whose auto memory is blocked',
+      "prompt.compose: not seen yet (it runs with each turn; still none after one: a plugin above passes it by); it gives a fork's line on the agents line the session's output style",
       'classic.Stop: not seen yet (it runs as a turn ends; still none after one: a plugin above passes it by); it drops finished shells and monitors from the agents line',
       'padding: statuslinePadding -1, drawn -1',
       'buttons row: never asked of the mod since it loaded: a plugin above answers the band over it',

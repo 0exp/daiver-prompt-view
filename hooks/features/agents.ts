@@ -229,6 +229,7 @@ export function forgetNotifiedTasks(e: PromptSubmitInput) {
 export function registerAgents(on: On) {
   // the main loop's output style, for a fork's line
   on('prompt.compose', (_$, e, next) => {
+    markSeen('prompt.compose')
     mainStyle = e.outputStyle?.name ?? 'default'
     return next(e)
   }).catch((_$, e, next) => next(e))
